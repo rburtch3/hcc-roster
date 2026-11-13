@@ -155,9 +155,9 @@ textarea.field{min-height:96px;resize:none}
 
 <div class="page">
   <div class="top">
-    <span class="tag">Test copy · sample data · not the live app</span>
+    <span class="tag">HCC Roster</span>
     <h1>HCC Roster, 7shifts style, with the 15 new features</h1>
-    <p>Tap through it like the real app. Switch between the leader's Admin view and a volunteer's view. Whatever you do in one view shows up in the other: confirm a serve, swap, pick up an open spot, approve it, post an announcement. The 15 new features are listed on the right; switch any of them off under Admin, More, Features.</p>
+    <p>Switch between the leader's Admin view and a volunteer's view. Whatever you do in one view shows up in the other: confirm a serve, swap, pick up an open spot, approve it, post an announcement. The 15 new features are listed on the right; switch any of them off under Admin, More, Features.</p>
   </div>
   <div class="switch" role="group" aria-label="View">
     <button type="button" data-v="admin">Admin (leader)</button>
@@ -172,7 +172,7 @@ textarea.field{min-height:96px;resize:none}
       </div>
       <div class="cols">
         <div>
-          <h2>New in this test copy</h2>
+          <h2>New in the roster</h2>
           <ul class="kept">
             <li><span class="y">NEW</span><span><b>Picker warnings</b> <span class="t">away, doesn't do that service, already serving, serving a lot</span></span></li>
             <li><span class="y">NEW</span><span><b>Draft tags</b> <span class="t">Publish tells only the people whose spots changed</span></span></li>
@@ -216,7 +216,7 @@ textarea.field{min-height:96px;resize:none}
             <li><span class="n">SKIP</span><span><b>Geo-fence, photo check, health check</b></span></li>
             <li><span class="n">SKIP</span><span><b>Breaks</b></span></li>
                       </ul>
-          <p class="small" style="color:var(--page-muted);margin-top:14px">Service times here are samples (Sun AM 10:00, Sun PM 6:00, Wed PM 7:00). Names and teams come from the roster's sample data. Messages, calls and WhatsApp are simulated; nothing is sent.</p>
+          <p class="small" style="color:var(--page-muted);margin-top:14px">People, teams, services and the schedule come from the HCC Roster Google Sheet. Nothing is sent to anyone from this page: WhatsApp opens on your phone for you to send.</p>
         </div>
       </div>
     </div>
@@ -227,7 +227,7 @@ textarea.field{min-height:96px;resize:none}
 (function(){
 "use strict";
 /* ---------------- sample data ---------------- */
-var TODAY = "2026-11-12";
+var TODAY = (function(){ var d = new Date(Date.now() + 330 * 60000); return d.toISOString().slice(0,10); })();
 var SVC = {
   "Sun AM": { time: "10:00 AM", call: "9:00 AM", name: "Sunday Morning" },
   "Sun PM": { time: "6:00 PM", call: "5:15 PM", name: "Sunday Evening" },
@@ -249,7 +249,7 @@ var POOL = {
   "Altar Workers": ["Varun","Althea","Anjali","Minal"],
   "Kids": ["Hema Letha","Jahanvi","Mayatri","Yamani"]
 };
-var ME = "Nirupa", ADMIN = "Pastor Ryan";
+var ME = "", ADMIN = "Pastor Ryan", LEADERS = {}, PEOPLE = [], SOURCE = "";
 var DATES = [["2026-11-15","Sun AM"],["2026-11-15","Sun PM"],["2026-11-18","Wed PM"],["2026-11-22","Sun AM"],["2026-11-22","Sun PM"],["2026-11-25","Wed PM"],["2026-11-29","Sun AM"],["2026-11-29","Sun PM"]];
 
 function seed(){
@@ -334,7 +334,7 @@ function daysFrom(iso){ return Math.round((dt(iso) - dt(TODAY)) / 864e5); }
 function when(sv){ var n = daysFrom(sv.date); return n === 0 ? "Today" : n === 1 ? "Tomorrow" : n < 7 ? ["Sunday","Monday","Tuesday","Wednesday","Thursday","Friday","Saturday"][dt(sv.date).getUTCDay()] : dShort(sv.date); }
 function initials(n){ return n.split(/\s+/).map(function(w){ return w[0]; }).join("").slice(0,2).toUpperCase(); }
 function teamsOf(p){ return Object.keys(POOL).filter(function(t){ return POOL[t].indexOf(p) >= 0; }); }
-function mine(){ return S.slots.filter(function(x){ return x.person === ME && x.status !== "declined"; }).sort(function(a,b){ return svc(a.sid).date < svc(b.sid).date ? -1 : svc(a.sid).date > svc(b.sid).date ? 1 : 0; }); }
+function mine(){ return S.slots.filter(function(x){ return x.person === ME && x.status !== "declined" && svc(x.sid).date >= TODAY; }).sort(function(a,b){ return svc(a.sid).date < svc(b.sid).date ? -1 : svc(a.sid).date > svc(b.sid).date ? 1 : 0; }); }
 function statusChip(x){
   if (x.status === "open" || !x.person) return '<span class="chip c-warn">Open</span>';
   if (x.status === "declined") return '<span class="chip c-late">Can\'t serve</span>';
@@ -342,9 +342,42 @@ function statusChip(x){
   return '<span class="chip c-ok">Confirmed</span>';
 }
 function pendingReqs(){ return S.requests.filter(function(r){ return r.state === "pending"; }); }
-function openFor(person){ var t = teamsOf(person); return S.slots.filter(function(x){ return x.status === "open" && t.indexOf(x.team) >= 0 && svc(x.sid).published !== false; }); }
+function openFor(person){ var t = teamsOf(person); return S.slots.filter(function(x){ return x.status === "open" && t.indexOf(x.team) >= 0 && svc(x.sid).published !== false && svc(x.sid).date >= TODAY; }); }
 function servingAt(sid, person){ return S.slots.some(function(x){ return x.sid === sid && x.person === person && x.status !== "declined"; }); }
-function blockedOn(person, sv){ return (person === "Paul" && (sv.date === "2026-11-25")) || (person === "Hemanth" && sv.date === "2026-11-15"); }
+function blockedOn(person, sv){ return (S.blockouts[person] || []).some(function(b){ return b.fromIso && sv.date >= b.fromIso && sv.date <= (b.toIso || b.fromIso); }); }
+/* real-data helpers */
+var MONTHS = ["January","February","March","April","May","June","July","August","September","October","November","December"];
+function todayLong(){ var d = dt(TODAY); return ["Sunday","Monday","Tuesday","Wednesday","Thursday","Friday","Saturday"][d.getUTCDay()] + ", " + d.getUTCDate() + " " + MONTHS[d.getUTCMonth()]; }
+function greet(){ var h = new Date(Date.now() + 330 * 60000).getUTCHours(); return h < 12 ? "Good morning" : h < 17 ? "Good afternoon" : "Good evening"; }
+function dm(iso){ var d = dt(iso); return d.getUTCDate() + " " + MON[d.getUTCMonth()]; }
+function upc(){ return S.services.filter(function(sv){ return sv.date >= TODAY; }); }
+function lastSvc(){ var p = S.services.filter(function(sv){ return sv.date < TODAY; }); return p[p.length - 1]; }
+function dashSvc(){ var u = upc(); return u.filter(function(sv){ return sv.svc === "Sun AM"; })[0] || u[0]; }
+function noteSvc(){ return lastSvc() || dashSvc(); }
+function dashTitle(sv){ if (!sv) return "Coming up"; var n = daysFrom(sv.date); return n === 0 ? "Today" : n < 7 && dt(sv.date).getUTCDay() === 0 ? "This Sunday" : n < 7 ? "This " + DOW[dt(sv.date).getUTCDay()] : dShort(sv.date); }
+function myBlocks(){ return S.blockouts[ME] || (S.blockouts[ME] = []); }
+function leaderOf(team){ return LEADERS[team] || "your leader"; }
+function weekOf(iso){ var dow = dt(iso).getUTCDay(), mon = isoAdd(iso, -((dow + 6) % 7)); return [mon, isoAdd(mon, 6)]; }
+function wk(p){ var w = weekOf(TODAY), seen = {}; S.slots.forEach(function(x){ var sv = svc(x.sid); if (x.person === p && x.status !== "declined" && sv.date >= w[0] && sv.date <= w[1]) seen[x.sid] = 1; }); return Object.keys(seen).length; }
+function lastServedText(p, sv){ var past = S.slots.filter(function(x){ return x.person === p && x.status !== "declined" && svc(x.sid).date < sv.date; }).map(function(x){ return svc(x.sid).date; }).sort(); return past.length ? "Last served " + dShort(past[past.length - 1]) : "No serves before this"; }
+function availText(p){ var b = (S.blockouts[p] || []).filter(function(x){ return !x.toIso || x.toIso >= TODAY; }); return b.length ? "Away " + b.map(function(x){ return x.from + (x.to && x.to !== x.from ? " to " + x.to : "") + (x.reason ? " (" + x.reason + ")" : ""); }).join(", ") + "." : "No blockouts."; }
+function pastOf(sv){ return sv ? S.slots.filter(function(x){ return x.sid === sv.id && x.person && x.status !== "declined"; }).map(function(x){ return [x.person, x.role]; }) : []; }
+function parseDay(t){ t = String(t || "").trim(); var m = t.match(/^(\d{4})-(\d{2})-(\d{2})$/); if (m) return t;
+  m = t.match(/^(\d{1,2})\s*([A-Za-z]{3})[a-z]*\.?\s*(\d{4})?$/); if (!m) return "";
+  var mo = MON.map(function(x){ return x.toLowerCase(); }).indexOf(m[2].toLowerCase()); if (mo < 0) return "";
+  var y = m[3] ? +m[3] : +TODAY.slice(0,4), iso = y + "-" + ("0" + (mo + 1)).slice(-2) + "-" + ("0" + m[1]).slice(-2);
+  if (!m[3] && iso < isoAdd(TODAY, -31)) iso = (y + 1) + iso.slice(4); return iso; }
+function blockSummary(){ var n = Object.keys(S.blockouts).reduce(function(a, k){ return a + S.blockouts[k].filter(function(b){ return !b.toIso || b.toIso >= TODAY; }).length; }, 0); return n ? n + " blockout" + (n > 1 ? "s" : "") + " coming up" : "No blockouts coming up"; }
+function planBlock(sv){ var pl = S.plans && S.plans[sv.id]; if (!pl || !pl.length) return ""; return '<div class="lbl">Order of service</div><div class="grp">' + pl.map(function(r){ return '<div class="row"><div class="m"><div class="t" style="font-weight:500">' + esc(r[0]) + '</div></div><span class="small">' + esc(r[1] || "") + '</span></div>'; }).join("") + '</div>'; }
+function waText(t){ window.open("https://wa.me/?text=" + encodeURIComponent(t), "_blank", "noopener"); }
+function to24(t){ var m = String(t || "").match(/(\d{1,2}):(\d{2})\s*([AP]M)/i); if (!m) return [10, 0]; var h = +m[1] % 12 + (m[3].toUpperCase() === "PM" ? 12 : 0); return [h, +m[2]]; }
+function icsFor(list){
+  function stamp(iso, hm, add){ var d = new Date(Date.UTC(+iso.slice(0,4), +iso.slice(5,7) - 1, +iso.slice(8,10), hm[0], hm[1]) - 330 * 60000 + (add || 0)); return d.toISOString().replace(/[-:]/g, "").slice(0,15) + "Z"; }
+  var lines = ["BEGIN:VCALENDAR","VERSION:2.0","PRODID:-//HCC//Roster//EN","CALSCALE:GREGORIAN"];
+  list.forEach(function(x){ var sv = svc(x.sid), c = SVC[sv.svc] || {}, hm = to24(c.call);
+    lines.push("BEGIN:VEVENT","UID:" + x.id.replace(/[^A-Za-z0-9]/g, "") + "@hcc-roster","DTSTAMP:" + stamp(TODAY, [0,0]),"DTSTART:" + stamp(sv.date, hm),"DTEND:" + stamp(sv.date, hm, 2 * 3600000),"SUMMARY:" + (x.role + " · " + (c.name || sv.svc)).replace(/[,;]/g, " "),"DESCRIPTION:" + (x.team + ". Call time " + (c.call || "") + "\\, service " + (c.time || "")).replace(/;/g, " "),"END:VEVENT"); });
+  lines.push("END:VCALENDAR");
+  var a = document.createElement("a"); a.href = URL.createObjectURL(new Blob([lines.join("\r\n")], { type: "text/calendar" })); a.download = "hcc-roster.ics"; document.body.appendChild(a); a.click(); a.remove(); }
 var ICON = {
   home: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 11l9-7 9 7v9a1 1 0 0 1-1 1h-5v-6h-6v6H4a1 1 0 0 1-1-1z"/></svg>',
   cal: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><rect x="3" y="5" width="18" height="16" rx="3"/><path d="M3 10h18M8 3v4M16 3v4"/></svg>',
@@ -357,7 +390,7 @@ var ICON = {
 
 /* ---------------- shell ---------------- */
 var app = document.getElementById("app");
-function statusBar(){ return '<div class="sb"><span>1:01</span><i>●●● ▮</i></div>'; }
+function statusBar(){ var d = new Date(Date.now() + 330 * 60000), h = d.getUTCHours() % 12 || 12, m = ("0" + d.getUTCMinutes()).slice(-2); return '<div class="sb"><span>' + h + ':' + m + '</span><i>●●● ▮</i></div>'; }
 function header(title, opts){
   opts = opts || {};
   var left = S.stack.length ? '<button class="ic" data-a="back" aria-label="Back">‹</button>' : (opts.left || '<span style="width:40px"></span>');
@@ -398,7 +431,7 @@ var SCREENS = {};
 SCREENS["vol:home"] = function(){
   var m = mine(), next = m[0], nsv = next && svc(next.sid);
   var team = next ? S.slots.filter(function(x){ return x.sid === next.sid && x.team === next.team && x.person && x.person !== ME; }) : [];
-  var body = '<p class="small" style="margin:0 4px">Thursday, 12 November</p><h2 class="big">Good afternoon, ' + ME + '.</h2>';
+  var body = '<p class="small" style="margin:0 4px">' + todayLong() + '</p><h2 class="big">' + greet() + ', ' + esc(ME) + '.</h2>';
   if (next) {
     body += '<div class="hero"><div class="k">' + (next.status === "confirmed" ? "You're serving" : "Please confirm") + '</div>'
       + '<div class="w">' + esc(when(nsv)) + ', ' + SVC[nsv.svc].call + '</div>'
@@ -415,20 +448,20 @@ SCREENS["vol:home"] = function(){
   var a = S.announcements[0];
   if (a) body += '<div class="lbl">Announcement<a data-a="tab" data-v="msgs">All</a></div><div class="card ann"><div class="t">' + esc(a.title) + '</div><p>' + esc(a.text) + '</p><span class="small">' + esc(a.who) + ' · ' + esc(a.when) + '</span></div>';
   body += '<div class="btns"><button class="btn sec" data-a="sheet" data-s="msgLeader">Message your leader</button></div>';
-  return { head: header("", { left: '<button class="ic" data-a="push" data-s="notifs" aria-label="Notifications" style="font-size:20px">🔔</button>', right: '<span class="av" style="width:34px;height:34px;font-size:12px">NI</span>' }), body: body };
+  return { head: header("", { left: '<button class="ic" data-a="push" data-s="notifs" aria-label="Notifications" style="font-size:20px">🔔</button>', right: '<span class="av" style="width:34px;height:34px;font-size:12px">' + initials(ME || "?") + '</span>' }), body: body };
 };
 SCREENS["vol:sched"] = function(){
   var body = '<div class="seg"><button data-a="volMode" data-v="mine"' + (S.volSchedMode === "mine" ? ' aria-current="true"' : '') + '>My serves</button><button data-a="volMode" data-v="all"' + (S.volSchedMode === "all" ? ' aria-current="true"' : '') + '>Full roster</button></div>';
   if (S.volSchedMode === "mine") {
     var m = mine();
     body += m.length ? '<div class="grp">' + m.map(function(x){ var sv = svc(x.sid); return '<div class="row tap" data-a="detail" data-id="' + x.id + '"><div style="width:44px;text-align:center"><div class="small" style="text-transform:uppercase">' + DOW[dt(sv.date).getUTCDay()] + '</div><div style="font:700 22px/26px var(--font)">' + dt(sv.date).getUTCDate() + '</div></div><div class="m"><div class="t">' + SVC[sv.svc].call + ' call</div><div class="s">' + esc(x.role) + ' · ' + SVC[sv.svc].name + '</div></div>' + statusChip(x) + '<span class="chev">›</span></div>'; }).join("") + '</div>' : '<div class="empty">No serves coming up.</div>';
-    body += '<div class="btns"><button class="btn soft" data-a="toast" data-t="Your serves are now in your phone calendar (test copy)">Add all to my calendar</button></div>';
+    body += '<div class="btns"><button class="btn soft" data-a="ics">Add all to my calendar</button></div>';
   } else {
-    S.services.filter(function(sv){ return sv.published; }).slice(0,4).forEach(function(sv){
+    upc().filter(function(sv){ return sv.published; }).slice(0,4).forEach(function(sv){
       var mediaSlots = S.slots.filter(function(x){ return x.sid === sv.id && teamsOf(ME).indexOf(x.team) >= 0; });
       body += '<div class="lbl">' + dShort(sv.date) + ' · ' + sv.svc + '</div><div class="grp">' + mediaSlots.map(function(x){ return '<div class="row"><span class="av' + (x.person ? '' : ' g') + '">' + (x.person ? initials(x.person) : '?') + '</span><div class="m"><div class="t">' + esc(x.person || "Open") + '</div><div class="s">' + esc(x.role) + '</div></div>' + statusChip(x) + '</div>'; }).join("") + '</div>';
     });
-    body += '<p class="small mt" style="margin-left:4px">Showing your team, Media. Leaders see every team.</p>';
+    body += '<p class="small mt" style="margin-left:4px">Showing your team' + (teamsOf(ME).length > 1 ? 's' : '') + ', ' + esc(teamsOf(ME).join(", ") || "none yet") + '. Leaders see every team.</p>';
   }
   return { head: header("Schedule"), body: body };
 };
@@ -438,7 +471,7 @@ SCREENS["vol:pool"] = function(){
   body += open.length ? '<div class="grp">' + open.map(function(x){ var sv = svc(x.sid); var asked = S.pendingMine[x.id];
     return '<div class="row"><div class="m"><div class="t">' + esc(x.role) + '</div><div class="s">' + dShort(sv.date) + ' · ' + SVC[sv.svc].name + ' · ' + SVC[sv.svc].call + ' call</div></div>' + (asked ? '<span class="chip c-acc">Waiting for leader</span>' : '<button class="btn sm" data-a="pickup" data-id="' + x.id + '">I can serve</button>') + '</div>'; }).join("") + '</div>' : '<div class="empty">Every spot on your teams is filled. 🎉</div>';
   var gives = S.requests.filter(function(r){ return r.kind === "giveaway" && r.state === "pending" && teamsOf(ME).indexOf(slot(r.slot).team) >= 0; });
-  if (gives.length) body += '<div class="lbl">Someone needs cover</div><div class="grp">' + gives.map(function(r){ var x = slot(r.slot), sv = svc(x.sid); return '<div class="row"><span class="av">' + initials(r.from) + '</span><div class="m"><div class="t">' + esc(r.from) + ' · ' + esc(x.role) + '</div><div class="s">' + dShort(sv.date) + ' · ' + sv.svc + '</div></div><button class="btn sm soft" data-a="toast" data-t="Asked to cover ' + esc(r.from) + '\'s spot">Cover</button></div>'; }).join("") + '</div>';
+  if (gives.length) body += '<div class="lbl">Someone needs cover</div><div class="grp">' + gives.map(function(r){ var x = slot(r.slot), sv = svc(x.sid); return '<div class="row"><span class="av">' + initials(r.from) + '</span><div class="m"><div class="t">' + esc(r.from) + ' · ' + esc(x.role) + '</div><div class="s">' + dShort(sv.date) + ' · ' + sv.svc + '</div></div><button class="btn sm soft" data-a="cover" data-id="' + r.id + '">Cover</button></div>'; }).join("") + '</div>';
   return { head: header("Open spots"), body: body };
 };
 function msgsBody(){
@@ -449,15 +482,15 @@ function msgsBody(){
 }
 SCREENS["vol:msgs"] = function(){ return { head: header("Messages", { right: '<button class="ic" data-a="sheet" data-s="newChat" aria-label="New chat">✎</button>' }), body: msgsBody() }; };
 SCREENS["vol:more"] = function(){
-  var body = '<div class="card" style="display:flex;gap:12px;align-items:center"><span class="av" style="width:52px;height:52px;font-size:17px">NI</span><div><div class="t" style="font:700 18px/22px var(--font)">Nirupa</div><div class="small">Media · serving since 2023</div></div></div>'
+  var body = '<div class="card" style="display:flex;gap:12px;align-items:center"><span class="av" style="width:52px;height:52px;font-size:17px">' + initials(ME || "?") + '</span><div><div class="t" style="font:700 18px/22px var(--font)">' + esc(ME) + '</div><div class="small">' + esc(teamsOf(ME).join(" · ") || "Volunteer") + '</div></div></div>'
     + '<div class="lbl">Serving</div><div class="grp">'
     + row("Availability", "Which services you can do", "push", "avail")
-    + row("Blockout dates", (S.blockouts.Nirupa.length) + " coming up", "push", "avail")
+    + row("Blockout dates", myBlocks().length + " coming up", "push", "avail")
     + row("Team contacts", "Call or WhatsApp your team", "push", "contacts") + '</div>'
     + '<div class="lbl">Settings</div><div class="grp">'
     + row("Notifications", "What we tell you about", "push", "notifSettings")
     + row("Calendar sync", S.settings.cal ? "On, your phone calendar" : "Off", "push", "notifSettings") + '</div>'
-    + '<div class="lbl">HCC</div><div class="grp">' + row("HCC Hub home", "", "toast", "Opens the HCC Hub") + '</div>';
+    + '<div class="lbl">HCC</div><div class="grp">' + row("HCC Hub home", "", "hub", "") + '</div>';
   return { head: header("More"), body: body };
 };
 function row(t, s, a, v){ return '<div class="row tap" data-a="' + a + '" data-s="' + esc(v) + '" data-t="' + esc(v) + '" data-v="' + esc(v) + '"><div class="m"><div class="t">' + esc(t) + '</div>' + (s ? '<div class="s">' + esc(s) + '</div>' : '') + '</div><span class="chev">›</span></div>'; }
@@ -470,14 +503,13 @@ SCREENS.detail = function(o){
     + '<div style="margin:0 4px 12px">' + statusChip(x) + '</div>';
   if (me && x.status === "pending") body += '<div class="btns two"><button class="btn" data-a="confirm" data-id="' + x.id + '">Confirm</button><button class="btn sec" data-a="sheet" data-s="cant" data-id="' + x.id + '">Can\'t make it</button></div>';
   body += '<div class="lbl">Serving with you</div><div class="grp">' + with_.map(function(y){ return '<div class="row"><span class="av' + (y.person ? '' : ' g') + '">' + (y.person ? initials(y.person) : '?') + '</span><div class="m"><div class="t">' + esc(y.person || "Open spot") + '</div><div class="s">' + esc(y.role) + '</div></div>' + statusChip(y) + '</div>'; }).join("") + '</div>';
-  body += '<div class="lbl">Order of service</div><div class="grp">'
-    + [["Welcome and prayer","5 min"],["Worship: Firm Foundation, Goodness of God, Way Maker","20 min"],["Announcements and offering","8 min"],["Sermon","40 min"],["Response and altar","10 min"]].map(function(r){ return '<div class="row"><div class="m"><div class="t" style="font-weight:500">' + esc(r[0]) + '</div></div><span class="small">' + r[1] + '</span></div>'; }).join("") + '</div>';
+  body += planBlock(sv);
   if (x.team === "Media") body += '<div class="lbl">Your checklist</div><div class="grp">' + ["Load slides and lyrics","Test clicker and stage display","Sermon notes from Pastor","Countdown at 9:55"].map(function(t,i){ return '<label class="row tap"><input type="checkbox" ' + (i===0?'checked':'') + ' style="width:20px;height:20px;accent-color:var(--accent)"><div class="m"><div class="t" style="font-weight:500">' + t + '</div></div></label>'; }).join("") + '</div>';
-  if (me) body += '<div class="btns"><button class="btn sec" data-a="sheet" data-s="change" data-id="' + x.id + '">Swap or give away</button><button class="btn soft" data-a="toast" data-t="Added to your calendar (test copy)">Add to calendar</button></div>';
+  if (me) body += '<div class="btns"><button class="btn sec" data-a="sheet" data-s="change" data-id="' + x.id + '">Swap or give away</button><button class="btn soft" data-a="ics" data-id="' + x.id + '">Add to calendar</button></div>';
   return { head: header("Serve details"), body: body };
 };
 SCREENS.notifs = function(){
-  return { head: header("Notifications", { right: '<button class="ic" data-a="push" data-s="notifSettings" aria-label="Settings" style="font-size:20px">⚙︎</button>' }), body: '<div class="grp">' + S.notifs.map(function(n){ return '<div class="row"><span class="av">HC</span><div class="m"><div class="t">' + esc(n.t) + '</div><div class="s">' + esc(n.s) + '</div></div><span class="small">' + esc(n.when) + '</span></div>'; }).join("") + '</div>' };
+  return { head: header("Notifications", { right: '<button class="ic" data-a="push" data-s="notifSettings" aria-label="Settings" style="font-size:20px">⚙︎</button>' }), body: (S.notifs.length ? '' : '<div class="empty">Nothing yet.</div>') + '<div class="grp">' + S.notifs.map(function(n){ return '<div class="row"><span class="av">HC</span><div class="m"><div class="t">' + esc(n.t) + '</div><div class="s">' + esc(n.s) + '</div></div><span class="small">' + esc(n.when) + '</span></div>'; }).join("") + '</div>' };
 };
 SCREENS.notifSettings = function(){
   var opts = [["push","Push notifications","On your phone's lock screen"],["sched","Schedule","When you're put on the roster or it changes"],["pool","Open spots","When a spot opens on your team"],["ann","Announcements","From your leaders"],["msgs","Messages","Chats you're in"],["wa","Also on WhatsApp","A copy of schedule messages"],["cal","Calendar sync","Your serves in your phone calendar"]];
@@ -487,19 +519,19 @@ SCREENS.avail = function(){
   var body = '<div class="lbl">Services I usually serve</div><div class="grp">' + Object.keys(S.regular).map(function(k){ return '<label class="row tap"><div class="m"><div class="t">' + SVC[k].name + '</div><div class="s">' + SVC[k].time + '</div></div><input type="checkbox" class="tog" data-a="regular" data-k="' + k + '"' + (S.regular[k] ? ' checked' : '') + '></label>'; }).join("") + '</div>'
     + '<p class="small" style="margin:8px 4px 0">Leaders won\'t put you on a service you switch off.</p>'
     + '<div class="lbl">Blockout dates<a data-a="sheet" data-s="blockout">Add</a></div>'
-    + (S.blockouts.Nirupa.length ? '<div class="grp">' + S.blockouts.Nirupa.map(function(b){ return '<div class="row"><div class="m"><div class="t">' + esc(b.from) + (b.to && b.to !== b.from ? ' to ' + esc(b.to) : '') + '</div><div class="s">' + esc(b.reason) + '</div></div><span class="chip c-ok">Leader told</span></div>'; }).join("") + '</div>' : '<div class="empty">No dates blocked out.</div>');
+    + (myBlocks().length ? '<div class="grp">' + myBlocks().map(function(b){ return '<div class="row"><div class="m"><div class="t">' + esc(b.from) + (b.to && b.to !== b.from ? ' to ' + esc(b.to) : '') + '</div><div class="s">' + esc(b.reason) + '</div></div><span class="chip c-ok">Leader told</span></div>'; }).join("") + '</div>' : '<div class="empty">No dates blocked out.</div>');
   return { head: header("Availability"), body: body };
 };
 SCREENS.contacts = function(){
-  var people = S.view === "admin" ? Object.keys(POOL).reduce(function(a,t){ POOL[t].forEach(function(p){ if (a.indexOf(p) < 0) a.push(p); }); return a; }, []).sort() : POOL.Media.filter(function(p){ return p !== ME; }).concat(["Bharat"]);
+  var people = S.view === "admin" ? Object.keys(POOL).reduce(function(a,t){ POOL[t].forEach(function(p){ if (a.indexOf(p) < 0) a.push(p); }); return a; }, []).sort() : teamsOf(ME).reduce(function(a, t){ POOL[t].concat(LEADERS[t] ? [LEADERS[t]] : []).forEach(function(p){ if (p !== ME && a.indexOf(p) < 0) a.push(p); }); return a; }, []).sort();
   return { head: header(S.view === "admin" ? "Team" : "Team contacts"), body: '<input class="field" placeholder="Search" style="margin-bottom:12px" aria-label="Search">' + '<div class="grp">' + people.map(function(p){ return '<div class="row tap" data-a="push" data-s="person" data-id="' + esc(p) + '"><span class="av">' + initials(p) + '</span><div class="m"><div class="t">' + esc(p) + '</div><div class="s">' + esc(teamsOf(p).join(", ") || "Leader") + '</div></div><span class="chev">›</span></div>'; }).join("") + '</div>' };
 };
 SCREENS.person = function(o){
   var p = o.id, serves = S.slots.filter(function(x){ return x.person === p && x.status !== "declined"; });
   var body = '<div style="display:grid;justify-items:center;gap:6px;margin:6px 0 14px"><span class="av" style="width:72px;height:72px;font-size:24px">' + initials(p) + '</span><div style="font:700 22px/28px var(--font)">' + esc(p) + '</div><div class="small">' + esc(teamsOf(p).join(" · ")) + '</div></div>'
-    + '<div class="two"><button class="btn wa" data-a="toast" data-t="Opens WhatsApp with ' + esc(p) + ' (test copy)">WhatsApp</button><button class="btn sec" data-a="toast" data-t="Calls ' + esc(p) + ' (test copy)">Call</button></div>'
+    + '<div class="two"><button class="btn wa" data-a="toast" data-t="No phone number saved for ' + esc(p) + ' yet.">WhatsApp</button><button class="btn sec" data-a="toast" data-t="No phone number saved for ' + esc(p) + ' yet.">Call</button></div>'
     + '<div class="lbl">Coming up</div><div class="grp">' + (serves.length ? serves.slice(0,5).map(function(x){ var sv = svc(x.sid); return '<div class="row"><div class="m"><div class="t">' + dShort(sv.date) + ' · ' + sv.svc + '</div><div class="s">' + esc(x.role) + '</div></div>' + statusChip(x) + '</div>'; }).join("") : '<div class="empty">Nothing scheduled.</div>') + '</div>';
-  if (S.view === "admin") body += '<div class="lbl">Availability</div><div class="card small" style="color:var(--ink)">' + (p === "Paul" ? 'Blocked out 24 to 27 Nov (travel), waiting for your OK.' : 'Usually serves Sun AM and Wed PM. No blockouts.') + '</div>';
+  if (S.view === "admin") body += '<div class="lbl">Availability</div><div class="card small" style="color:var(--ink)">' + esc(availText(p)) + '</div>';
   return { head: header(""), body: body };
 };
 SCREENS.chat = function(o){
@@ -511,18 +543,20 @@ SCREENS.chat = function(o){
 
 /* ---------------- admin screens ---------------- */
 SCREENS["admin:dash"] = function(){
-  var sv = svc("s0"), sl = S.slots.filter(function(x){ return x.sid === sv.id; });
+  var sv = dashSvc(); if (!sv) return { head: header("Dashboard"), body: '<div class="empty">No services coming up. Add dates to the Sheet.</div>' };
+  var sl = S.slots.filter(function(x){ return x.sid === sv.id; });
   var c = { confirmed: 0, pending: 0, open: 0, declined: 0 }; sl.forEach(function(x){ c[x.person ? x.status : "open"]++; });
-  var tot = sl.length;
-  var body = '<p class="small" style="margin:0 4px">Thursday, 12 November</p><h2 class="big">This Sunday</h2>'
-    + '<div class="card"><div style="display:flex;justify-content:space-between;align-items:baseline"><div class="t" style="font:600 16px/21px var(--font)">Sunday Morning · 15 Nov</div><span class="small">' + tot + ' spots</span></div>'
+  var tot = sl.length || 1;
+  var body = '<p class="small" style="margin:0 4px">' + todayLong() + '</p><h2 class="big">' + dashTitle(sv) + '</h2>'
+    + '<div class="card"><div style="display:flex;justify-content:space-between;align-items:baseline"><div class="t" style="font:600 16px/21px var(--font)">' + esc(SVC[sv.svc].name) + ' · ' + dm(sv.date) + '</div><span class="small">' + sl.length + ' spots</span></div>'
     + '<div class="bar" style="margin:10px 0 12px"><i style="width:' + (c.confirmed/tot*100) + '%;background:var(--ok)"></i><i style="width:' + (c.pending/tot*100) + '%;background:var(--chevron)"></i><i style="width:' + (c.open/tot*100) + '%;background:var(--warn)"></i><i style="width:' + (c.declined/tot*100) + '%;background:var(--late)"></i></div>'
     + '<div class="stats"><div class="stat ok"><b>' + c.confirmed + '</b><span>Confirmed</span></div><div class="stat"><b>' + c.pending + '</b><span>Not yet</span></div><div class="stat warn"><b>' + c.open + '</b><span>Open</span></div><div class="stat late"><b>' + c.declined + '</b><span>Can\'t</span></div></div>'
-    + '<div class="btns two"><button class="btn sm soft" style="width:100%" data-a="openSvc" data-id="s0">Open schedule</button><button class="btn sm sec" style="width:100%" data-a="sheet" data-s="nudge">Remind not yet</button></div></div>';
+    + '<div class="btns two"><button class="btn sm soft" style="width:100%" data-a="openSvc" data-id="' + sv.id + '">Open schedule</button><button class="btn sm sec" style="width:100%" data-a="sheet" data-s="nudge">Remind not yet</button></div></div>';
   var pr = pendingReqs();
   body += '<div class="lbl">Needs you<a data-a="tab" data-v="reqs">' + pr.length + ' requests</a></div><div class="grp">' + pr.slice(0,3).map(reqRowShort).join("") + (pr.length ? '' : '<div class="empty">All caught up.</div>') + '</div>';
-  body += '<div class="lbl">Heads up</div><div class="warnbox"><span>⚠︎</span><span><b>Bharat serves 3 times this week</b> (Sun AM, Sun PM, Wed PM). Give him a break on Wednesday?</span></div>';
-  body += '<div class="lbl">Who\'s serving</div><div class="grp">' + S.services.slice(0,3).map(function(s){ var sl = S.slots.filter(function(x){ return x.sid === s.id; }), f = sl.filter(function(x){ return x.person && x.status !== "declined"; }).length; return '<div class="row tap" data-a="openSvc" data-id="' + s.id + '"><div class="m"><div class="t">' + dShort(s.date) + ' · ' + s.svc + '</div><div class="s">' + f + ' of ' + sl.length + ' spots filled</div></div>' + (f === sl.length ? '<span class="chip c-ok">Full</span>' : '<span class="chip c-warn">' + (sl.length - f) + ' open</span>') + '<span class="chev">›</span></div>'; }).join("") + '</div>';
+  var lots = PEOPLE.concat(Object.keys(POOL).reduce(function(a, t){ return a.concat(POOL[t]); }, [])).filter(function(p, i, a){ return a.indexOf(p) === i && wk(p) >= 3; });
+  if (lots.length) body += '<div class="lbl">Heads up</div>' + lots.slice(0,3).map(function(p){ return '<div class="warnbox" style="margin-bottom:8px"><span>⚠︎</span><span><b>' + esc(p) + ' serves ' + wk(p) + ' times this week.</b> Give them a break?</span></div>'; }).join("");
+  body += '<div class="lbl">Who\'s serving</div><div class="grp">' + upc().slice(0,3).map(function(s){ var sl = S.slots.filter(function(x){ return x.sid === s.id; }), f = sl.filter(function(x){ return x.person && x.status !== "declined"; }).length; return '<div class="row tap" data-a="openSvc" data-id="' + s.id + '"><div class="m"><div class="t">' + dShort(s.date) + ' · ' + s.svc + '</div><div class="s">' + f + ' of ' + sl.length + ' spots filled</div></div>' + (f === sl.length ? '<span class="chip c-ok">Full</span>' : '<span class="chip c-warn">' + (sl.length - f) + ' open</span>') + '<span class="chev">›</span></div>'; }).join("") + '</div>';
   return { head: header("", { left: '<span class="small" style="padding-left:6px">HCC · All ministries ▾</span>', right: '<span class="av" style="width:34px;height:34px;font-size:12px">PR</span>' }), body: body };
 };
 function reqTitle(r){ var x = r.slot && slot(r.slot), sv = x && svc(x.sid);
@@ -549,14 +583,14 @@ SCREENS.reqDetail = function(o){
   if (r.kind === "swap") body += '<div class="steps mt"><div class="on">Requested</div><div class="' + (r.stage >= 2 ? 'on' : 'now') + '">' + esc(r.to) + ' accepted</div><div class="' + (r.state === "approved" ? 'on' : r.stage >= 2 ? 'now' : '') + '">Leader approved</div></div>';
   if (r.note) body += '<p style="margin:12px 0 0">"' + esc(r.note) + '"</p>';
   body += '</div>';
-  if (r.kind === "swap" && r.to) body += '<div class="lbl">Checks</div><div class="grp"><div class="row"><span class="chip c-ok">OK</span><div class="m"><div class="s">' + esc(r.to) + ' serves on Media and isn\'t blocked out that day</div></div></div><div class="row"><span class="chip c-warn">Note</span><div class="m"><div class="s">' + esc(r.to) + ' would serve 2 services that Sunday</div></div></div></div>';
+  if (r.kind === "swap" && r.to) body += '<div class="lbl">Checks</div><div class="grp"><div class="row"><span class="chip c-ok">OK</span><div class="m"><div class="s">' + esc(r.to) + ' serves on Media and isn\'t blocked out that day</div></div></div><div class="row"><span class="chip c-warn">Note</span><div class="m"><div class="s">' + esc(r.to) + ' would serve ' + (S.slots.filter(function(y){ return y.person === r.to && svc(y.sid).date === svc(x.sid).date; }).map(function(y){ return y.sid; }).filter(function(v, i, a){ return a.indexOf(v) === i; }).length + 1) + ' services that day</div></div></div></div>';
   if (r.kind === "giveaway") body += '<div class="lbl">Who could cover</div><div class="grp">' + POOL[x.team].filter(function(p){ return p !== r.from; }).slice(0,4).map(function(p){ var busy = servingAt(x.sid, p); return '<div class="row"><span class="av">' + initials(p) + '</span><div class="m"><div class="t">' + esc(p) + '</div><div class="s">' + (busy ? 'Already serving then' : 'Available') + '</div></div>' + (busy ? '' : '<button class="btn sm soft" data-a="assignCover" data-id="' + r.id + '" data-p="' + esc(p) + '">Ask</button>') + '</div>'; }).join("") + '</div>';
   if (r.state === "pending") body += '<div class="btns"><button class="btn" data-a="approve" data-id="' + r.id + '">Approve</button><button class="btn sec" data-a="decline" data-id="' + r.id + '">Decline</button></div>';
   return { head: header("Request"), body: body };
 };
 SCREENS["admin:sched"] = function(){
   var sv = svc(S.adminSid), dirty = S.slots.filter(function(x){ return x.dirty; }).length;
-  var body = '<div class="strip">' + S.services.map(function(s){ var d = dt(s.date); return '<button data-a="openSvc" data-id="' + s.id + '"' + (s.id === sv.id ? ' aria-current="true"' : '') + '><small>' + DOW[d.getUTCDay()] + ' ' + s.svc.split(" ")[1] + '</small>' + d.getUTCDate() + (s.published ? '' : '<small>Draft</small>') + '</button>'; }).join("") + '</div>';
+  var body = '<div class="strip">' + upc().map(function(s){ var d = dt(s.date); return '<button data-a="openSvc" data-id="' + s.id + '"' + (s.id === sv.id ? ' aria-current="true"' : '') + '><small>' + DOW[d.getUTCDay()] + ' ' + s.svc.split(" ")[1] + '</small>' + d.getUTCDate() + (s.published ? '' : '<small>Draft</small>') + '</button>'; }).join("") + '</div>';
   body += '<div style="display:flex;justify-content:space-between;align-items:center;margin:14px 4px 4px"><div><div class="t" style="font:700 20px/26px var(--font)">' + SVC[sv.svc].name + '</div><div class="small">' + dLong(sv.date) + ' · ' + SVC[sv.svc].time + (sv.published ? '' : ' · <b style="color:var(--warn)">Draft, volunteers can\'t see it</b>') + '</div></div></div>';
   body += '<div class="pick mt"><button data-a="sheet" data-s="copy">Copy last week</button><button data-a="sheet" data-s="templates">Templates</button><button data-a="autofill">Auto-fill open</button></div>';
   Object.keys(ROLES).forEach(function(team){
@@ -568,14 +602,14 @@ SCREENS["admin:sched"] = function(){
 };
 SCREENS["admin:msgs"] = function(){ return { head: header("Messages", { right: '<button class="ic" data-a="sheet" data-s="announce" aria-label="New announcement">＋</button>' }), body: msgsBody() }; };
 SCREENS["admin:more"] = function(){
-  var body = '<div class="lbl">People</div><div class="grp">' + row("Team", "Everyone who serves, by ministry", "push", "contacts") + row("Availability and blockouts", "Paul's blockout waits for you", "tab", "reqs") + '</div>'
-    + '<div class="lbl">Planning</div><div class="grp">' + row("Service notes", "Attendance and what happened", "push", "notes") + row("Templates", "Your usual line-ups", "sheet", "templates") + row("Services and roles", "Wed PM, Sun AM, Sun PM", "toast", "Opens Setup") + '</div>'
-    + '<div class="lbl">Settings</div><div class="grp">' + row("Notifications", "", "push", "notifSettings") + row("HCC Hub home", "", "toast", "Opens the HCC Hub") + '</div>';
+  var body = '<div class="lbl">People</div><div class="grp">' + row("Team", "Everyone who serves, by ministry", "push", "contacts") + row("Availability and blockouts", blockSummary(), "tab", "reqs") + '</div>'
+    + '<div class="lbl">Planning</div><div class="grp">' + row("Service notes", "Attendance and what happened", "push", "notes") + row("Templates", "Your usual line-ups", "sheet", "templates") + row("Services and roles", Object.keys(SVC).join(", "), "toast", "Services and roles come from the Google Sheet.") + '</div>'
+    + '<div class="lbl">Settings</div><div class="grp">' + row("Notifications", "", "push", "notifSettings") + row("HCC Hub home", "", "hub", "") + '</div>';
   return { head: header("More"), body: body };
 };
 SCREENS.notes = function(){
   var body = S.notes.map(function(n){ return '<div class="card" style="margin-bottom:10px"><div class="t" style="font:600 16px/21px var(--font)">' + esc(n.date) + ' · ' + esc(n.svc) + '</div><div class="stats mt" style="grid-template-columns:repeat(3,1fr)"><div class="stat"><b>' + n.adults + '</b><span>Adults</span></div><div class="stat"><b>' + n.kids + '</b><span>Kids</span></div><div class="stat acc"><b>' + n.visitors + '</b><span>Visitors</span></div></div><p style="margin:10px 0 0;font-size:15px">' + esc(n.text) + '</p></div>'; }).join("");
-  body += '<div class="btns"><button class="btn" data-a="sheet" data-s="note">Add notes for Sun 15 Nov</button></div>';
+  body += '<div class="btns"><button class="btn" data-a="sheet" data-s="note">Add notes for ' + (noteSvc() ? dShort(noteSvc().date) + ' ' + noteSvc().svc : 'a service') + '</button></div>';
   return { head: header("Service notes"), body: body };
 };
 
@@ -595,29 +629,32 @@ SHEETS.swap = function(o){ var x = slot(o.id);
   return '<h4>Swap with</h4><p class="s">People on ' + esc(x.team) + ' who are free then.</p><div class="grp">' + POOL[x.team].filter(function(p){ return p !== ME; }).map(function(p){ var busy = servingAt(x.sid, p);
     return '<div class="row' + (busy ? '' : ' tap') + '"' + (busy ? '' : ' data-a="swapWith" data-id="' + x.id + '" data-p="' + esc(p) + '"') + '><span class="av' + (busy ? ' g' : '') + '">' + initials(p) + '</span><div class="m"><div class="t">' + esc(p) + '</div><div class="s">' + (busy ? 'Already serving then' : 'Free') + '</div></div>' + (busy ? '' : '<span class="chev">›</span>') + '</div>'; }).join("") + '</div>'; };
 SHEETS.fill = function(o){ var x = slot(o.id), sv = svc(x.sid);
-  var people = POOL[x.team].map(function(p){ var st = blockedOn(p, sv) ? "blocked" : (servingAt(sv.id, p) && x.person !== p) ? "busy" : (!S.regular[sv.svc] && p === ME) ? "off" : "free"; return { p: p, st: st }; });
+  var people = POOL[x.team].map(function(p){ var st = blockedOn(p, sv) ? "blocked" : (servingAt(sv.id, p) && x.person !== p) ? "busy" : (S.regularBy && S.regularBy[p] && S.regularBy[p][sv.svc] === false) ? "off" : "free"; return { p: p, st: st }; });
   people.sort(function(a,b){ var o = { free: 0, busy: 1, off: 2, blocked: 3 }; return o[a.st] - o[b.st]; });
   var lab = { free: ["Available","c-ok"], busy: ["Already serving","c-mut"], blocked: ["Blocked out","c-late"], off: ["Doesn't do " + sv.svc, "c-warn"] };
   return '<h4>' + esc(x.role) + '</h4><p class="s">' + dShort(sv.date) + ' · ' + SVC[sv.svc].name + (x.person ? ' · now ' + esc(x.person) : '') + '</p>'
-    + '<div class="lbl" style="margin-top:4px">Find who\'s available</div><div class="grp">' + people.map(function(e){ return '<div class="row tap" data-a="assign" data-id="' + x.id + '" data-p="' + esc(e.p) + '"><span class="av' + (e.st === "free" ? '' : ' g') + '">' + initials(e.p) + '</span><div class="m"><div class="t">' + esc(e.p) + (e.p === x.person ? ' ✓' : '') + '</div><div class="s">' + (S.serveCount[e.p] ? 'Serving ' + S.serveCount[e.p] + ' times this week' : 'Served 2 Sundays ago') + '</div></div><span class="chip ' + lab[e.st][1] + '">' + lab[e.st][0] + '</span></div>'; }).join("") + '</div>'
-    + (x.person ? '<div class="btns two"><button class="btn sec" data-a="clearSlot" data-id="' + x.id + '">Leave open</button><button class="btn soft" data-a="toast" data-t="Opens WhatsApp with ' + esc(x.person) + ' (test copy)">Message ' + esc(x.person) + '</button></div>' : '<div class="btns"><button class="btn soft" data-a="postOpen" data-id="' + x.id + '">Post to Open spots</button></div>'); };
+    + '<div class="lbl" style="margin-top:4px">Find who\'s available</div><div class="grp">' + people.map(function(e){ return '<div class="row tap" data-a="assign" data-id="' + x.id + '" data-p="' + esc(e.p) + '"><span class="av' + (e.st === "free" ? '' : ' g') + '">' + initials(e.p) + '</span><div class="m"><div class="t">' + esc(e.p) + (e.p === x.person ? ' ✓' : '') + '</div><div class="s">' + (wk(e.p) ? 'Serving ' + wk(e.p) + ' times this week' : lastServedText(e.p, sv)) + '</div></div><span class="chip ' + lab[e.st][1] + '">' + lab[e.st][0] + '</span></div>'; }).join("") + '</div>'
+    + (x.person ? '<div class="btns two"><button class="btn sec" data-a="clearSlot" data-id="' + x.id + '">Leave open</button><button class="btn soft" data-a="toast" data-t="No phone number saved for ' + esc(x.person) + ' yet.">Message ' + esc(x.person) + '</button></div>' : '<div class="btns"><button class="btn soft" data-a="postOpen" data-id="' + x.id + '">Post to Open spots</button></div>'); };
 SHEETS.publish = function(){ var sv = svc(S.adminSid), dirty = S.slots.filter(function(x){ return x.dirty; }).length;
   return '<h4>Publish ' + dShort(sv.date) + ' ' + sv.svc + '?</h4><p class="s">' + (dirty ? dirty + ' change' + (dirty > 1 ? 's' : '') + ' since you last published.' : 'Volunteers will see this service.') + '</p>'
     + '<div class="grp"><label class="row tap"><div class="m"><div class="t">Notify changed volunteers</div><div class="s">App notification, plus a WhatsApp message you send</div></div><input type="checkbox" class="tog" checked></label><label class="row tap"><div class="m"><div class="t">Ask everyone to confirm</div></div><input type="checkbox" class="tog" checked></label></div>'
     + '<div class="btns"><button class="btn" data-a="publish">Publish</button><button class="btn sec" data-a="closeSheet">Not yet</button></div>'; };
 SHEETS.copy = function(){ return '<h4>Copy last week</h4><p class="s">Copies who served on the same service last week into empty spots. You can still change anyone before you publish.</p><div class="btns"><button class="btn" data-a="autofill" data-t="copy">Copy into empty spots</button><button class="btn sec" data-a="closeSheet">Cancel</button></div>'; };
 SHEETS.templates = function(){ return '<h4>Templates</h4><p class="s">Saved line-ups you can drop onto any service.</p><div class="grp">' + [["Sunday AM, Band A","Bharat leads · 7 musicians"],["Sunday AM, Band B","Paul leads · 6 musicians"],["Wednesday, light","No camera or reels"],["Thanksgiving combined","Everyone on Sun AM"]].map(function(t){ return '<div class="row tap" data-a="useTemplate" data-t="' + esc(t[0]) + '"><div class="m"><div class="t">' + esc(t[0]) + '</div><div class="s">' + esc(t[1]) + '</div></div><span class="chev">›</span></div>'; }).join("") + '</div><div class="btns"><button class="btn sec" data-a="toast" data-t="Saved this service as a template (test copy)">Save this service as a template</button></div>'; };
-SHEETS.nudge = function(){ var n = S.slots.filter(function(x){ return x.sid === "s0" && x.status === "pending" && x.person; });
-  return '<h4>Remind ' + n.length + ' people</h4><p class="s">Everyone on Sun 15 Nov who hasn\'t confirmed yet.</p><p class="small" style="margin:0 0 10px;color:var(--ink)">' + esc(n.map(function(x){ return x.person; }).join(", ")) + '</p><div class="card small" style="color:var(--ink)">Hi! You\'re serving this Sunday, 15 Nov. Please tap Confirm in the Roster app, or tell me if you can\'t make it. Thank you!</div><div class="btns"><button class="btn wa" data-a="toast" data-t="WhatsApp opens with this message ready to send (test copy)">Share on WhatsApp</button><button class="btn sec" data-a="toast" data-t="Reminder sent in the app (test copy)">Send in the app</button></div>'; };
+function nudgeText(sv){ return "Hi! You're serving " + (when(sv) === "Today" ? "today" : dLong(sv.date)) + ". Please tap Confirm in the Roster app, or tell me if you can't make it. Thank you!"; }
+SHEETS.nudge = function(){ var sv = dashSvc(), n = S.slots.filter(function(x){ return x.sid === sv.id && x.status === "pending" && x.person; });
+  return '<h4>Remind ' + n.length + ' people</h4><p class="s">Everyone on ' + dShort(sv.date) + ' ' + esc(sv.svc) + ' who hasn\'t confirmed yet.</p><p class="small" style="margin:0 0 10px;color:var(--ink)">' + esc(n.map(function(x){ return x.person; }).join(", ")) + '</p><div class="card small" style="color:var(--ink)">' + esc(nudgeText(sv)) + '</div><div class="btns"><button class="btn wa" data-a="waNudge">Share on WhatsApp</button><button class="btn sec" data-a="remindApp">Send in the app</button></div>'; };
 SHEETS.announce = function(){ return '<h4>New announcement</h4><label class="fl" for="anTo">To</label><div class="pick" id="anTo">' + ["Everyone","Serving this Sunday","Song Service","Media","Leaders"].map(function(t,i){ return '<button data-a="pickReason" aria-pressed="' + (i===0) + '">' + t + '</button>'; }).join("") + '</div>'
   + '<label class="fl" for="anTitle">Title</label><input class="field" id="anTitle" placeholder="Short headline" value="Prayer before service">'
   + '<label class="fl" for="anText">Message</label><textarea class="field" id="anText">All volunteers, we\'ll pray together in the side room at 9:30 this Sunday.</textarea>'
   + '<div class="grp mt"><label class="row tap"><div class="m"><div class="t">Also share on WhatsApp</div><div class="s">Opens WhatsApp for you to send</div></div><input type="checkbox" class="tog"></label></div>'
   + '<div class="btns"><button class="btn" data-a="postAnn">Post</button></div>'; };
-SHEETS.newChat = function(){ return '<h4>New chat</h4><p class="s">Message a group based on the schedule.</p><div class="grp">' + [["Serving this Sunday AM","19 people"],["Serving this Sunday PM","12 people"],["Serving Wednesday","14 people"],["My team, Media","6 people"]].map(function(g){ return '<div class="row tap" data-a="makeChat" data-t="' + esc(g[0]) + '"><span class="av">★</span><div class="m"><div class="t">' + g[0] + '</div><div class="s">' + g[1] + '</div></div><span class="chev">›</span></div>'; }).join("") + '</div>'; };
-SHEETS.msgLeader = function(){ return '<h4>Message your leader</h4><p class="s">Goes to Nirmal, Media leader.</p><textarea class="field" id="ml" placeholder="Write a message"></textarea><div class="btns"><button class="btn" data-a="toast" data-t="Sent to Nirmal (test copy)">Send</button><button class="btn wa" data-a="toast" data-t="Opens WhatsApp with Nirmal (test copy)">WhatsApp instead</button></div>'; };
-SHEETS.blockout = function(){ return '<h4>Block out dates</h4><p class="s">You won\'t be scheduled on these days.</p><label class="fl" for="bf">From</label><input class="field" id="bf" value="20 Dec"><label class="fl" for="bt">To</label><input class="field" id="bt" value="27 Dec"><label class="fl" for="br">Reason (optional)</label><input class="field" id="br" value="Christmas travel"><div class="btns"><button class="btn" data-a="addBlock">Save</button></div>'; };
-SHEETS.note = function(){ return '<h4>Sun 15 Nov · notes</h4><div class="two"><div><label class="fl" for="na">Adults</label><input class="field" id="na" inputmode="numeric" value="150"></div><div><label class="fl" for="nk">Kids</label><input class="field" id="nk" inputmode="numeric" value="34"></div></div><label class="fl" for="nv">Visitors</label><input class="field" id="nv" inputmode="numeric" value="4"><label class="fl" for="nt">What happened</label><textarea class="field" id="nt">Smooth service. New song went well.</textarea><div class="btns"><button class="btn" data-a="saveNote">Save</button></div>'; };
+SHEETS.newChat = function(){ var gs = upc().slice(0,3).map(function(sv){ var n = S.slots.filter(function(x){ return x.sid === sv.id && x.person && x.status !== "declined"; }).map(function(x){ return x.person; }).filter(function(v, i, a){ return a.indexOf(v) === i; }).length; return ["Serving " + dShort(sv.date) + " " + sv.svc, n + " people"]; });
+  (S.view === "admin" ? Object.keys(ROLES) : teamsOf(ME)).forEach(function(t){ gs.push([(S.view === "admin" ? "" : "My team, ") + t, (POOL[t] || []).length + " people"]); });
+  return '<h4>New chat</h4><p class="s">Message a group based on the schedule.</p><div class="grp">' + gs.map(function(g){ return '<div class="row tap" data-a="makeChat" data-t="' + esc(g[0]) + '"><span class="av">★</span><div class="m"><div class="t">' + g[0] + '</div><div class="s">' + g[1] + '</div></div><span class="chev">›</span></div>'; }).join("") + '</div>'; };
+SHEETS.msgLeader = function(){ var t = teamsOf(ME)[0], l = leaderOf(t); return '<h4>Message your leader</h4><p class="s">Goes to ' + esc(l) + (t ? ', ' + esc(t) + ' leader' : '') + '.</p><textarea class="field" id="ml" placeholder="Write a message"></textarea><div class="btns"><button class="btn" data-a="leaderMsg">Send</button><button class="btn wa" data-a="leaderWa">WhatsApp instead</button></div>'; };
+SHEETS.blockout = function(){ return '<h4>Block out dates</h4><p class="s">You won\'t be scheduled on these days.</p><label class="fl" for="bf">From</label><input class="field" id="bf" placeholder="Like: 20 Dec"><label class="fl" for="bt">To</label><input class="field" id="bt" placeholder="Like: 27 Dec"><label class="fl" for="br">Reason (optional)</label><input class="field" id="br" placeholder="Like: Travel"><div class="btns"><button class="btn" data-a="addBlock">Save</button></div>'; };
+SHEETS.note = function(){ var ns = noteSvc(); return '<h4>' + (ns ? dShort(ns.date) + ' ' + esc(ns.svc) : 'Service') + ' · notes</h4><div class="two"><div><label class="fl" for="na">Adults</label><input class="field" id="na" inputmode="numeric"></div><div><label class="fl" for="nk">Kids</label><input class="field" id="nk" inputmode="numeric"></div></div><label class="fl" for="nv">Visitors</label><input class="field" id="nv" inputmode="numeric"><label class="fl" for="nt">What happened</label><textarea class="field" id="nt" placeholder="Anything worth remembering"></textarea><div class="btns"><button class="btn" data-a="saveNote">Save</button></div>'; };
 
 /* ---------------- actions ---------------- */
 var A = {
@@ -634,7 +671,7 @@ var A = {
   openSvc: function(d){ S.adminSid = d.id; S.tab.admin = "sched"; S.stack = []; render(); },
   confirm: function(d){ var x = slot(d.id); x.status = "confirmed"; toast("Confirmed. See you " + when(svc(x.sid)) + "!"); render.same = true; render(); },
   pickReason: function(d, el){ el.parentNode.querySelectorAll("button").forEach(function(b){ b.setAttribute("aria-pressed", String(b === el)); }); },
-  cantDo: function(d){ var x = slot(d.id); x.status = "declined"; var note = (document.getElementById("cantNote") || {}).value; S.requests.unshift({ id: "r" + Date.now(), kind: "cant", slot: x.id, from: ME, state: "pending", note: note || "Travelling" }); S.sheet = null; S.stack = []; toast("Nirmal knows. Thanks for telling us early."); render(); },
+  cantDo: function(d){ var x = slot(d.id); x.status = "declined"; var note = (document.getElementById("cantNote") || {}).value; S.requests.unshift({ id: "r" + Date.now(), kind: "cant", slot: x.id, from: ME, state: "pending", note: note || "Travelling" }); S.sheet = null; S.stack = []; toast(leaderOf(x.team) + " knows. Thanks for telling us early."); render(); },
   giveaway: function(d){ var x = slot(d.id); S.requests.unshift({ id: "r" + Date.now(), kind: "giveaway", slot: x.id, from: ME, state: "pending", note: "Posted to Open spots" }); S.sheet = null; toast("Posted to Open spots. You're still on until someone takes it."); render.same = true; render(); },
   swapWith: function(d){ S.requests.unshift({ id: "r" + Date.now(), kind: "swap", slot: d.id, from: ME, to: d.p, stage: 1, state: "pending" }); S.sheet = null; toast("Asked " + d.p + ". Then your leader approves."); render.same = true; render(); },
   pickup: function(d){ S.pendingMine[d.id] = 1; S.requests.unshift({ id: "r" + Date.now(), kind: "pickup", slot: d.id, from: ME, state: "pending" }); toast("Sent to your leader for approval"); render.same = true; render(); },
@@ -642,7 +679,7 @@ var A = {
     if (r.kind === "swap") { x.person = r.to; x.status = "confirmed"; r.stage = 3; }
     if (r.kind === "pickup") { x.person = r.from; x.status = "confirmed"; S.requests.forEach(function(o){ if (o !== r && o.kind === "pickup" && o.slot === r.slot && o.state === "pending") o.state = "declined"; }); }
     if (r.kind === "cant") { x.person = null; x.status = "open"; }
-    if (r.kind === "blockout" && r.from === "Paul") S.blockouts.Paul.push({ from: "24 Nov", to: "27 Nov", reason: r.reason });
+    if (r.kind === "blockout") (S.blockouts[r.from] = S.blockouts[r.from] || []).push({ from: r.range, reason: r.reason, fromIso: r.fromIso, toIso: r.toIso });
     S.notifs.unshift({ t: { swap: "Swap approved", pickup: "You're on!", giveaway: "Give-away approved", cant: "Your leader saw it", blockout: "Blockout approved" }[r.kind], s: reqTitle(r)[1], when: "Now" });
     if (S.stack.length) S.stack.pop(); toast("Approved. " + r.from + " is told."); render.same = true; render(); },
   decline: function(d){ var r = req(d.id); r.state = "declined"; if (r.kind === "pickup") delete S.pendingMine[r.slot]; if (S.stack.length) S.stack.pop(); toast("Declined. " + r.from + " is told."); render.same = true; render(); },
@@ -655,8 +692,8 @@ var A = {
   publish: function(){ var sv = svc(S.adminSid); sv.published = true; var n = S.slots.filter(function(x){ return x.dirty; }).length; S.slots.forEach(function(x){ x.dirty = false; }); S.sheet = null; toast("Published. " + (n ? n + " volunteer" + (n > 1 ? "s" : "") + " notified." : "Volunteers can see it now.")); render.same = true; render(); },
   postAnn: function(){ var to = document.querySelector("#anTo [aria-pressed=true]"); S.announcements.unshift({ id: "a" + Date.now(), who: ADMIN, to: to ? to.textContent : "Everyone", when: "Just now", title: document.getElementById("anTitle").value || "Announcement", text: document.getElementById("anText").value }); S.notifs.unshift({ t: "New announcement", s: document.getElementById("anTitle").value, when: "Now" }); S.sheet = null; S.msgTab = "ann"; toast("Posted. Switch to Volunteer to see it."); render(); },
   makeChat: function(d){ var c = { id: "c" + Date.now(), name: d.t, auto: true, msgs: [{ who: "HCC Roster", t: "Chat started for " + d.t + "." }] }; S.chats.unshift(c); S.sheet = null; S.msgTab = "chats"; push("chat", { id: c.id }); },
-  addBlock: function(){ S.blockouts.Nirupa.push({ from: document.getElementById("bf").value, to: document.getElementById("bt").value, reason: document.getElementById("br").value }); S.sheet = null; toast("Blocked out. Your leader is told."); render.same = true; render(); },
-  saveNote: function(){ S.notes.unshift({ date: "Sun 15 Nov", svc: "Sun AM", adults: +document.getElementById("na").value || 0, kids: +document.getElementById("nk").value || 0, visitors: +document.getElementById("nv").value || 0, text: document.getElementById("nt").value }); S.sheet = null; render(); },
+  addBlock: function(){ var f = document.getElementById("bf").value.trim(), t = document.getElementById("bt").value.trim() || f, fi = parseDay(f), ti = parseDay(t); if (!fi || !ti) { toast("Type dates like 20 Dec."); render.same = true; render(); return; } myBlocks().push({ from: dm(fi), to: dm(ti), fromIso: fi, toIso: ti < fi ? fi : ti, reason: document.getElementById("br").value.trim() }); S.sheet = null; toast("Blocked out. " + leaderOf(teamsOf(ME)[0]) + " can see it."); render.same = true; render(); },
+  saveNote: function(){ var ns = noteSvc(); S.notes.unshift({ date: ns ? dShort(ns.date) : dShort(TODAY), svc: ns ? ns.svc : "", adults: +document.getElementById("na").value || 0, kids: +document.getElementById("nk").value || 0, visitors: +document.getElementById("nv").value || 0, text: document.getElementById("nt").value }); S.sheet = null; render(); },
   setting: function(d, el){ S.settings[d.k] = el.checked; },
   regular: function(d, el){ S.regular[d.k] = el.checked; }
 };
@@ -684,7 +721,6 @@ function drawJumps(){
   if (drawJumps.v === S.view) return; drawJumps.v = S.view;
   jumpBox.innerHTML = "";
   JUMPS[S.view].forEach(function(j){ var b = document.createElement("button"); b.type = "button"; b.textContent = j[0]; b.addEventListener("click", j[1]); jumpBox.appendChild(b); });
-  var r = document.createElement("button"); r.type = "button"; r.textContent = "Reset demo"; r.addEventListener("click", function(){ var v = S.view; S = seed(); S.view = v; render(); }); jumpBox.appendChild(r);
 }
 /* ================= Test copy: the 15 new features, each with an on/off switch ================= */
 var FEATS = [
@@ -774,8 +810,9 @@ msgsBody = function(){
   var body = '<div class="seg"><button data-a="msgTab" data-v="ann"' + (S.msgTab === "ann" ? ' aria-current="true"' : '') + '>Announcements</button><button data-a="msgTab" data-v="chats"' + (S.msgTab === "chats" ? ' aria-current="true"' : '') + '>Chats</button></div>';
   if (S.msgTab === "ann") {
     body += visibleShouts().map(shoutCard).join("");
+    if (!visibleShouts().length && !visibleAnns().length) body += '<div class="empty">No announcements yet.</div>';
     body += visibleAnns().map(function(a){ return '<div class="card ann" style="margin-bottom:10px"><div style="display:flex;gap:10px;align-items:center"><span class="av">' + initials(a.who) + '</span><div><div class="t">' + esc(a.who) + '</div><div class="small">To ' + esc(a.to) + ' · ' + esc(a.when) + '</div></div></div><div class="t" style="margin-top:6px">' + esc(a.title) + '</div><p>' + esc(a.text) + '</p></div>'; }).join("");
-  } else body += '<div class="grp">' + S.chats.map(function(c){ var last = c.msgs[c.msgs.length-1]; return '<div class="row tap" data-a="push" data-s="chat" data-id="' + c.id + '"><span class="av' + (c.auto ? '' : ' g') + '">' + (c.auto ? '★' : initials(c.name)) + '</span><div class="m"><div class="t">' + esc(c.name) + '</div><div class="s">' + esc(last.who) + ': ' + esc(last.t) + '</div></div><span class="chev">›</span></div>'; }).join("") + '</div>';
+  } else body += (S.chats.length ? '' : '<div class="empty">No chats yet. Tap ✎ to start one.</div>') + '<div class="grp">' + S.chats.map(function(c){ var last = c.msgs[c.msgs.length-1]; return '<div class="row tap" data-a="push" data-s="chat" data-id="' + c.id + '"><span class="av' + (c.auto ? '' : ' g') + '">' + (c.auto ? '★' : initials(c.name)) + '</span><div class="m"><div class="t">' + esc(c.name) + '</div><div class="s">' + esc(last.who) + ': ' + esc(last.t) + '</div></div><span class="chev">›</span></div>'; }).join("") + '</div>';
   return body;
 };
 
@@ -793,7 +830,7 @@ function weekCard(){
 SCREENS["vol:home"] = function(){
   var m = mine(), next = m[0], nsv = next && svc(next.sid);
   var team = next ? S.slots.filter(function(x){ return x.sid === next.sid && x.team === next.team && x.person && x.person !== ME; }) : [];
-  var body = '<p class="small" style="margin:0 4px">Thursday, 12 November</p><h2 class="big">Good afternoon, ' + ME + '.</h2>';
+  var body = '<p class="small" style="margin:0 4px">' + todayLong() + '</p><h2 class="big">' + greet() + ', ' + esc(ME) + '.</h2>';
   if (on("home")) body += weekCard();
   if (on("swaps")) S.requests.filter(function(r){ return r.kind === "swap" && r.to === ME && r.state === "pending" && r.stage === 1; }).forEach(function(r){ var x = slot(r.slot), sv = svc(x.sid);
     body += '<div class="card" style="margin-bottom:12px"><div class="t" style="font:600 16px/21px var(--font)">' + esc(r.from) + ' asks to swap</div><div class="small">You take ' + esc(x.role) + ', ' + dShort(sv.date) + ' ' + sv.svc + '</div>' + (r.note ? '<p style="margin:8px 0 0;font-size:15px">"' + esc(r.note) + '"</p>' : '') + '<div class="btns two"><button class="btn sm" style="width:100%" data-a="acceptSwap" data-id="' + r.id + '">Accept</button><button class="btn sm sec" style="width:100%" data-a="declineSwap" data-id="' + r.id + '">Decline</button></div><p class="small" style="margin:8px 0 0">Then your leader approves.</p></div>'; });
@@ -819,20 +856,20 @@ SCREENS["vol:home"] = function(){
   var a = visibleAnns()[0];
   if (a) body += '<div class="lbl">Announcement<a data-a="tab" data-v="msgs">All</a></div><div class="card ann"><div class="t">' + esc(a.title) + '</div><p>' + esc(a.text) + '</p><span class="small">' + esc(a.who) + ' · ' + esc(a.when) + '</span></div>';
   body += '<div class="btns"><button class="btn sec" data-a="sheet" data-s="msgLeader">Message your leader</button></div>';
-  return { head: header("", { left: '<button class="ic" data-a="push" data-s="notifs" aria-label="Notifications" style="font-size:20px">🔔</button>', right: '<span class="av" style="width:34px;height:34px;font-size:12px">NI</span>' }), body: body };
+  return { head: header("", { left: '<button class="ic" data-a="push" data-s="notifs" aria-label="Notifications" style="font-size:20px">🔔</button>', right: '<span class="av" style="width:34px;height:34px;font-size:12px">' + initials(ME || "?") + '</span>' }), body: body };
 };
 SCREENS["vol:sched"] = function(){
   var body = '<div class="seg"><button data-a="volMode" data-v="mine"' + (S.volSchedMode === "mine" ? ' aria-current="true"' : '') + '>My serves</button><button data-a="volMode" data-v="all"' + (S.volSchedMode === "all" ? ' aria-current="true"' : '') + '>Full roster</button></div>';
   if (S.volSchedMode === "mine") {
     var m = mine();
     body += m.length ? '<div class="grp">' + m.map(function(x){ var sv = svc(x.sid); return '<div class="row tap" data-a="detail" data-id="' + x.id + '"><div style="width:44px;text-align:center"><div class="small" style="text-transform:uppercase">' + DOW[dt(sv.date).getUTCDay()] + '</div><div style="font:700 22px/26px var(--font)">' + dt(sv.date).getUTCDate() + '</div></div><div class="m"><div class="t">' + SVC[sv.svc].call + ' call' + evTag(sv.date) + '</div><div class="s">' + esc(x.role) + ' · ' + SVC[sv.svc].name + (on("notes") && x.note ? ' · Note' : '') + '</div></div>' + statusChip(x) + '<span class="chev">›</span></div>'; }).join("") + '</div>' : '<div class="empty">No serves coming up.</div>';
-    body += '<div class="btns"><button class="btn soft" data-a="toast" data-t="Your serves are now in your phone calendar (test copy)">Add all to my calendar</button></div>';
+    body += '<div class="btns"><button class="btn soft" data-a="ics">Add all to my calendar</button></div>';
   } else {
-    S.services.filter(function(sv){ return sv.published; }).slice(0,4).forEach(function(sv){
+    upc().filter(function(sv){ return sv.published; }).slice(0,4).forEach(function(sv){
       var mediaSlots = S.slots.filter(function(x){ return x.sid === sv.id && teamsOf(ME).indexOf(x.team) >= 0; });
       body += '<div class="lbl">' + dShort(sv.date) + ' · ' + sv.svc + '</div>' + evBanner(sv.date) + '<div class="grp">' + mediaSlots.map(function(x){ return '<div class="row"><span class="av' + (x.person ? '' : ' g') + '">' + (x.person ? initials(x.person) : '?') + '</span><div class="m"><div class="t">' + esc(x.person || "Open") + '</div><div class="s">' + esc(x.role) + '</div></div>' + statusChip(x) + '</div>'; }).join("") + '</div>';
     });
-    body += '<p class="small mt" style="margin-left:4px">Showing your team, Media. Leaders see every team.</p>';
+    body += '<p class="small mt" style="margin-left:4px">Showing your team' + (teamsOf(ME).length > 1 ? 's' : '') + ', ' + esc(teamsOf(ME).join(", ") || "none yet") + '. Leaders see every team.</p>';
   }
   return { head: header("Schedule"), body: body };
 };
@@ -843,22 +880,22 @@ SCREENS["vol:pool"] = function(){
     return '<div class="row"><div class="m"><div class="t">' + esc(x.role) + evTag(sv.date) + '</div><div class="s">' + dShort(sv.date) + ' · ' + SVC[sv.svc].name + ' · ' + SVC[sv.svc].call + ' call' + (on("bids") && others ? ' · ' + others + ' other' + (others > 1 ? 's' : '') + ' raised a hand' : '') + '</div></div>'
       + (!on("bids") ? '<span class="chip c-warn">Open</span>' : asked ? '<span class="chip c-acc">Hand raised</span>' : '<button class="btn sm" data-a="pickup" data-id="' + x.id + '">I can serve</button>') + '</div>'; }).join("") + '</div>' : '<div class="empty">Every spot on your teams is filled. 🎉</div>';
   var gives = S.requests.filter(function(r){ return r.kind === "giveaway" && r.state === "pending" && teamsOf(ME).indexOf(slot(r.slot).team) >= 0; });
-  if (gives.length) body += '<div class="lbl">Someone needs cover</div><div class="grp">' + gives.map(function(r){ var x = slot(r.slot), sv = svc(x.sid); return '<div class="row"><span class="av">' + initials(r.from) + '</span><div class="m"><div class="t">' + esc(r.from) + ' · ' + esc(x.role) + '</div><div class="s">' + dShort(sv.date) + ' · ' + sv.svc + '</div></div><button class="btn sm soft" data-a="toast" data-t="Asked to cover ' + esc(r.from) + '\'s spot">Cover</button></div>'; }).join("") + '</div>';
+  if (gives.length) body += '<div class="lbl">Someone needs cover</div><div class="grp">' + gives.map(function(r){ var x = slot(r.slot), sv = svc(x.sid); return '<div class="row"><span class="av">' + initials(r.from) + '</span><div class="m"><div class="t">' + esc(r.from) + ' · ' + esc(x.role) + '</div><div class="s">' + dShort(sv.date) + ' · ' + sv.svc + '</div></div><button class="btn sm soft" data-a="cover" data-id="' + r.id + '">Cover</button></div>'; }).join("") + '</div>';
   return { head: header("Open spots"), body: body };
 };
 SCREENS["vol:more"] = function(){
   var left = todosLeft();
-  var body = '<div class="card" style="display:flex;gap:12px;align-items:center"><span class="av" style="width:52px;height:52px;font-size:17px">NI</span><div><div class="t" style="font:700 18px/22px var(--font)">Nirupa</div><div class="small">Media · serving since 2023</div></div></div>'
+  var body = '<div class="card" style="display:flex;gap:12px;align-items:center"><span class="av" style="width:52px;height:52px;font-size:17px">' + initials(ME || "?") + '</span><div><div class="t" style="font:700 18px/22px var(--font)">' + esc(ME) + '</div><div class="small">' + esc(teamsOf(ME).join(" · ") || "Volunteer") + '</div></div></div>'
     + '<div class="lbl">Serving</div><div class="grp">'
     + row("Availability", "Which services you can do", "push", "avail")
-    + row("Blockout dates", S.blockouts.Nirupa.length + " coming up", "push", "avail")
+    + row("Blockout dates", myBlocks().length + " coming up", "push", "avail")
     + (on("swaps") ? row("My requests", "Swaps and give-aways, and where each stands", "push", "myReqs") : '')
     + (on("onboarding") ? row("To-dos", left ? left + " to do" : "All done", "push", "todosVol") : '')
     + row("Team contacts", "Call, WhatsApp or thank your team", "push", "contacts") + '</div>'
     + '<div class="lbl">Settings</div><div class="grp">'
     + (on("notify") ? row("Notifications", "What we tell you about", "push", "notifSettings") : '')
     + row("Calendar sync", S.settings.cal ? "On, your phone calendar" : "Off", "push", "notifSettings") + '</div>'
-    + '<div class="lbl">HCC</div><div class="grp">' + row("HCC Hub home", "", "toast", "Opens the HCC Hub") + '</div>';
+    + '<div class="lbl">HCC</div><div class="grp">' + row("HCC Hub home", "", "hub", "") + row("Not " + ME + "?", "Pick your name", "whoami", "") + '</div>';
   return { head: header("More"), body: body };
 };
 SCREENS.myReqs = function(){
@@ -882,27 +919,26 @@ SCREENS.detail = function(o){
   if (on("notes") && x.note) body += '<div class="card" style="margin-bottom:12px"><div class="small" style="text-transform:uppercase;letter-spacing:.06em;font-weight:600">Note from your leader</div><p style="margin:4px 0 0">' + esc(x.note) + '</p></div>';
   if (me && x.status === "pending") body += '<div class="btns two"><button class="btn" data-a="confirm" data-id="' + x.id + '">Confirm</button><button class="btn sec" data-a="sheet" data-s="cant" data-id="' + x.id + '">Can\'t make it</button></div>';
   body += '<div class="lbl">Serving with you</div><div class="grp">' + with_.map(function(y){ return '<div class="row"><span class="av' + (y.person ? '' : ' g') + '">' + (y.person ? initials(y.person) : '?') + '</span><div class="m"><div class="t">' + esc(y.person || "Open spot") + '</div><div class="s">' + esc(y.role) + '</div></div>' + statusChip(y) + '</div>'; }).join("") + '</div>';
-  body += '<div class="lbl">Order of service</div><div class="grp">'
-    + [["Welcome and prayer","5 min"],["Worship: Firm Foundation, Goodness of God, Way Maker","20 min"],["Announcements and offering","8 min"],["Sermon","40 min"],["Response and altar","10 min"]].map(function(r){ return '<div class="row"><div class="m"><div class="t" style="font-weight:500">' + esc(r[0]) + '</div></div><span class="small">' + r[1] + '</span></div>'; }).join("") + '</div>';
+  body += planBlock(sv);
   ckFor(x.team, sv.svc).forEach(function(k){
     var done = k.items.filter(function(_, i){ return S.ticks[sv.id + "|" + k.id + "|" + i]; }).length;
     body += '<div class="lbl">' + esc(k.title) + ' · by ' + esc(k.due) + '<span class="small" style="text-transform:none;letter-spacing:0">' + done + '/' + k.items.length + '</span></div><div class="grp">' + k.items.map(function(t, i){ var key = sv.id + "|" + k.id + "|" + i, tk = S.ticks[key];
       return '<label class="row tap"><input type="checkbox" data-a="tick" data-k="' + key + '"' + (tk ? ' checked' : '') + ' style="width:20px;height:20px;accent-color:var(--accent)"><div class="m"><div class="t" style="font-weight:500">' + esc(t) + '</div>' + (tk ? '<div class="s">Done by ' + esc(tk.by) + ' · ' + esc(tk.at) + '</div>' : '') + '</div></label>'; }).join("") + '</div>';
   });
-  if (me) body += '<div class="btns"><button class="btn sec" data-a="sheet" data-s="change" data-id="' + x.id + '">Swap or give away</button><button class="btn soft" data-a="toast" data-t="Added to your calendar (test copy)">Add to calendar</button></div>';
+  if (me) body += '<div class="btns"><button class="btn sec" data-a="sheet" data-s="change" data-id="' + x.id + '">Swap or give away</button><button class="btn soft" data-a="ics" data-id="' + x.id + '">Add to calendar</button></div>';
   return { head: header("Serve details"), body: body };
 };
 SCREENS.person = function(o){
   var p = o.id, serves = S.slots.filter(function(x){ return x.person === p && x.status !== "declined"; });
   var body = '<div style="display:grid;justify-items:center;gap:6px;margin:6px 0 14px"><span class="av" style="width:72px;height:72px;font-size:24px">' + initials(p) + '</span><div style="font:700 22px/28px var(--font)">' + esc(p) + '</div><div class="small">' + esc(teamsOf(p).join(" · ")) + '</div></div>'
-    + '<div class="two"><button class="btn wa" data-a="toast" data-t="Opens WhatsApp with ' + esc(p) + ' (test copy)">WhatsApp</button><button class="btn sec" data-a="toast" data-t="Calls ' + esc(p) + ' (test copy)">Call</button></div>'
+    + '<div class="two"><button class="btn wa" data-a="toast" data-t="No phone number saved for ' + esc(p) + ' yet.">WhatsApp</button><button class="btn sec" data-a="toast" data-t="No phone number saved for ' + esc(p) + ' yet.">Call</button></div>'
     + (on("shoutouts") && p !== ME ? '<div class="btns"><button class="btn soft" data-a="sheet" data-s="shout" data-id="' + esc(p) + '">Send a shout-out</button></div>' : '');
   var got = on("shoutouts") ? S.shouts.filter(function(h){ return h.to === p; }) : [];
   if (got.length) body += '<div class="lbl">Shout-outs</div>' + got.map(shoutCard).join("");
   body += '<div class="lbl">Coming up</div><div class="grp">' + (serves.length ? serves.slice(0,5).map(function(x){ var sv = svc(x.sid); return '<div class="row"><div class="m"><div class="t">' + dShort(sv.date) + ' · ' + sv.svc + '</div><div class="s">' + esc(x.role) + '</div></div>' + statusChip(x) + '</div>'; }).join("") : '<div class="empty">Nothing scheduled.</div>') + '</div>';
   if (S.view === "admin") {
-    body += '<div class="lbl">Availability</div><div class="card small" style="color:var(--ink)">' + (p === "Paul" ? 'Blocked out 24 to 27 Nov (travel), waiting for your OK.' : 'Usually serves Sun AM and Wed PM. No blockouts.') + '</div>';
-    if (on("attendance")) body += '<div class="lbl">Attendance</div><div class="card small" style="color:var(--ink)">Last service, Sun 8 Nov: <b>' + esc(S.attend[p] || "not marked") + '</b>. Last 8 weeks: came 6, late 1, called off 1 (sample).</div>';
+    body += '<div class="lbl">Availability</div><div class="card small" style="color:var(--ink)">' + esc(availText(p)) + '</div>';
+    if (on("attendance")) body += '<div class="lbl">Attendance</div><div class="card small" style="color:var(--ink)">Last service' + (lastSvc() ? ', ' + dShort(lastSvc().date) + ' ' + lastSvc().svc : '') + ': <b>' + esc((lastSvc() && S.attend[lastSvc().id + "|" + p]) || "not marked") + '</b>.</div>';
     if (on("onboarding")) body += '<div class="lbl">To-dos</div><div class="grp">' + todosFor(p).map(function(t){ var d = (S.todoDone[t.id] || {})[p]; return '<div class="row"><div class="m"><div class="t">' + esc(t.title) + '</div></div>' + (d ? '<span class="chip c-ok">Done ' + esc(d) + '</span>' : '<span class="chip c-mut">Not yet</span>') + '</div>'; }).join("") + '</div>';
   }
   return { head: header(""), body: body };
@@ -912,11 +948,13 @@ SCREENS.person = function(o){
 var baseDash = SCREENS["admin:dash"];
 SCREENS["admin:dash"] = function(){
   var r = baseDash();
-  r.body = r.body.replace('<h2 class="big">This Sunday</h2>', '<h2 class="big">This Sunday</h2>' + evBanner("2026-11-15"));
-  if (on("checklists")) { var ks = S.checklists.filter(function(k){ return k.svc === "Sun AM"; });
-    r.body += '<div class="lbl">Checklists, Sun 15 Nov</div><div class="grp">' + ks.map(function(k){ var done = k.items.filter(function(_, i){ return S.ticks["s0|" + k.id + "|" + i]; }).length;
+  var dsv = dashSvc(); if (!dsv) return r;
+  r.body = r.body.replace(/(<h2 class="big">[^<]*<\/h2>)/, function(m){ return m + evBanner(dsv.date); });
+  var ks = S.checklists.filter(function(k){ return k.svc === dsv.svc; });
+  if (on("checklists") && ks.length) {
+    r.body += '<div class="lbl">Checklists, ' + dShort(dsv.date) + '</div><div class="grp">' + ks.map(function(k){ var done = k.items.filter(function(_, i){ return S.ticks[dsv.id + "|" + k.id + "|" + i]; }).length;
       return '<div class="row tap" data-a="push" data-s="checklistsAdmin"><div class="m"><div class="t">' + esc(k.title) + '</div><div class="s">' + esc(k.team) + ' · by ' + esc(k.due) + '</div></div><span class="chip ' + (done === k.items.length ? 'c-ok' : 'c-mut') + '">' + done + '/' + k.items.length + '</span><span class="chev">›</span></div>'; }).join("") + '</div>'; }
-  if (on("onboarding")) { var t = S.todos[0], need = Object.keys(POOL).filter(function(tm){ return t.teams.indexOf(tm) >= 0; }).reduce(function(a, tm){ POOL[tm].forEach(function(p){ if (a.indexOf(p) < 0) a.push(p); }); return a; }, []), done = need.filter(function(p){ return (S.todoDone[t.id] || {})[p]; }).length;
+  if (on("onboarding") && S.todos.length) { var t = S.todos[0], need = Object.keys(POOL).filter(function(tm){ return t.teams.indexOf(tm) >= 0; }).reduce(function(a, tm){ POOL[tm].forEach(function(p){ if (a.indexOf(p) < 0) a.push(p); }); return a; }, []), done = need.filter(function(p){ return (S.todoDone[t.id] || {})[p]; }).length;
     r.body += '<div class="lbl">Onboarding</div><div class="grp"><div class="row tap" data-a="push" data-s="todosAdmin"><div class="m"><div class="t">' + esc(t.title) + '</div><div class="s">' + done + ' of ' + need.length + ' have confirmed</div></div><span class="chev">›</span></div></div>'; }
   return r;
 };
@@ -935,14 +973,14 @@ SCREENS["admin:reqs"] = function(){
 SCREENS.reqDetail = function(o){
   var r = req(o.id), t = reqTitle(r), x = r.slot && slot(r.slot), waiting = r.kind === "swap" && r.stage < 2;
   var body = '<div class="card"><div class="t" style="font:700 20px/26px var(--font)">' + esc(t[0]) + '</div><div class="small">' + esc(t[1]) + '</div>' + (r.kind === "swap" ? swapSteps(r) : '') + (r.note ? '<p style="margin:12px 0 0">"' + esc(r.note) + '"</p>' : '') + '</div>';
-  if (r.kind === "swap" && r.to) body += '<div class="lbl">Checks</div><div class="grp"><div class="row"><span class="chip c-ok">OK</span><div class="m"><div class="s">' + esc(r.to) + ' serves on ' + esc(x.team) + ' and isn\'t blocked out that day</div></div></div><div class="row"><span class="chip c-warn">Note</span><div class="m"><div class="s">' + esc(r.to) + ' would serve 2 services that Sunday</div></div></div></div>';
+  if (r.kind === "swap" && r.to) body += '<div class="lbl">Checks</div><div class="grp"><div class="row"><span class="chip c-ok">OK</span><div class="m"><div class="s">' + esc(r.to) + ' serves on ' + esc(x.team) + ' and isn\'t blocked out that day</div></div></div><div class="row"><span class="chip c-warn">Note</span><div class="m"><div class="s">' + esc(r.to) + ' would serve ' + (S.slots.filter(function(y){ return y.person === r.to && svc(y.sid).date === svc(x.sid).date; }).map(function(y){ return y.sid; }).filter(function(v, i, a){ return a.indexOf(v) === i; }).length + 1) + ' services that day</div></div></div></div>';
   if (r.kind === "giveaway") body += '<div class="lbl">Who could cover</div><div class="grp">' + POOL[x.team].filter(function(p){ return p !== r.from; }).slice(0,4).map(function(p){ var busy = servingAt(x.sid, p); return '<div class="row"><span class="av">' + initials(p) + '</span><div class="m"><div class="t">' + esc(p) + '</div><div class="s">' + (busy ? 'Already serving then' : 'Available') + '</div></div>' + (busy ? '' : '<button class="btn sm soft" data-a="assignCover" data-id="' + r.id + '" data-p="' + esc(p) + '">Ask</button>') + '</div>'; }).join("") + '</div>';
   if (r.state === "pending") body += waiting ? '<div class="btns"><span class="chip c-mut">Waiting for ' + esc(r.to) + ' to accept</span></div>' : '<div class="btns"><button class="btn" data-a="approve" data-id="' + r.id + '">Approve</button><button class="btn sec" data-a="decline" data-id="' + r.id + '">Decline</button></div>';
   return { head: header("Request"), body: body };
 };
 SCREENS["admin:sched"] = function(){
   var sv = svc(S.adminSid), dirty = S.slots.filter(function(x){ return x.dirty && x.sid === sv.id; }).length;
-  var body = '<div class="strip">' + S.services.map(function(s){ var d = dt(s.date); return '<button data-a="openSvc" data-id="' + s.id + '"' + (s.id === sv.id ? ' aria-current="true"' : '') + '><small>' + DOW[d.getUTCDay()] + ' ' + s.svc.split(" ")[1] + '</small>' + d.getUTCDate() + (s.published ? '' : '<small>Draft</small>') + '</button>'; }).join("") + '</div>';
+  var body = '<div class="strip">' + upc().map(function(s){ var d = dt(s.date); return '<button data-a="openSvc" data-id="' + s.id + '"' + (s.id === sv.id ? ' aria-current="true"' : '') + '><small>' + DOW[d.getUTCDay()] + ' ' + s.svc.split(" ")[1] + '</small>' + d.getUTCDate() + (s.published ? '' : '<small>Draft</small>') + '</button>'; }).join("") + '</div>';
   body += '<div style="display:flex;justify-content:space-between;align-items:center;margin:14px 4px 8px"><div><div class="t" style="font:700 20px/26px var(--font)">' + SVC[sv.svc].name + '</div><div class="small">' + dLong(sv.date) + ' · ' + SVC[sv.svc].time + (sv.published ? '' : ' · <b style="color:var(--warn)">Draft, volunteers can\'t see it</b>') + '</div></div></div>';
   body += evBanner(sv.date);
   body += '<div class="pick mt"><button data-a="sheet" data-s="copy">Copy last week</button>' + (on("templates") ? '<button data-a="sheet" data-s="templates">Templates</button>' : '') + '<button data-a="autofill">Auto-fill open</button>' + (on("events") ? '<button data-a="sheet" data-s="addEvent">Add event</button>' : '') + '</div>';
@@ -960,14 +998,14 @@ SCREENS["admin:sched"] = function(){
 };
 SCREENS["admin:more"] = function(){
   var nOn = FEATS.filter(function(f){ return on(f[0]); }).length;
-  var body = '<div class="lbl">People</div><div class="grp">' + row("Team", "Everyone who serves, by ministry", "push", "contacts") + row("Availability and blockouts", "Paul's blockout waits for you", "tab", "reqs")
+  var body = '<div class="lbl">People</div><div class="grp">' + row("Team", "Everyone who serves, by ministry", "push", "contacts") + row("Availability and blockouts", blockSummary(), "tab", "reqs")
     + (on("onboarding") ? row("Onboarding to-dos", "Who has read and confirmed", "push", "todosAdmin") : '') + '</div>'
     + '<div class="lbl">Planning</div><div class="grp">' + row("Service notes", on("attendance") ? "Attendance and what happened" : "What happened", "push", "notes")
     + (on("templates") ? row("Templates", S.templates.length + " saved line-ups", "sheet", "templates") : '')
     + (on("checklists") ? row("Checklists", "Setup lists per team and service", "push", "checklistsAdmin") : '')
     + (on("events") ? row("Events", S.events.length + " coming up", "push", "eventsAdmin") : '')
-    + row("Services and roles", "Wed PM, Sun AM, Sun PM", "toast", "Opens Setup") + '</div>'
-    + '<div class="lbl">Settings</div><div class="grp">' + row("Features", nOn + " of " + FEATS.length + " on", "push", "features") + (on("notify") ? row("Notifications", "", "push", "notifSettings") : '') + row("HCC Hub home", "", "toast", "Opens the HCC Hub") + '</div>';
+    + row("Services and roles", Object.keys(SVC).join(", "), "toast", "Services and roles come from the Google Sheet.") + '</div>'
+    + '<div class="lbl">Settings</div><div class="grp">' + row("Features", nOn + " of " + FEATS.length + " on", "push", "features") + (on("notify") ? row("Notifications", "", "push", "notifSettings") : '') + row("HCC Hub home", "", "hub", "") + '</div>';
   return { head: header("More"), body: body };
 };
 SCREENS.features = function(){
@@ -976,32 +1014,35 @@ SCREENS.features = function(){
 var FLAGS = ["Came","Late","No-show","Sick","Called off"];
 SCREENS.notes = function(){
   var body = '';
-  if (on("attendance")) {
-    var cnt = {}; FLAGS.forEach(function(f){ cnt[f] = 0; }); S.past.forEach(function(p){ if (S.attend[p[0]]) cnt[S.attend[p[0]]]++; });
-    var marked = S.past.filter(function(p){ return S.attend[p[0]]; }).length;
-    body += '<div class="lbl" style="margin-top:4px">Attendance · Sun 8 Nov AM<span class="small" style="text-transform:none;letter-spacing:0">' + marked + '/' + S.past.length + ' marked</span></div>'
+  var ls = lastSvc(), past = pastOf(ls), ak = function(p){ return ls.id + "|" + p; };
+  if (on("attendance") && ls) {
+    var cnt = {}; FLAGS.forEach(function(f){ cnt[f] = 0; }); past.forEach(function(p){ if (S.attend[ak(p[0])]) cnt[S.attend[ak(p[0])]]++; });
+    var marked = past.filter(function(p){ return S.attend[ak(p[0])]; }).length;
+    body += '<div class="lbl" style="margin-top:4px">Attendance · ' + dShort(ls.date) + ' ' + esc(ls.svc.split(" ")[1] || ls.svc) + '<span class="small" style="text-transform:none;letter-spacing:0">' + marked + '/' + past.length + ' marked</span></div>'
       + '<div class="pick" style="margin-bottom:10px">' + FLAGS.filter(function(f){ return cnt[f]; }).map(function(f){ return '<span class="chip ' + (f === "Came" ? 'c-ok' : f === "No-show" ? 'c-late' : 'c-warn') + '">' + cnt[f] + ' ' + f.toLowerCase() + '</span>'; }).join("") + '</div>'
-      + '<div class="grp">' + S.past.map(function(p){ return '<div class="row" style="align-items:flex-start"><span class="av">' + initials(p[0]) + '</span><div class="m"><div class="t">' + esc(p[0]) + '</div><div class="s">' + esc(p[1]) + '</div><div class="pick att">' + FLAGS.map(function(f){ return '<button data-a="flag" data-p="' + esc(p[0]) + '" data-v="' + f + '" aria-pressed="' + (S.attend[p[0]] === f) + '">' + f + '</button>'; }).join("") + '</div></div></div>'; }).join("") + '</div>';
+      + '<div class="grp">' + past.map(function(p){ return '<div class="row" style="align-items:flex-start"><span class="av">' + initials(p[0]) + '</span><div class="m"><div class="t">' + esc(p[0]) + '</div><div class="s">' + esc(p[1]) + '</div><div class="pick att">' + FLAGS.map(function(f){ return '<button data-a="flag" data-p="' + esc(p[0]) + '" data-v="' + f + '" aria-pressed="' + (S.attend[ak(p[0])] === f) + '">' + f + '</button>'; }).join("") + '</div></div></div>'; }).join("") + '</div>';
   }
-  body += '<div class="lbl">Notes</div>' + S.notes.map(function(n){ return '<div class="card" style="margin-bottom:10px"><div class="t" style="font:600 16px/21px var(--font)">' + esc(n.date) + ' · ' + esc(n.svc) + '</div><div class="stats mt" style="grid-template-columns:repeat(3,1fr)"><div class="stat"><b>' + n.adults + '</b><span>Adults</span></div><div class="stat"><b>' + n.kids + '</b><span>Kids</span></div><div class="stat acc"><b>' + n.visitors + '</b><span>Visitors</span></div></div><p style="margin:10px 0 0;font-size:15px">' + esc(n.text) + '</p></div>'; }).join("");
-  body += '<div class="btns"><button class="btn" data-a="sheet" data-s="note">Add notes for Sun 15 Nov</button></div>';
+  body += '<div class="lbl">Notes</div>' + (S.notes.length ? '' : '<div class="empty">No notes yet.</div>') + S.notes.map(function(n){ return '<div class="card" style="margin-bottom:10px"><div class="t" style="font:600 16px/21px var(--font)">' + esc(n.date) + ' · ' + esc(n.svc) + '</div><div class="stats mt" style="grid-template-columns:repeat(3,1fr)"><div class="stat"><b>' + n.adults + '</b><span>Adults</span></div><div class="stat"><b>' + n.kids + '</b><span>Kids</span></div><div class="stat acc"><b>' + n.visitors + '</b><span>Visitors</span></div></div><p style="margin:10px 0 0;font-size:15px">' + esc(n.text) + '</p></div>'; }).join("");
+  body += '<div class="btns"><button class="btn" data-a="sheet" data-s="note">Add notes for ' + (noteSvc() ? dShort(noteSvc().date) + ' ' + noteSvc().svc : 'a service') + '</button></div>';
   return { head: header("Service notes"), body: body };
 };
 SCREENS.todosAdmin = function(){
   var body = S.todos.map(function(t){ var need = Object.keys(POOL).filter(function(tm){ return !t.teams.length || t.teams.indexOf(tm) >= 0; }).reduce(function(a, tm){ POOL[tm].forEach(function(p){ if (a.indexOf(p) < 0) a.push(p); }); return a; }, []).sort();
     var done = need.filter(function(p){ return (S.todoDone[t.id] || {})[p]; });
     return '<div class="lbl">' + esc(t.title) + '<span class="small" style="text-transform:none;letter-spacing:0">' + done.length + ' of ' + need.length + '</span></div><div class="card small" style="color:var(--ink);margin-bottom:8px">' + esc(t.text) + ' For ' + esc(t.teams.join(", ") || "everyone") + '.</div><div class="grp">' + need.map(function(p){ var d = (S.todoDone[t.id] || {})[p]; return '<div class="row"><span class="av' + (d ? '' : ' g') + '">' + initials(p) + '</span><div class="m"><div class="t">' + esc(p) + '</div></div>' + (d ? '<span class="chip c-ok">Done ' + esc(d) + '</span>' : '<span class="chip c-mut">Not yet</span>') + '</div>'; }).join("") + '</div>'; }).join("");
+  if (!S.todos.length) body = '<div class="empty">No to-dos yet.</div>';
   body += '<div class="btns"><button class="btn" data-a="sheet" data-s="addTodo">Add a to-do</button></div>';
   return { head: header("Onboarding to-dos"), body: body };
 };
 SCREENS.checklistsAdmin = function(){
-  var body = S.checklists.map(function(k){ var done = k.items.filter(function(_, i){ return S.ticks["s0|" + k.id + "|" + i]; }).length;
-    return '<div class="lbl">' + esc(k.title) + ' · ' + esc(k.team) + ', ' + esc(k.svc) + '<span class="small" style="text-transform:none;letter-spacing:0">' + done + '/' + k.items.length + ' this Sunday</span></div><div class="grp">' + k.items.map(function(t, i){ var tk = S.ticks["s0|" + k.id + "|" + i]; return '<div class="row"><div class="m"><div class="t" style="font-weight:500">' + esc(t) + '</div><div class="s">' + (tk ? 'Done by ' + esc(tk.by) + ' · ' + esc(tk.at) : 'Not done yet') + '</div></div>' + (tk ? '<span class="chip c-ok">Done</span>' : '') + '</div>'; }).join("")
+  var ds = dashSvc(), dk = ds ? ds.id + "|" : "-|";
+  var body = S.checklists.map(function(k){ var done = k.items.filter(function(_, i){ return S.ticks[dk + k.id + "|" + i]; }).length;
+    return '<div class="lbl">' + esc(k.title) + ' · ' + esc(k.team) + ', ' + esc(k.svc) + '<span class="small" style="text-transform:none;letter-spacing:0">' + done + '/' + k.items.length + ' this Sunday</span></div><div class="grp">' + k.items.map(function(t, i){ var tk = S.ticks[dk + k.id + "|" + i]; return '<div class="row"><div class="m"><div class="t" style="font-weight:500">' + esc(t) + '</div><div class="s">' + (tk ? 'Done by ' + esc(tk.by) + ' · ' + esc(tk.at) : 'Not done yet') + '</div></div>' + (tk ? '<span class="chip c-ok">Done</span>' : '') + '</div>'; }).join("")
       + '<form class="row" data-a="addItem" data-id="' + k.id + '"><input class="field" name="t" placeholder="Add an item" aria-label="Add an item to ' + esc(k.title) + '" style="min-height:40px;padding:8px 12px;background:var(--ground)"><button class="btn sm" type="submit">Add</button></form></div>'; }).join("");
-  return { head: header("Checklists"), body: '<p class="small" style="margin:0 4px">Volunteers on that team see the list on their serve details and tick items off.</p>' + body };
+  return { head: header("Checklists"), body: '<p class="small" style="margin:0 4px">Volunteers on that team see the list on their serve details and tick items off.</p>' + (S.checklists.length ? body : '<div class="empty">No checklists yet.</div>') + '<div class="btns"><button class="btn" data-a="sheet" data-s="addCk">Add a checklist</button></div>' };
 };
 SCREENS.eventsAdmin = function(){
-  return { head: header("Events"), body: S.events.map(function(e){ return '<div class="card" style="margin-bottom:10px"><div class="small">' + dLong(e.date) + '</div><div class="t" style="font:600 17px/22px var(--font)">' + esc(e.title) + '</div><p style="margin:4px 0 0;font-size:15px">' + esc(e.note) + '</p></div>'; }).join("") + '<div class="btns"><button class="btn" data-a="sheet" data-s="addEvent">Add an event</button></div>' };
+  return { head: header("Events"), body: (S.events.length ? '' : '<div class="empty">No events yet.</div>') + S.events.map(function(e){ return '<div class="card" style="margin-bottom:10px"><div class="small">' + dLong(e.date) + '</div><div class="t" style="font:600 17px/22px var(--font)">' + esc(e.title) + '</div><p style="margin:4px 0 0;font-size:15px">' + esc(e.note) + '</p></div>'; }).join("") + '<div class="btns"><button class="btn" data-a="sheet" data-s="addEvent">Add an event</button></div>' };
 };
 
 /* ---------- sheets ---------- */
@@ -1011,15 +1052,15 @@ SHEETS.change = function(o){ var x = slot(o.id), sv = svc(x.sid);
     + '<div class="row tap" data-a="giveaway" data-id="' + x.id + '"><div class="m"><div class="t">Give it away</div><div class="s">Post to Open spots; anyone on ' + esc(x.team) + ' can take it</div></div><span class="chev">›</span></div></div>'
     + '<p class="small mt">Your leader approves before anything changes.</p>'; };
 SHEETS.fill = function(o){ var x = slot(o.id), sv = svc(x.sid), pick = on("picker");
-  var people = POOL[x.team].map(function(p){ var st = blockedOn(p, sv) ? "blocked" : (servingAt(sv.id, p) && x.person !== p) ? "busy" : (!S.regular[sv.svc] && p === ME) ? "off" : (S.serveCount[p] || 0) >= 3 ? "lots" : "free"; return { p: p, st: st }; });
+  var people = POOL[x.team].map(function(p){ var st = blockedOn(p, sv) ? "blocked" : (servingAt(sv.id, p) && x.person !== p) ? "busy" : (S.regularBy && S.regularBy[p] && S.regularBy[p][sv.svc] === false) ? "off" : (wk(p) || 0) >= 3 ? "lots" : "free"; return { p: p, st: st }; });
   if (pick) people.sort(function(a,b){ var o = { free: 0, lots: 1, busy: 2, off: 3, blocked: 4 }; return o[a.st] - o[b.st]; });
   var lab = { free: ["Available","c-ok"], lots: ["Serving a lot","c-warn"], busy: ["Already serving","c-mut"], blocked: ["Away","c-late"], off: ["Doesn't do " + sv.svc, "c-warn"] };
   var h = on("bids") && !x.person ? hands(x) : [];
   var out = '<h4>' + esc(x.role) + '</h4><p class="s">' + dShort(sv.date) + ' · ' + SVC[sv.svc].name + (x.person ? ' · now ' + esc(x.person) : ' · open') + '</p>';
   if (h.length) out += '<div class="lbl" style="margin-top:4px">Raised their hand</div><div class="grp">' + h.map(function(r){ return '<div class="row"><span class="av">' + initials(r.from) + '</span><div class="m"><div class="t">' + esc(r.from) + '</div><div class="s">Asked to serve this spot</div></div><button class="btn sm" data-a="assignHand" data-id="' + r.id + '">Pick</button></div>'; }).join("") + '</div>';
-  out += '<div class="lbl"' + (h.length ? '' : ' style="margin-top:4px"') + '>' + (pick ? 'Find who\'s available' : 'Pick someone') + '</div><div class="grp">' + people.map(function(e){ return '<div class="row tap" data-a="assign" data-id="' + x.id + '" data-p="' + esc(e.p) + '"><span class="av' + (!pick || e.st === "free" ? '' : ' g') + '">' + initials(e.p) + '</span><div class="m"><div class="t">' + esc(e.p) + (e.p === x.person ? ' ✓' : '') + '</div>' + (pick ? '<div class="s">' + (S.serveCount[e.p] ? 'Serving ' + S.serveCount[e.p] + ' times this week' : e.st === "blocked" ? 'Blocked out that day' : 'Served 2 Sundays ago') + '</div>' : '') + '</div>' + (pick ? '<span class="chip ' + lab[e.st][1] + '">' + lab[e.st][0] + '</span>' : '') + '</div>'; }).join("") + '</div>';
+  out += '<div class="lbl"' + (h.length ? '' : ' style="margin-top:4px"') + '>' + (pick ? 'Find who\'s available' : 'Pick someone') + '</div><div class="grp">' + people.map(function(e){ return '<div class="row tap" data-a="assign" data-id="' + x.id + '" data-p="' + esc(e.p) + '"><span class="av' + (!pick || e.st === "free" ? '' : ' g') + '">' + initials(e.p) + '</span><div class="m"><div class="t">' + esc(e.p) + (e.p === x.person ? ' ✓' : '') + '</div>' + (pick ? '<div class="s">' + (wk(e.p) ? 'Serving ' + wk(e.p) + ' times this week' : e.st === "blocked" ? 'Blocked out that day' : lastServedText(e.p, sv)) + '</div>' : '') + '</div>' + (pick ? '<span class="chip ' + lab[e.st][1] + '">' + lab[e.st][0] + '</span>' : '') + '</div>'; }).join("") + '</div>';
   if (on("notes")) out += '<label class="fl" for="spotNote">Note for whoever serves</label><input class="field" id="spotNote" placeholder="Like: Kids room A, bring keys" value="' + esc(x.note || "") + '"><div class="btns"><button class="btn sm soft" style="width:100%" data-a="saveSpotNote" data-id="' + x.id + '">Save note</button></div>';
-  out += (x.person ? '<div class="btns two"><button class="btn sec" data-a="clearSlot" data-id="' + x.id + '">Leave open</button><button class="btn soft" data-a="toast" data-t="Opens WhatsApp with ' + esc(x.person) + ' (test copy)">Message ' + esc(x.person) + '</button></div>' : '<div class="btns"><button class="btn soft" data-a="postOpen" data-id="' + x.id + '">Post to Open spots</button></div>');
+  out += (x.person ? '<div class="btns two"><button class="btn sec" data-a="clearSlot" data-id="' + x.id + '">Leave open</button><button class="btn soft" data-a="toast" data-t="No phone number saved for ' + esc(x.person) + ' yet.">Message ' + esc(x.person) + '</button></div>' : '<div class="btns"><button class="btn soft" data-a="postOpen" data-id="' + x.id + '">Post to Open spots</button></div>');
   return out; };
 SHEETS.publish = function(){ var sv = svc(S.adminSid), changed = S.slots.filter(function(x){ return x.dirty && x.sid === sv.id && x.person; }), all = S.slots.filter(function(x){ return x.sid === sv.id && x.person; });
   var told = on("drafts") ? changed : all, names = told.map(function(x){ return x.person; }).filter(function(p, i, a){ return a.indexOf(p) === i; });
@@ -1030,19 +1071,19 @@ SHEETS.publish = function(){ var sv = svc(S.adminSid), changed = S.slots.filter(
     + '<div class="grp mt"><label class="row tap"><div class="m"><div class="t">Ask them to confirm</div></div><input type="checkbox" class="tog" checked></label></div>'
     + '<div class="btns"><button class="btn" data-a="publish">Publish</button><button class="btn sec" data-a="closeSheet">Not yet</button></div>'; };
 SHEETS.templates = function(){ var sv = svc(S.adminSid);
-  return '<h4>Templates</h4><p class="s">Drop a saved line-up onto ' + dShort(sv.date) + ' ' + sv.svc + '. It only fills empty spots.</p><div class="grp">' + S.templates.map(function(t, i){ return '<div class="row tap" data-a="useTemplate" data-id="' + i + '"><div class="m"><div class="t">' + esc(t.name) + '</div><div class="s">' + esc(t.sv) + ' · ' + Object.keys(t.lines).length + ' spots · saved by ' + esc(t.by) + '</div></div><span class="chev">›</span></div>'; }).join("") + '</div>'
+  return '<h4>Templates</h4><p class="s">Drop a saved line-up onto ' + dShort(sv.date) + ' ' + sv.svc + '. It only fills empty spots.</p>' + (S.templates.length ? '' : '<p class="small">No templates saved yet.</p>') + '<div class="grp">' + S.templates.map(function(t, i){ return '<div class="row tap" data-a="useTemplate" data-id="' + i + '"><div class="m"><div class="t">' + esc(t.name) + '</div><div class="s">' + esc(t.sv) + ' · ' + Object.keys(t.lines).length + ' spots · saved by ' + esc(t.by) + '</div></div><span class="chev">›</span></div>'; }).join("") + '</div>'
     + '<label class="fl" for="tplName">Save this service as a template</label><input class="field" id="tplName" placeholder="Like: Sunday AM, Band C"><div class="btns"><button class="btn sec" data-a="saveTemplate">Save template</button></div>'; };
 SHEETS.announce = function(){
-  var groups = [["Everyone"],["Song Service"],["Media"],["Leaders"]];
-  if (on("audience")) S.services.filter(function(s){ return s.published; }).slice(0,4).forEach(function(s){ var n = S.slots.filter(function(x){ return x.sid === s.id && x.person && x.status !== "declined"; }).length; groups.push(["Serving " + dShort(s.date) + " " + s.svc.split(" ")[1] + " (" + n + ")", s.id]); });
+  var groups = [["Everyone"]].concat(Object.keys(ROLES).map(function(t){ return [t]; })).concat([["Leaders"]]);
+  if (on("audience")) upc().filter(function(s){ return s.published; }).slice(0,4).forEach(function(s){ var n = S.slots.filter(function(x){ return x.sid === s.id && x.person && x.status !== "declined"; }).length; groups.push(["Serving " + dShort(s.date) + " " + s.svc.split(" ")[1] + " (" + n + ")", s.id]); });
   return '<h4>New announcement</h4><label class="fl" for="anTo">To</label><div class="pick" id="anTo">' + groups.map(function(g, i){ return '<button data-a="pickReason"' + (g[1] ? ' data-sid="' + g[1] + '"' : '') + ' aria-pressed="' + (i === 0) + '">' + esc(g[0]) + '</button>'; }).join("") + '</div>'
-  + '<label class="fl" for="anTitle">Title</label><input class="field" id="anTitle" placeholder="Short headline" value="Prayer before service">'
-  + '<label class="fl" for="anText">Message</label><textarea class="field" id="anText">Everyone serving, we\'ll pray together in the side room at 9:30 this Sunday.</textarea>'
+  + '<label class="fl" for="anTitle">Title</label><input class="field" id="anTitle" placeholder="Short headline">'
+  + '<label class="fl" for="anText">Message</label><textarea class="field" id="anText" placeholder="What everyone should know"></textarea>'
   + '<div class="grp mt"><label class="row tap"><div class="m"><div class="t">Also share on WhatsApp</div><div class="s">Opens WhatsApp for you to send</div></div><input type="checkbox" class="tog"></label></div>'
   + '<div class="btns"><button class="btn" data-a="postAnn">Post</button></div>'; };
 SHEETS.shout = function(o){ return '<h4>Shout-out for ' + esc(o.id) + '</h4><p class="s">Shows on ' + esc(teamsOf(o.id)[0] || "their team") + '\'s Messages, and ' + esc(o.id) + ' gets a notification.</p><div class="pick" id="shBadge">' + ["Faithful servant","Team player","Above and beyond","Early bird"].map(function(b, i){ return '<button data-a="pickReason" aria-pressed="' + (i === 0) + '">' + b + '</button>'; }).join("") + '</div><label class="fl" for="shText">Message (optional)</label><textarea class="field" id="shText" placeholder="What they did"></textarea><div class="btns"><button class="btn" data-a="sendShout" data-id="' + esc(o.id) + '">Send shout-out</button></div>'; };
-SHEETS.addEvent = function(){ var sv = svc(S.adminSid); return '<h4>Add an event</h4><p class="s">Shows as a banner on that day for leaders and volunteers.</p><label class="fl" for="evDate">Day</label><select class="field" id="evDate">' + S.services.filter(function(s, i, a){ return a.findIndex(function(t){ return t.date === s.date; }) === i; }).map(function(s){ return '<option value="' + s.date + '"' + (s.date === sv.date ? ' selected' : '') + '>' + dShort(s.date) + '</option>'; }).join("") + '</select><label class="fl" for="evTitle">Title</label><input class="field" id="evTitle" value="Dedication Sunday"><label class="fl" for="evNote">Note (optional)</label><input class="field" id="evNote" value="Families with babies sit in the front rows."><div class="btns"><button class="btn" data-a="saveEvent">Add event</button></div>'; };
-SHEETS.addTodo = function(){ return '<h4>Add a to-do</h4><p class="s">New volunteers on these teams see it on Home until they confirm.</p><label class="fl" for="tdTitle">Title</label><input class="field" id="tdTitle" value="Welcome team handbook"><label class="fl" for="tdText">What to do</label><input class="field" id="tdText" value="Read the handbook and confirm."><label class="fl">Teams</label><div class="pick" id="tdTeams">' + Object.keys(POOL).map(function(t){ return '<button data-a="toggleBtn" aria-pressed="' + (t === "Welcome") + '">' + esc(t) + '</button>'; }).join("") + '</div><div class="btns"><button class="btn" data-a="saveTodo">Add to-do</button></div>'; };
+SHEETS.addEvent = function(){ var sv = svc(S.adminSid); return '<h4>Add an event</h4><p class="s">Shows as a banner on that day for leaders and volunteers.</p><label class="fl" for="evDate">Day</label><select class="field" id="evDate">' + upc().filter(function(s, i, a){ return a.findIndex(function(t){ return t.date === s.date; }) === i; }).map(function(s){ return '<option value="' + s.date + '"' + (s.date === sv.date ? ' selected' : '') + '>' + dShort(s.date) + '</option>'; }).join("") + '</select><label class="fl" for="evTitle">Title</label><input class="field" id="evTitle" placeholder="Like: Baptism Sunday"><label class="fl" for="evNote">Note (optional)</label><input class="field" id="evNote" placeholder="What people should know"><div class="btns"><button class="btn" data-a="saveEvent">Add event</button></div>'; };
+SHEETS.addTodo = function(){ return '<h4>Add a to-do</h4><p class="s">New volunteers on these teams see it on Home until they confirm.</p><label class="fl" for="tdTitle">Title</label><input class="field" id="tdTitle" placeholder="Like: Child-safety policy"><label class="fl" for="tdText">What to do</label><input class="field" id="tdText" placeholder="Like: Read the policy and confirm"><label class="fl">Teams</label><div class="pick" id="tdTeams">' + Object.keys(POOL).map(function(t){ return '<button data-a="toggleBtn" aria-pressed="false">' + esc(t) + '</button>'; }).join("") + '</div><div class="btns"><button class="btn" data-a="saveTodo">Add to-do</button></div>'; };
 
 /* ---------- actions ---------- */
 var baseApprove = A.approve;
@@ -1050,10 +1091,10 @@ A.approve = function(d){ var r = req(d.id); if (r.kind === "swap" && r.stage < 2
 A.assignHand = function(d){ S.sheet = null; A.approve(d); };
 A.acceptSwap = function(d){ var r = req(d.id); r.stage = 2; S.notifs.unshift({ t: "Swap accepted", s: ME + " accepted. Waiting for your leader.", when: "Now" }); toast("Accepted. Now your leader approves."); render.same = true; render(); };
 A.declineSwap = function(d){ var r = req(d.id); r.state = "declined"; toast(r.from + " is told."); render.same = true; render(); };
-A.doneTodo = function(d){ (S.todoDone[d.id] = S.todoDone[d.id] || {})[ME] = "12 Nov"; toast("Thanks. Your leader can see you've done it."); render.same = true; render(); };
+A.doneTodo = function(d){ (S.todoDone[d.id] = S.todoDone[d.id] || {})[ME] = dm(TODAY); toast("Thanks. Your leader can see you've done it."); render.same = true; render(); };
 A.tick = function(d, el){ if (el.checked) S.ticks[d.k] = { by: S.view === "admin" ? ADMIN : ME, at: "Just now" }; else delete S.ticks[d.k]; render.same = true; render(); };
 A.feat = function(d, el){ S.feat[d.k] = el.checked; toast(FEATS.filter(function(f){ return f[0] === d.k; })[0][1] + (el.checked ? " is on" : " is off")); render.same = true; render(); };
-A.flag = function(d){ S.attend[d.p] = S.attend[d.p] === d.v ? undefined : d.v; render.same = true; render(); };
+A.flag = function(d){ var ls = lastSvc(); if (!ls) return; var k = ls.id + "|" + d.p; if (S.attend[k] === d.v) delete S.attend[k]; else S.attend[k] = d.v; render.same = true; render(); };
 A.saveSpotNote = function(d){ var x = slot(d.id); x.note = (document.getElementById("spotNote").value || "").trim(); S.sheet = null; toast(x.note ? "Note saved. " + (x.person || "Whoever serves") + " sees it on their card." : "Note removed."); render.same = true; render(); };
 A.useTemplate = function(d){ var t = S.templates[+d.id], n = 0, sv = svc(S.adminSid);
   S.slots.forEach(function(x){ if (x.sid !== sv.id || (x.person && x.status !== "declined")) return; var p = t.lines[x.team + "|" + x.role]; if (p && !servingAt(sv.id, p) && !blockedOn(p, sv)) { x.person = p; x.status = "pending"; x.dirty = true; n++; } });
@@ -1063,7 +1104,7 @@ A.saveTemplate = function(){ var sv = svc(S.adminSid), name = (document.getEleme
   S.templates.push({ name: name, sv: sv.svc, by: ADMIN, lines: lines }); S.sheet = null; toast("Saved \"" + name + "\" with " + Object.keys(lines).length + " spots."); render.same = true; render(); };
 A.publish = function(){ var sv = svc(S.adminSid); sv.published = true; var ch = S.slots.filter(function(x){ return x.dirty && x.sid === sv.id && x.person; }), n = on("drafts") ? ch.length : S.slots.filter(function(x){ return x.sid === sv.id && x.person; }).length;
   S.slots.forEach(function(x){ if (x.sid === sv.id) x.dirty = false; }); S.sheet = null; toast("Published. " + n + " volunteer" + (n === 1 ? "" : "s") + " told."); render.same = true; render(); };
-A.postAnn = function(){ var to = document.querySelector("#anTo [aria-pressed=true]"); S.announcements.unshift({ id: "a" + Date.now(), who: ADMIN, to: to ? to.textContent : "Everyone", aud: to && to.dataset.sid, when: "Just now", title: document.getElementById("anTitle").value || "Announcement", text: document.getElementById("anText").value }); S.notifs.unshift({ t: "New announcement", s: document.getElementById("anTitle").value, when: "Now" }); S.sheet = null; S.msgTab = "ann"; toast(to && to.dataset.sid ? "Posted to the people serving then. Nirupa serves Sun 15 Nov AM and Wed 18 Nov." : "Posted. Switch to Volunteer to see it."); render(); };
+A.postAnn = function(){ var to = document.querySelector("#anTo [aria-pressed=true]"); S.announcements.unshift({ id: "a" + Date.now(), who: ADMIN, to: to ? to.textContent : "Everyone", aud: to && to.dataset.sid, when: "Just now", title: document.getElementById("anTitle").value || "Announcement", text: document.getElementById("anText").value }); S.notifs.unshift({ t: "New announcement", s: document.getElementById("anTitle").value, when: "Now" }); S.sheet = null; S.msgTab = "ann"; toast(to && to.dataset.sid ? "Posted to the people serving then." : "Posted. Volunteers see it in Messages."); render(); };
 A.sendShout = function(d){ var b = document.querySelector("#shBadge [aria-pressed=true]"); S.shouts.unshift({ to: d.id, from: S.view === "admin" ? ADMIN : ME, badge: b ? b.textContent : "Thank you", text: (document.getElementById("shText").value || "").trim(), when: "Just now", team: teamsOf(d.id)[0] || "" }); S.sheet = null; toast("Shout-out sent to " + d.id + "."); render.same = true; render(); };
 A.saveEvent = function(){ var t = (document.getElementById("evTitle").value || "").trim(); if (!t) return; S.events.push({ id: "e" + Date.now(), date: document.getElementById("evDate").value, title: t, note: document.getElementById("evNote").value }); S.sheet = null; toast("Event added. It shows on that day for everyone."); render.same = true; render(); };
 A.toggleBtn = function(d, el){ el.setAttribute("aria-pressed", String(el.getAttribute("aria-pressed") !== "true")); };
@@ -1093,25 +1134,252 @@ JUMPS.vol = JUMPS.vol.concat([
   ["Shout-outs", function(){ A.tab({ v: "msgs" }); S.msgTab = "ann"; render(); }]
 ]);
 
-/* ---------------- saving: one shared copy on the server ---------------- */
-var SKIP = { view: 1, stack: 1, sheet: 1, toast: 1 }, saveTimer, loaded = false, lastSaved = "";
-function snapshot(){ var o = {}; for (var k in S) if (!SKIP[k]) o[k] = S[k]; return JSON.stringify(o); }
-function saveSoon(){
+/* ================= Real roster: who you are, leader PIN, shared saving ================= */
+var LS = {
+  get: function(k){ try { return localStorage.getItem(k); } catch (e) { return null; } },
+  set: function(k, v){ try { if (v == null) localStorage.removeItem(k); else localStorage.setItem(k, v); } catch (e) {} }
+};
+ME = LS.get("roster.me") || "";
+var LOCAL = { view: 1, tab: 1, stack: 1, sheet: 1, toast: 1, volSchedMode: 1, reqFilter: 1, msgTab: 1, adminSid: 1, settings: 1, regular: 1, pendingMine: 1, serveCount: 1 };
+function localDefaults(){ return { view: LS.get("roster.view") === "admin" ? "admin" : "vol", tab: { admin: "dash", vol: "home" }, stack: [], sheet: null, toast: null, adminSid: "", volSchedMode: "mine", reqFilter: "pending", msgTab: "ann", settings: {}, regular: {}, pendingMine: {}, serveCount: {} }; }
+function applyCfg(){ var c = S.cfg || {}; SVC = c.services || {}; ROLES = c.roles || {}; POOL = c.pool || {}; LEADERS = c.leaders || {}; PEOPLE = c.people || []; SOURCE = c.source || ""; }
+function everyone(){ var a = PEOPLE.slice(); Object.keys(POOL).forEach(function(t){ POOL[t].forEach(function(p){ if (a.indexOf(p) < 0) a.push(p); }); }); return a.sort(function(x, y){ return x.toLowerCase() < y.toLowerCase() ? -1 : 1; }); }
+function seedReal(D){
+  var order = Object.keys(D.services), byId = {}, services = [], slots = [], count = {};
+  D.schedule.forEach(function(r){ var id = r[0] + "|" + r[1]; if (!byId[id]) { byId[id] = { id: id, date: r[0], svc: r[1], published: true }; services.push(byId[id]); } });
+  services.sort(function(a, b){ return a.date < b.date ? -1 : a.date > b.date ? 1 : order.indexOf(a.svc) - order.indexOf(b.svc); });
+  function add(sv, team, role, person){ var key = sv.id + "|" + team + "|" + role; count[key] = (count[key] || 0) + 1;
+    slots.push({ id: key + "|" + (count[key] - 1), sid: sv.id, team: team, role: role, person: person || null, status: person ? (sv.date < TODAY ? "confirmed" : "pending") : "open", dirty: false }); }
+  var rows = {}; D.schedule.forEach(function(r){ var k = r[0] + "|" + r[1]; (rows[k] = rows[k] || []).push(r); });
+  services.forEach(function(sv){
+    var have = {};
+    (rows[sv.id] || []).forEach(function(r){ add(sv, r[2], r[3], r[4]); have[r[2] + "|" + r[3]] = (have[r[2] + "|" + r[3]] || 0) + 1; });
+    Object.keys(D.roles).forEach(function(team){ var need = {}; (D.roles[team][sv.svc] || []).forEach(function(role){ need[role] = (need[role] || 0) + 1; });
+      Object.keys(need).forEach(function(role){ for (var i = have[team + "|" + role] || 0; i < need[role]; i++) add(sv, team, role, null); }); });
+  });
+  return { cfg: { services: D.services, roles: D.roles, pool: D.pool, leaders: D.leaders, people: D.people, source: D.source },
+    services: services, slots: slots, requests: [], blockouts: {}, announcements: [], chats: [], notifs: [], notes: [],
+    feat: {}, events: [], templates: [], attend: {}, checklists: [], ticks: {}, todos: [], todoDone: {}, shouts: [], optOut: {}, plans: {},
+    settingsBy: {}, regularBy: {}, pendingBy: {}, pinHash: "" };
+}
+function ensureShape(){
+  [["services",[]],["slots",[]],["requests",[]],["announcements",[]],["chats",[]],["notifs",[]],["notes",[]],["events",[]],["templates",[]],["checklists",[]],["todos",[]],["shouts",[]]].forEach(function(k){ if (!Array.isArray(S[k[0]])) S[k[0]] = k[1]; });
+  ["blockouts","feat","attend","ticks","todoDone","optOut","plans","settingsBy","regularBy","pendingBy","cfg"].forEach(function(k){ if (!S[k] || typeof S[k] !== "object") S[k] = {}; });
+  if (typeof S.pinHash !== "string") S.pinHash = "";
+}
+function bindMe(){
+  var set = { push: true, ann: true, sched: true, pool: true, msgs: true, wa: true, cal: false }, reg = {};
+  Object.keys(SVC).forEach(function(k){ reg[k] = true; });
+  if (!ME) { S.settings = set; S.regular = reg; S.pendingMine = {}; return; }
+  S.settings = S.settingsBy[ME] = S.settingsBy[ME] || set;
+  S.regular = S.regularBy[ME] = S.regularBy[ME] || reg;
+  S.pendingMine = S.pendingBy[ME] = S.pendingBy[ME] || {};
+}
+function fixLocal(){ if (!svc(S.adminSid)) S.adminSid = (dashSvc() || S.services[S.services.length - 1] || {}).id || ""; }
+var rev = 0, lastSaved = "", saveTimer, loaded = false, inflight = false, again = false, failed = false, loadErr = "";
+function snapshot(){ var o = {}; for (var k in S) if (!LOCAL[k]) o[k] = S[k]; return JSON.stringify(o); }
+function adopt(j){
+  if (!j || !j.data) return;
+  var keep = {}; for (var k in LOCAL) keep[k] = S[k];
+  S = j.data; for (var k2 in keep) S[k2] = keep[k2];
+  ensureShape(); rev = j.rev; lastSaved = snapshot(); applyCfg(); bindMe(); fixLocal();
+}
+/* two people saved at once: keep both changes where they don't touch the same thing */
+var clashes = 0;
+function J(x){ return JSON.stringify(x); }
+function same(a, b){ return J(a) === J(b); }
+function byId(a){ var o = {}; a.forEach(function(x){ o[x.id] = x; }); return o; }
+function merge3(b, m, t){
+  if (same(m, b)) return t;
+  if (same(t, b) || same(t, m)) return m;
+  if (Array.isArray(m) && Array.isArray(t) && Array.isArray(b)) {
+    var all = b.concat(m, t), keyed = all.length && all.every(function(x){ return x && typeof x === "object" && x.id != null; });
+    var front = [], back = [], seenOld = false, out;
+    if (keyed) {
+      var bi = byId(b), mi = byId(m), ti = byId(t); out = [];
+      t.forEach(function(x){ var bx = bi[x.id], mx = mi[x.id];
+        if (bx && !mx) { if (!same(x, bx)) out.push(x); return; }
+        out.push(mx && bx ? merge3(bx, mx, x) : x); });
+      m.forEach(function(x){ if (bi[x.id] || ti[x.id]) { seenOld = true; return; } (seenOld ? back : front).push(x); });
+      return front.concat(out, back);
+    }
+    var bs = b.map(J), ms = m.map(J), ts = t.map(J);
+    out = t.filter(function(x){ var j = J(x); return !(bs.indexOf(j) >= 0 && ms.indexOf(j) < 0); });
+    m.forEach(function(x){ var j = J(x); if (bs.indexOf(j) >= 0 || ts.indexOf(j) >= 0) { seenOld = true; return; } (seenOld ? back : front).push(x); });
+    return front.concat(out, back);
+  }
+  if (m && t && b && typeof m === "object" && typeof t === "object" && typeof b === "object" && !Array.isArray(m) && !Array.isArray(t)) {
+    var o = {}, keys = {}; [b, m, t].forEach(function(x){ for (var k in x) keys[k] = 1; });
+    for (var k in keys) {
+      var inB = k in b, inM = k in m, inT = k in t;
+      if (inB && !inM) { if (inT && !same(t[k], b[k])) o[k] = t[k]; continue; }
+      if (inB && !inT) { if (!same(m[k], b[k])) o[k] = m[k]; continue; }
+      if (!inB && !inT) { o[k] = m[k]; continue; }
+      if (!inB && !inM) { o[k] = t[k]; continue; }
+      o[k] = merge3(inB ? b[k] : undefined, m[k], t[k]);
+    }
+    return o;
+  }
+  clashes++;
+  return t;
+}
+function saveSoon(){ if (!loaded) return; clearTimeout(saveTimer); saveTimer = setTimeout(saveNow, 400); }
+function saveNow(){
   if (!loaded) return;
-  clearTimeout(saveTimer);
-  saveTimer = setTimeout(function(){
-    var body = snapshot(); if (body === lastSaved) return;
-    fetch("/api/state", { method: "PUT", headers: { "content-type": "application/json" }, body: body })
-      .then(function(r){ if (r.ok) lastSaved = body; }).catch(function(){});
-  }, 400);
+  if (inflight) { again = true; return; }
+  var body = snapshot(); if (body === lastSaved) return;
+  inflight = true;
+  fetch("/api/state", { method: "PUT", headers: { "content-type": "application/json" }, body: '{"rev":' + rev + ',"data":' + body + '}' })
+    .then(function(r){ return r.json().then(function(j){ return { s: r.status, j: j }; }, function(){ return { s: r.status }; }); })
+    .then(function(x){
+      inflight = false;
+      if (x.s === 200) { rev = x.j.rev; lastSaved = body; failed = false; }
+      else if (x.s === 409 && x.j && x.j.data) {
+        var base = lastSaved ? JSON.parse(lastSaved) : null;
+        if (!base) { adopt(x.j); toast("The roster was just set up on another phone, so this phone now shows that copy."); render.same = true; render(); }
+        else {
+          clashes = 0;
+          var merged = merge3(base, JSON.parse(body), x.j.data);
+          adopt({ rev: x.j.rev, data: merged }); lastSaved = J(x.j.data);
+          if (clashes) toast("Someone else changed the same thing just now, so their change was kept.");
+          render.same = true; render(); saveSoon();
+        }
+      }
+      else if (!failed) { failed = true; toast("Couldn't save just now. Please try again."); render.same = true; render(); }
+      if (again) { again = false; saveSoon(); }
+    }, function(){ inflight = false; if (!failed) { failed = true; toast("Couldn't save. You look offline."); render.same = true; render(); } });
 }
-function loadState(){
-  return fetch("/api/state", { cache: "no-store" }).then(function(r){ return r.ok ? r.json() : null; }).then(function(d){
-    if (d && typeof d === "object" && d.slots) { for (var k in d) if (!SKIP[k]) S[k] = d[k]; lastSaved = JSON.stringify(d); }
-  }).catch(function(){});
+function poll(){
+  if (!loaded || inflight || S.sheet || document.visibilityState === "hidden" || snapshot() !== lastSaved) return;
+  fetch("/api/state", { cache: "no-store" }).then(function(r){ return r.ok ? r.json() : null; }).then(function(j){
+    if (j && j.data && j.rev !== rev && !inflight && !S.sheet && snapshot() === lastSaved) { adopt(j); render.same = true; render(); }
+  }, function(){});
 }
+setInterval(poll, 30000);
+document.addEventListener("visibilitychange", poll);
+function load(){
+  S = localDefaults();
+  return fetch("/api/state", { cache: "no-store" }).then(function(r){ if (!r.ok) throw new Error("state " + r.status); return r.json(); }).then(function(j){
+    if (j.data) { adopt(j); return; }
+    rev = j.rev;
+    return fetch("/roster-data.json", { cache: "no-store" }).then(function(r){ if (!r.ok) throw new Error("data " + r.status); return r.json(); }).then(function(D){
+      var keep = S; S = seedReal(D); for (var k in LOCAL) S[k] = keep[k];
+      ensureShape(); applyCfg(); bindMe(); fixLocal(); lastSaved = "";
+    });
+  });
+}
+
+/* who are you, and the leader PIN */
+function plainHead(t){ return '<div class="hd"><span style="width:40px"></span><h3>' + esc(t) + '</h3><span style="width:40px"></span></div>'; }
+SCREENS.who = function(){
+  var ps = everyone();
+  return { head: plainHead("Who are you?"), noTabs: true, body: '<p class="small" style="margin:0 4px 12px">Pick your name to see your serves. This phone remembers you.</p><div class="grp">'
+    + ps.map(function(p){ return '<div class="row tap" data-a="setMe" data-id="' + esc(p) + '"><span class="av">' + initials(p) + '</span><div class="m"><div class="t">' + esc(p) + '</div><div class="s">' + esc(teamsOf(p).join(" · ") || "Volunteer") + '</div></div><span class="chev">›</span></div>'; }).join("")
+    + '</div><p class="small mt" style="margin-left:4px">Not on the list? Ask your team leader to add you to the roster.</p>' };
+};
+function adminOk(){ return !!S.pinHash && LS.get("roster.admin") === S.pinHash; }
+SCREENS.pin = function(){
+  var first = !S.pinHash;
+  return { head: plainHead(first ? "Set a leader PIN" : "Leaders only"), noTabs: true, body: '<div class="card"><p class="small" style="margin:0 0 10px">' + (first ? "Pick a 4 to 8 digit PIN. Give it only to team leaders. They type it once on each phone." : "Type the leader PIN to open the Admin view.") + '</p>'
+    + '<label class="fl" for="pin1">' + (first ? "New PIN" : "PIN") + '</label><input class="field" id="pin1" type="password" inputmode="numeric" autocomplete="off" maxlength="8">'
+    + (first ? '<label class="fl" for="pin2">Type it again</label><input class="field" id="pin2" type="password" inputmode="numeric" autocomplete="off" maxlength="8">' : '')
+    + '<div class="btns"><button class="btn" data-a="pinGo">' + (first ? "Save PIN" : "Open Admin") + '</button><button class="btn sec" data-a="toVol">Back to Volunteer</button></div></div>' };
+};
+function hashPin(pin){
+  var txt = "hcc-roster|" + pin;
+  if (window.crypto && crypto.subtle && window.TextEncoder) return crypto.subtle.digest("SHA-256", new TextEncoder().encode(txt)).then(function(b){ return [].map.call(new Uint8Array(b), function(x){ return ("0" + x.toString(16)).slice(-2); }).join(""); });
+  var h = 5381; for (var i = 0; i < txt.length; i++) h = ((h << 5) + h + txt.charCodeAt(i)) | 0; return Promise.resolve("d" + (h >>> 0).toString(16));
+}
+A.pinGo = function(){
+  var p1 = (document.getElementById("pin1").value || "").trim(), e2 = document.getElementById("pin2"), first = !S.pinHash;
+  if (!/^\d{4,8}$/.test(p1)) { toast("Use 4 to 8 digits."); return; }
+  if (first && e2.value.trim() !== p1) { toast("The two PINs don't match."); return; }
+  hashPin(p1).then(function(h){
+    if (first) { S.pinHash = h; LS.set("roster.admin", h); toast("PIN saved. Admin is open on this phone."); }
+    else if (h === S.pinHash) { LS.set("roster.admin", h); toast("Admin is open on this phone."); }
+    else { toast("That PIN isn't right."); return; }
+    S.stack = []; render();
+  });
+};
+A.toVol = function(){ S.view = "vol"; S.stack = []; S.sheet = null; render(); };
+A.lockAdmin = function(){ LS.set("roster.admin", null); S.stack = []; render(); };
+A.setMe = function(d){ ME = d.id; LS.set("roster.me", ME); bindMe(); S.stack = []; S.tab.vol = "home"; render(); };
+A.whoami = function(){ ME = ""; LS.set("roster.me", null); bindMe(); S.stack = []; S.sheet = null; S.tab.vol = "home"; render(); };
+
+/* real actions in place of the test copy's toasts */
+A.ics = function(d){ var list = d.id ? [slot(d.id)].filter(Boolean) : mine(); if (!list.length) { toast("Nothing coming up to add."); return; } icsFor(list); toast(list.length > 1 ? "Your " + list.length + " serves are ready to add to your calendar." : "Ready to add to your calendar."); };
+A.hub = function(){ window.open("https://hub.hyderabadchristiancenter.com/", "_blank", "noopener"); };
+A.cover = function(d){ var r = req(d.id); if (!r) return; var x = slot(r.slot); if (!x) return;
+  if (S.requests.some(function(q){ return q.kind === "pickup" && q.slot === x.id && q.from === ME && q.state === "pending"; })) { toast("You already offered. Your leader confirms."); return; }
+  S.pendingMine[x.id] = 1; S.requests.unshift({ id: "r" + Date.now(), kind: "pickup", slot: x.id, from: ME, state: "pending" });
+  toast("You offered to cover " + r.from + "'s spot. Your leader confirms."); render.same = true; render(); };
+A.waNudge = function(){ var sv = dashSvc(); if (sv) waText(nudgeText(sv)); };
+A.remindApp = function(){ var sv = dashSvc(); if (!sv) return; S.notifs.unshift({ t: "Please confirm your serve", s: SVC[sv.svc].name + " · " + dShort(sv.date), when: "Now" }); S.sheet = null; toast("Reminder posted in the app."); render.same = true; render(); };
+A.leaderMsg = function(){ var v = (document.getElementById("ml").value || "").trim(); if (!v) return; var l = leaderOf(teamsOf(ME)[0]), name = ME + " and " + l;
+  var c = S.chats.filter(function(c){ return c.name === name; })[0]; if (!c) { c = { id: "c" + Date.now(), name: name, msgs: [] }; S.chats.push(c); }
+  c.msgs.push({ who: ME, t: v }); S.sheet = null; toast("Sent to " + l + "."); render.same = true; render(); };
+A.leaderWa = function(){ toast("No phone number saved for " + leaderOf(teamsOf(ME)[0]) + " yet."); };
+var baseSetting = A.setting;
+A.setting = function(d, el){ baseSetting(d, el); if (d.k === "sched" && ME) { if (el.checked) delete S.optOut[ME]; else S.optOut[ME] = true; } saveSoon(); };
+var baseRegular = A.regular;
+A.regular = function(d, el){ baseRegular(d, el); saveSoon(); };
+SHEETS.addCk = function(){
+  var teams = Object.keys(ROLES).filter(function(t){ return Object.keys(ROLES[t]).some(function(k){ return ROLES[t][k].length; }); });
+  return '<h4>Add a checklist</h4><p class="s">Volunteers on that team tick it off on their serve details.</p><label class="fl" for="ckTitle">Name</label><input class="field" id="ckTitle" placeholder="Like: Media setup">'
+    + '<div class="two"><div><label class="fl" for="ckTeam">Team</label><select class="field" id="ckTeam">' + teams.map(function(t){ return '<option>' + esc(t) + '</option>'; }).join("") + '</select></div><div><label class="fl" for="ckSvc">Service</label><select class="field" id="ckSvc">' + Object.keys(SVC).map(function(k){ return '<option>' + esc(k) + '</option>'; }).join("") + '</select></div></div>'
+    + '<label class="fl" for="ckDue">Done by (optional)</label><input class="field" id="ckDue" placeholder="Like: 9:30 AM"><label class="fl" for="ckItems">Items, one per line</label><textarea class="field" id="ckItems" placeholder="Load slides&#10;Test mics"></textarea>'
+    + '<div class="btns"><button class="btn" data-a="saveCk">Save checklist</button></div>';
+};
+A.saveCk = function(){ var t = (document.getElementById("ckTitle").value || "").trim(), items = (document.getElementById("ckItems").value || "").split(/\n/).map(function(x){ return x.trim(); }).filter(Boolean);
+  if (!t || !items.length) { toast("Add a name and at least one item."); return; }
+  S.checklists.push({ id: "k" + Date.now(), team: document.getElementById("ckTeam").value, svc: document.getElementById("ckSvc").value, title: t, due: (document.getElementById("ckDue").value || "").trim(), items: items });
+  S.sheet = null; toast("Checklist added."); render.same = true; render(); };
+
+/* jump list that works on the real roster */
+function firstOpen(){ var u = upc().map(function(sv){ return sv.id; }); return S.slots.filter(function(x){ return u.indexOf(x.sid) >= 0 && (x.status === "open" || !x.person); })[0]; }
+function myFirst(f){ var m = mine()[0]; if (!m) { toast("Nothing coming up for you."); return; } f(m); }
+function nextSvc(){ var sv = dashSvc(); if (!sv) { toast("No services coming up."); return; } return sv; }
+JUMPS = {
+  admin: [["Dashboard", function(){ A.tab({ v: "dash" }); }],
+    ["Schedule, next service", function(){ var sv = nextSvc(); if (sv) A.openSvc({ id: sv.id }); }],
+    ["Find who's available", function(){ var o = firstOpen(); if (!o) { toast("No open spots coming up."); return; } A.openSvc({ id: o.sid }); S.sheet = { s: "fill", id: o.id }; render(); }],
+    ["Publish", function(){ var sv = nextSvc(); if (!sv) return; A.openSvc({ id: sv.id }); S.sheet = { s: "publish" }; render(); }],
+    ["Requests", function(){ A.tab({ v: "reqs" }); }],
+    ["New announcement", function(){ A.tab({ v: "msgs" }); S.sheet = { s: "announce" }; render(); }],
+    ["Service notes and attendance", function(){ A.tab({ v: "more" }); push("notes"); }],
+    ["Team", function(){ A.tab({ v: "more" }); push("contacts"); }],
+    ["Features (on/off)", function(){ A.tab({ v: "more" }); push("features"); }],
+    ["Templates", function(){ var sv = nextSvc(); if (!sv) return; A.openSvc({ id: sv.id }); S.sheet = { s: "templates" }; render(); }],
+    ["Checklists", function(){ A.tab({ v: "more" }); push("checklistsAdmin"); }],
+    ["Onboarding to-dos", function(){ A.tab({ v: "more" }); push("todosAdmin"); }],
+    ["Events", function(){ A.tab({ v: "more" }); push("eventsAdmin"); }]],
+  vol: [["Home", function(){ A.tab({ v: "home" }); }],
+    ["Serve details", function(){ myFirst(function(m){ A.tab({ v: "home" }); push("detail", { id: m.id }); }); }],
+    ["Can't make it", function(){ myFirst(function(m){ A.tab({ v: "home" }); S.sheet = { s: "cant", id: m.id }; render(); }); }],
+    ["Swap or give away", function(){ myFirst(function(m){ A.tab({ v: "home" }); S.sheet = { s: "change", id: m.id }; render(); }); }],
+    ["Open spots", function(){ A.tab({ v: "pool" }); }],
+    ["My schedule", function(){ A.tab({ v: "sched" }); }],
+    ["Availability", function(){ A.tab({ v: "more" }); push("avail"); }],
+    ["Notifications", function(){ A.tab({ v: "home" }); push("notifs"); }],
+    ["My requests", function(){ A.tab({ v: "more" }); push("myReqs"); }],
+    ["To-dos", function(){ A.tab({ v: "more" }); push("todosVol"); }],
+    ["Shout-outs", function(){ A.tab({ v: "msgs" }); S.msgTab = "ann"; render(); }]]
+};
+drawJumps.v = null;
+
+/* render: wait for the roster, then ask who you are or for the leader PIN */
+var baseRender = render;
+render = function(){
+  if (!loaded) { app.innerHTML = statusBar() + plainHead("Roster") + '<div class="body" id="body"><div class="empty">' + esc(loadErr || "Loading the roster…") + '</div></div>'; drawJumps(); return; }
+  LS.set("roster.view", S.view);
+  var gate = S.view === "vol" && !ME ? "who" : S.view === "admin" && !adminOk() ? "pin" : "";
+  if (gate) { if (!S.stack[0] || S.stack[0].s !== gate) S.stack = [{ s: gate }]; S.sheet = null; }
+  else if (S.stack[0] && (S.stack[0].s === "who" || S.stack[0].s === "pin")) S.stack = [];
+  baseRender();
+};
+S = localDefaults();
 render();
-loadState().then(function(){ loaded = true; render.same = true; render(); });
+load().then(function(){ loaded = true; render(); }, function(){ loadErr = "Couldn't load the roster. Check your connection and refresh."; render(); });
 })();
 </script>
 

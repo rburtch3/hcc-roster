@@ -1,0 +1,6457 @@
+{
+ "source": "Sheet copy, Oct 2026",
+ "services": {
+  "Sun AM": {
+   "call": "10:00 AM",
+   "time": "11:00 AM",
+   "name": "Sunday Morning"
+  },
+  "Sun PM": {
+   "call": "6:00 PM",
+   "time": "7:00 PM",
+   "name": "Sunday Evening"
+  },
+  "Wed PM": {
+   "call": "7:00 PM",
+   "time": "8:00 PM",
+   "name": "Wednesday Evening"
+  },
+  "Sat Cleanup": {
+   "call": "9:00 PM",
+   "time": "9:00 PM",
+   "name": "Saturday Cleanup"
+  }
+ },
+ "roles": {
+  "Song Service": {
+   "Sun AM": [
+    "Worship Lead",
+    "Guitar 1",
+    "Guitar 2",
+    "Singer",
+    "Singer",
+    "Keyboard",
+    "Drums",
+    "Bass"
+   ],
+   "Sun PM": [
+    "Worship Lead",
+    "Singer",
+    "Singer",
+    "Guitar",
+    "Keyboard",
+    "Drums"
+   ],
+   "Wed PM": [
+    "Worship Lead",
+    "Singer",
+    "Singer",
+    "Guitar",
+    "Keyboard",
+    "Drums"
+   ]
+  },
+  "Media": {
+   "Sun AM": [
+    "ProPresenter",
+    "Lights",
+    "Sound",
+    "Camera/Video",
+    "Audio Recording",
+    "Reels"
+   ],
+   "Sun PM": [
+    "ProPresenter",
+    "Sound"
+   ],
+   "Wed PM": [
+    "ProPresenter",
+    "Sound"
+   ]
+  },
+  "Welcome": {
+   "Sun AM": [
+    "Greeter",
+    "Greeter",
+    "Visitor Bags"
+   ],
+   "Sun PM": [
+    "Greeter"
+   ],
+   "Wed PM": [
+    "Greeter"
+   ]
+  },
+  "Ushers": {
+   "Sun AM": [
+    "Usher (Offering)",
+    "Usher (Offering)",
+    "Usher (Door)"
+   ],
+   "Sun PM": [
+    "Usher (Offering)",
+    "Usher (Offering)",
+    "Usher (Door)"
+   ],
+   "Wed PM": [
+    "Usher (Offering)",
+    "Usher (Offering)",
+    "Usher (Door)"
+   ]
+  },
+  "Altar Workers": {
+   "Sun AM": [
+    "Altar Worker (Men)",
+    "Altar Worker (Men)",
+    "Altar Worker (Women)",
+    "Altar Worker (Women)"
+   ],
+   "Sun PM": [
+    "Altar Worker (Men)",
+    "Altar Worker (Women)"
+   ],
+   "Wed PM": [
+    "Altar Worker (Men)",
+    "Altar Worker (Women)"
+   ]
+  },
+  "Kids": {
+   "Sun AM": [
+    "Nursery (0-3)",
+    "Children's Church (3-11)",
+    "Children's Church (3-11)"
+   ]
+  },
+  "Facilities": {
+   "Sun AM": [
+    "Door Unlock"
+   ],
+   "Sun PM": [
+    "Door Unlock"
+   ],
+   "Wed PM": [
+    "Door Unlock"
+   ]
+  },
+  "Cleanup": {
+   "Sat Cleanup": [
+    "Cleanup",
+    "Cleanup"
+   ]
+  },
+  "Accounting": {
+   "Sun AM": []
+  }
+ },
+ "pool": {
+  "Song Service": [
+   "Bharat",
+   "Suresh",
+   "Eisley",
+   "Gracie",
+   "Mona",
+   "Hemanth",
+   "Paul",
+   "Jabin",
+   "Joshua",
+   "Althea"
+  ],
+  "Media": [
+   "Nirupa",
+   "Mona",
+   "Nishal",
+   "Nirmal",
+   "Varun",
+   "Jayanth",
+   "Joshua",
+   "Eisley",
+   "Minal"
+  ],
+  "Welcome": [
+   "Bharat",
+   "Althea",
+   "Vijay",
+   "Yamani",
+   "Anjali",
+   "Mona"
+  ],
+  "Ushers": [
+   "Hemanth",
+   "Deepak",
+   "Jayanth",
+   "Vijay"
+  ],
+  "Altar Workers": [
+   "Paul",
+   "Suresh",
+   "Varun",
+   "Anjali",
+   "Althea",
+   "Mayank"
+  ],
+  "Kids": [
+   "Angel",
+   "Esther",
+   "Althea",
+   "Zeena",
+   "Gracie",
+   "Yamani",
+   "Prasanna",
+   "Sudha"
+  ],
+  "Facilities": [
+   "Bharat"
+  ],
+  "Cleanup": [
+   "Nishal",
+   "Paul",
+   "Suresh",
+   "Jayanth",
+   "Hemanth",
+   "Angel",
+   "Bharat",
+   "Varun",
+   "Deepak",
+   "Prasanna",
+   "Mona",
+   "Anjali"
+  ],
+  "Accounting": [
+   "Angel",
+   "Anjali"
+  ]
+ },
+ "leaders": {
+  "Song Service": "Bharat",
+  "Media": "Minal",
+  "Welcome": "Hemanth",
+  "Ushers": "Hemanth",
+  "Altar Workers": "Paul",
+  "Kids": "Angel",
+  "Facilities": "Bharat",
+  "Cleanup": "Hemanth"
+ },
+ "people": [
+  "Bharat",
+  "Althea",
+  "Nirupa",
+  "Anjali",
+  "Paul",
+  "Suresh",
+  "Nirmal",
+  "Varun",
+  "Mayank",
+  "Navya",
+  "Mona",
+  "Minal",
+  "Hema Letha",
+  "Jahanvi",
+  "Mayatri",
+  "Esther",
+  "Gracie",
+  "Joshua",
+  "Hemanth",
+  "Angel",
+  "Deepak",
+  "Prasanna",
+  "Jayanth",
+  "Jabin",
+  "Nishal",
+  "Vijay",
+  "Yamani",
+  "Zeena",
+  "Rajesh",
+  "Eisley",
+  "Sudha"
+ ],
+ "schedule": [
+  [
+   "2026-10-25",
+   "Sun AM",
+   "Song Service",
+   "Worship Lead",
+   "Bharat"
+  ],
+  [
+   "2026-10-25",
+   "Sun AM",
+   "Song Service",
+   "Guitar 1",
+   "Suresh"
+  ],
+  [
+   "2026-10-25",
+   "Sun AM",
+   "Song Service",
+   "Guitar 2",
+   "Eisley"
+  ],
+  [
+   "2026-10-25",
+   "Sun AM",
+   "Song Service",
+   "Singer",
+   "Gracie"
+  ],
+  [
+   "2026-10-25",
+   "Sun AM",
+   "Song Service",
+   "Singer",
+   "Mona"
+  ],
+  [
+   "2026-10-25",
+   "Sun AM",
+   "Song Service",
+   "Keyboard",
+   "Hemanth"
+  ],
+  [
+   "2026-10-25",
+   "Sun AM",
+   "Song Service",
+   "Drums",
+   "Paul"
+  ],
+  [
+   "2026-10-25",
+   "Sun AM",
+   "Song Service",
+   "Bass",
+   ""
+  ],
+  [
+   "2026-10-25",
+   "Sun AM",
+   "Media",
+   "ProPresenter",
+   "Nirupa"
+  ],
+  [
+   "2026-10-25",
+   "Sun AM",
+   "Media",
+   "Lights",
+   "Nishal"
+  ],
+  [
+   "2026-10-25",
+   "Sun AM",
+   "Media",
+   "Sound",
+   "Nirmal"
+  ],
+  [
+   "2026-10-25",
+   "Sun AM",
+   "Media",
+   "Camera/Video",
+   "Varun"
+  ],
+  [
+   "2026-10-25",
+   "Sun AM",
+   "Media",
+   "Audio Recording",
+   "Joshua"
+  ],
+  [
+   "2026-10-25",
+   "Sun AM",
+   "Media",
+   "Reels",
+   "Minal"
+  ],
+  [
+   "2026-10-25",
+   "Sun AM",
+   "Welcome",
+   "Greeter",
+   "Vijay"
+  ],
+  [
+   "2026-10-25",
+   "Sun AM",
+   "Welcome",
+   "Greeter",
+   "Yamani"
+  ],
+  [
+   "2026-10-25",
+   "Sun AM",
+   "Welcome",
+   "Visitor Bags",
+   "Anjali"
+  ],
+  [
+   "2026-10-25",
+   "Sun AM",
+   "Ushers",
+   "Usher (Offering)",
+   "Deepak"
+  ],
+  [
+   "2026-10-25",
+   "Sun AM",
+   "Ushers",
+   "Usher (Offering)",
+   "Jayanth"
+  ],
+  [
+   "2026-10-25",
+   "Sun AM",
+   "Ushers",
+   "Usher (Offering)",
+   "Vijay"
+  ],
+  [
+   "2026-10-25",
+   "Sun AM",
+   "Altar Workers",
+   "Altar Worker (Men)",
+   "Varun"
+  ],
+  [
+   "2026-10-25",
+   "Sun AM",
+   "Altar Workers",
+   "Altar Worker (Men)",
+   "Mayank"
+  ],
+  [
+   "2026-10-25",
+   "Sun AM",
+   "Altar Workers",
+   "Altar Worker (Women)",
+   "Althea"
+  ],
+  [
+   "2026-10-25",
+   "Sun AM",
+   "Altar Workers",
+   "Altar Worker (Women)",
+   "Anjali"
+  ],
+  [
+   "2026-10-25",
+   "Sun AM",
+   "Kids",
+   "Nursery (0-3)",
+   "Angel"
+  ],
+  [
+   "2026-10-25",
+   "Sun AM",
+   "Kids",
+   "Children's Church (3-11)",
+   "Prasanna"
+  ],
+  [
+   "2026-10-25",
+   "Sun AM",
+   "Facilities",
+   "Door Unlock",
+   "Bharat"
+  ],
+  [
+   "2026-10-25",
+   "Sun AM",
+   "Accounting",
+   "Usher Rpt",
+   "Angel"
+  ],
+  [
+   "2026-10-25",
+   "Sun AM",
+   "Accounting",
+   "Usher Rpt",
+   "Anjali"
+  ],
+  [
+   "2026-10-25",
+   "Sun PM",
+   "Song Service",
+   "Worship Lead",
+   "Paul"
+  ],
+  [
+   "2026-10-25",
+   "Sun PM",
+   "Song Service",
+   "Singer",
+   "Gracie"
+  ],
+  [
+   "2026-10-25",
+   "Sun PM",
+   "Song Service",
+   "Singer",
+   "Mona"
+  ],
+  [
+   "2026-10-25",
+   "Sun PM",
+   "Song Service",
+   "Guitar",
+   "Joshua"
+  ],
+  [
+   "2026-10-25",
+   "Sun PM",
+   "Song Service",
+   "Keyboard",
+   "Althea"
+  ],
+  [
+   "2026-10-25",
+   "Sun PM",
+   "Song Service",
+   "Drums",
+   "Jabin"
+  ],
+  [
+   "2026-10-25",
+   "Sun PM",
+   "Media",
+   "ProPresenter",
+   "Nirupa"
+  ],
+  [
+   "2026-10-25",
+   "Sun PM",
+   "Media",
+   "Sound",
+   "Nirmal"
+  ],
+  [
+   "2026-10-25",
+   "Sun PM",
+   "Welcome",
+   "Greeter",
+   "Althea"
+  ],
+  [
+   "2026-10-25",
+   "Sun PM",
+   "Ushers",
+   "Usher (Offering)",
+   "Deepak"
+  ],
+  [
+   "2026-10-25",
+   "Sun PM",
+   "Ushers",
+   "Usher (Offering)",
+   "Jayanth"
+  ],
+  [
+   "2026-10-25",
+   "Sun PM",
+   "Ushers",
+   "Usher (Door)",
+   "Vijay"
+  ],
+  [
+   "2026-10-25",
+   "Sun PM",
+   "Altar Workers",
+   "Altar Worker (Men)",
+   "Varun"
+  ],
+  [
+   "2026-10-25",
+   "Sun PM",
+   "Altar Workers",
+   "Altar Worker (Women)",
+   "Anjali"
+  ],
+  [
+   "2026-10-25",
+   "Sun PM",
+   "Facilities",
+   "Door Unlock",
+   "Bharat"
+  ],
+  [
+   "2026-10-28",
+   "Wed PM",
+   "Song Service",
+   "Worship Lead",
+   "Bharat"
+  ],
+  [
+   "2026-10-28",
+   "Wed PM",
+   "Song Service",
+   "Singer",
+   "Paul"
+  ],
+  [
+   "2026-10-28",
+   "Wed PM",
+   "Song Service",
+   "Singer",
+   "Gracie"
+  ],
+  [
+   "2026-10-28",
+   "Wed PM",
+   "Song Service",
+   "Guitar",
+   "Suresh"
+  ],
+  [
+   "2026-10-28",
+   "Wed PM",
+   "Song Service",
+   "Keyboard",
+   "Hemanth"
+  ],
+  [
+   "2026-10-28",
+   "Wed PM",
+   "Song Service",
+   "Drums",
+   "Jabin"
+  ],
+  [
+   "2026-10-28",
+   "Wed PM",
+   "Media",
+   "ProPresenter",
+   "Mona"
+  ],
+  [
+   "2026-10-28",
+   "Wed PM",
+   "Media",
+   "Sound",
+   "Nirmal"
+  ],
+  [
+   "2026-10-28",
+   "Wed PM",
+   "Welcome",
+   "Greeter",
+   "Yamani"
+  ],
+  [
+   "2026-10-28",
+   "Wed PM",
+   "Ushers",
+   "Usher (Offering)",
+   "Deepak"
+  ],
+  [
+   "2026-10-28",
+   "Wed PM",
+   "Ushers",
+   "Usher (Offering)",
+   "Jayanth"
+  ],
+  [
+   "2026-10-28",
+   "Wed PM",
+   "Ushers",
+   "Usher (Door)",
+   "Vijay"
+  ],
+  [
+   "2026-10-28",
+   "Wed PM",
+   "Altar Workers",
+   "Altar Worker (Men)",
+   "Varun"
+  ],
+  [
+   "2026-10-28",
+   "Wed PM",
+   "Altar Workers",
+   "Altar Worker (Women)",
+   "Anjali"
+  ],
+  [
+   "2026-10-28",
+   "Wed PM",
+   "Facilities",
+   "Door Unlock",
+   "Bharat"
+  ],
+  [
+   "2026-10-31",
+   "Sat Cleanup",
+   "Cleanup",
+   "Cleanup",
+   "Deepak"
+  ],
+  [
+   "2026-10-31",
+   "Sat Cleanup",
+   "Cleanup",
+   "Cleanup",
+   "Prasanna"
+  ],
+  [
+   "2026-11-01",
+   "Sun AM",
+   "Song Service",
+   "Worship Lead",
+   "Bharat"
+  ],
+  [
+   "2026-11-01",
+   "Sun AM",
+   "Song Service",
+   "Guitar 1",
+   "Suresh"
+  ],
+  [
+   "2026-11-01",
+   "Sun AM",
+   "Song Service",
+   "Guitar 2",
+   "Eisley"
+  ],
+  [
+   "2026-11-01",
+   "Sun AM",
+   "Song Service",
+   "Singer",
+   "Gracie"
+  ],
+  [
+   "2026-11-01",
+   "Sun AM",
+   "Song Service",
+   "Singer",
+   "Mona"
+  ],
+  [
+   "2026-11-01",
+   "Sun AM",
+   "Song Service",
+   "Keyboard",
+   "Hemanth"
+  ],
+  [
+   "2026-11-01",
+   "Sun AM",
+   "Song Service",
+   "Drums",
+   "Jabin"
+  ],
+  [
+   "2026-11-01",
+   "Sun AM",
+   "Song Service",
+   "Bass",
+   ""
+  ],
+  [
+   "2026-11-01",
+   "Sun AM",
+   "Media",
+   "ProPresenter",
+   "Nirupa"
+  ],
+  [
+   "2026-11-01",
+   "Sun AM",
+   "Media",
+   "Lights",
+   "Nishal"
+  ],
+  [
+   "2026-11-01",
+   "Sun AM",
+   "Media",
+   "Sound",
+   "Nirmal"
+  ],
+  [
+   "2026-11-01",
+   "Sun AM",
+   "Media",
+   "Camera/Video",
+   "Jayanth"
+  ],
+  [
+   "2026-11-01",
+   "Sun AM",
+   "Media",
+   "Audio Recording",
+   "Joshua"
+  ],
+  [
+   "2026-11-01",
+   "Sun AM",
+   "Media",
+   "Reels",
+   "Minal"
+  ],
+  [
+   "2026-11-01",
+   "Sun AM",
+   "Welcome",
+   "Greeter",
+   "Vijay"
+  ],
+  [
+   "2026-11-01",
+   "Sun AM",
+   "Welcome",
+   "Greeter",
+   "Yamani"
+  ],
+  [
+   "2026-11-01",
+   "Sun AM",
+   "Welcome",
+   "Visitor Bags",
+   "Anjali"
+  ],
+  [
+   "2026-11-01",
+   "Sun AM",
+   "Ushers",
+   "Usher (Offering)",
+   "Deepak"
+  ],
+  [
+   "2026-11-01",
+   "Sun AM",
+   "Ushers",
+   "Usher (Offering)",
+   "Vijay"
+  ],
+  [
+   "2026-11-01",
+   "Sun AM",
+   "Ushers",
+   "Usher (Door)",
+   ""
+  ],
+  [
+   "2026-11-01",
+   "Sun AM",
+   "Altar Workers",
+   "Altar Worker (Men)",
+   "Paul"
+  ],
+  [
+   "2026-11-01",
+   "Sun AM",
+   "Altar Workers",
+   "Altar Worker (Men)",
+   "Varun"
+  ],
+  [
+   "2026-11-01",
+   "Sun AM",
+   "Altar Workers",
+   "Altar Worker (Women)",
+   "Althea"
+  ],
+  [
+   "2026-11-01",
+   "Sun AM",
+   "Altar Workers",
+   "Altar Worker (Women)",
+   "Anjali"
+  ],
+  [
+   "2026-11-01",
+   "Sun AM",
+   "Kids",
+   "Nursery (0-3)",
+   "Esther"
+  ],
+  [
+   "2026-11-01",
+   "Sun AM",
+   "Kids",
+   "Children's Church (3-11)",
+   "Angel"
+  ],
+  [
+   "2026-11-01",
+   "Sun AM",
+   "Kids",
+   "Children's Church (3-11)",
+   "Prasanna"
+  ],
+  [
+   "2026-11-01",
+   "Sun AM",
+   "Facilities",
+   "Door Unlock",
+   "Bharat"
+  ],
+  [
+   "2026-11-01",
+   "Sun PM",
+   "Song Service",
+   "Worship Lead",
+   "Bharat"
+  ],
+  [
+   "2026-11-01",
+   "Sun PM",
+   "Song Service",
+   "Singer",
+   "Paul"
+  ],
+  [
+   "2026-11-01",
+   "Sun PM",
+   "Song Service",
+   "Singer",
+   "Gracie"
+  ],
+  [
+   "2026-11-01",
+   "Sun PM",
+   "Song Service",
+   "Guitar",
+   "Suresh"
+  ],
+  [
+   "2026-11-01",
+   "Sun PM",
+   "Song Service",
+   "Keyboard",
+   "Hemanth"
+  ],
+  [
+   "2026-11-01",
+   "Sun PM",
+   "Song Service",
+   "Drums",
+   "Jabin"
+  ],
+  [
+   "2026-11-01",
+   "Sun PM",
+   "Media",
+   "ProPresenter",
+   "Mona"
+  ],
+  [
+   "2026-11-01",
+   "Sun PM",
+   "Media",
+   "Sound",
+   "Nirmal"
+  ],
+  [
+   "2026-11-01",
+   "Sun PM",
+   "Welcome",
+   "Greeter",
+   "Vijay"
+  ],
+  [
+   "2026-11-01",
+   "Sun PM",
+   "Ushers",
+   "Usher (Offering)",
+   "Deepak"
+  ],
+  [
+   "2026-11-01",
+   "Sun PM",
+   "Ushers",
+   "Usher (Offering)",
+   "Jayanth"
+  ],
+  [
+   "2026-11-01",
+   "Sun PM",
+   "Ushers",
+   "Usher (Door)",
+   "Vijay"
+  ],
+  [
+   "2026-11-01",
+   "Sun PM",
+   "Altar Workers",
+   "Altar Worker (Men)",
+   "Varun"
+  ],
+  [
+   "2026-11-01",
+   "Sun PM",
+   "Altar Workers",
+   "Altar Worker (Women)",
+   "Althea"
+  ],
+  [
+   "2026-11-01",
+   "Sun PM",
+   "Facilities",
+   "Door Unlock",
+   "Bharat"
+  ],
+  [
+   "2026-11-04",
+   "Wed PM",
+   "Song Service",
+   "Worship Lead",
+   "Bharat"
+  ],
+  [
+   "2026-11-04",
+   "Wed PM",
+   "Song Service",
+   "Singer",
+   "Paul"
+  ],
+  [
+   "2026-11-04",
+   "Wed PM",
+   "Song Service",
+   "Singer",
+   "Gracie"
+  ],
+  [
+   "2026-11-04",
+   "Wed PM",
+   "Song Service",
+   "Guitar",
+   "Suresh"
+  ],
+  [
+   "2026-11-04",
+   "Wed PM",
+   "Song Service",
+   "Keyboard",
+   "Hemanth"
+  ],
+  [
+   "2026-11-04",
+   "Wed PM",
+   "Song Service",
+   "Drums",
+   "Jabin"
+  ],
+  [
+   "2026-11-04",
+   "Wed PM",
+   "Media",
+   "ProPresenter",
+   "Nirupa"
+  ],
+  [
+   "2026-11-04",
+   "Wed PM",
+   "Media",
+   "Sound",
+   "Nirmal"
+  ],
+  [
+   "2026-11-04",
+   "Wed PM",
+   "Welcome",
+   "Greeter",
+   "Vijay"
+  ],
+  [
+   "2026-11-04",
+   "Wed PM",
+   "Ushers",
+   "Usher (Offering)",
+   "Deepak"
+  ],
+  [
+   "2026-11-04",
+   "Wed PM",
+   "Ushers",
+   "Usher (Offering)",
+   "Jayanth"
+  ],
+  [
+   "2026-11-04",
+   "Wed PM",
+   "Ushers",
+   "Usher (Door)",
+   "Vijay"
+  ],
+  [
+   "2026-11-04",
+   "Wed PM",
+   "Altar Workers",
+   "Altar Worker (Men)",
+   "Varun"
+  ],
+  [
+   "2026-11-04",
+   "Wed PM",
+   "Altar Workers",
+   "Altar Worker (Women)",
+   "Althea"
+  ],
+  [
+   "2026-11-04",
+   "Wed PM",
+   "Facilities",
+   "Door Unlock",
+   "Bharat"
+  ],
+  [
+   "2026-11-07",
+   "Sat Cleanup",
+   "Cleanup",
+   "Cleanup",
+   "Mona"
+  ],
+  [
+   "2026-11-07",
+   "Sat Cleanup",
+   "Cleanup",
+   "Cleanup",
+   "Anjali"
+  ],
+  [
+   "2026-11-08",
+   "Sun AM",
+   "Song Service",
+   "Worship Lead",
+   "Bharat"
+  ],
+  [
+   "2026-11-08",
+   "Sun AM",
+   "Song Service",
+   "Guitar 1",
+   "Suresh"
+  ],
+  [
+   "2026-11-08",
+   "Sun AM",
+   "Song Service",
+   "Guitar 2",
+   "Eisley"
+  ],
+  [
+   "2026-11-08",
+   "Sun AM",
+   "Song Service",
+   "Singer",
+   "Mona"
+  ],
+  [
+   "2026-11-08",
+   "Sun AM",
+   "Song Service",
+   "Singer",
+   "Gracie"
+  ],
+  [
+   "2026-11-08",
+   "Sun AM",
+   "Song Service",
+   "Keyboard",
+   "Hemanth"
+  ],
+  [
+   "2026-11-08",
+   "Sun AM",
+   "Song Service",
+   "Drums",
+   "Paul"
+  ],
+  [
+   "2026-11-08",
+   "Sun AM",
+   "Song Service",
+   "Bass",
+   ""
+  ],
+  [
+   "2026-11-08",
+   "Sun AM",
+   "Media",
+   "ProPresenter",
+   "Nirupa"
+  ],
+  [
+   "2026-11-08",
+   "Sun AM",
+   "Media",
+   "Lights",
+   "Nishal"
+  ],
+  [
+   "2026-11-08",
+   "Sun AM",
+   "Media",
+   "Sound",
+   "Nirmal"
+  ],
+  [
+   "2026-11-08",
+   "Sun AM",
+   "Media",
+   "Camera/Video",
+   "Varun"
+  ],
+  [
+   "2026-11-08",
+   "Sun AM",
+   "Media",
+   "Audio Recording",
+   "Joshua"
+  ],
+  [
+   "2026-11-08",
+   "Sun AM",
+   "Media",
+   "Reels",
+   "Minal"
+  ],
+  [
+   "2026-11-08",
+   "Sun AM",
+   "Welcome",
+   "Greeter",
+   "Yamani"
+  ],
+  [
+   "2026-11-08",
+   "Sun AM",
+   "Welcome",
+   "Greeter",
+   "Vijay"
+  ],
+  [
+   "2026-11-08",
+   "Sun AM",
+   "Welcome",
+   "Visitor Bags",
+   "Anjali"
+  ],
+  [
+   "2026-11-08",
+   "Sun AM",
+   "Ushers",
+   "Usher (Offering)",
+   "Jayanth"
+  ],
+  [
+   "2026-11-08",
+   "Sun AM",
+   "Ushers",
+   "Usher (Offering)",
+   "Deepak"
+  ],
+  [
+   "2026-11-08",
+   "Sun AM",
+   "Ushers",
+   "Usher (Door)",
+   "Vijay"
+  ],
+  [
+   "2026-11-08",
+   "Sun AM",
+   "Altar Workers",
+   "Altar Worker (Men)",
+   ""
+  ],
+  [
+   "2026-11-08",
+   "Sun AM",
+   "Altar Workers",
+   "Altar Worker (Men)",
+   ""
+  ],
+  [
+   "2026-11-08",
+   "Sun AM",
+   "Altar Workers",
+   "Altar Worker (Women)",
+   "Althea"
+  ],
+  [
+   "2026-11-08",
+   "Sun AM",
+   "Altar Workers",
+   "Altar Worker (Women)",
+   "Anjali"
+  ],
+  [
+   "2026-11-08",
+   "Sun AM",
+   "Kids",
+   "Nursery (0-3)",
+   "Zeena"
+  ],
+  [
+   "2026-11-08",
+   "Sun AM",
+   "Kids",
+   "Children's Church (3-11)",
+   "Sudha"
+  ],
+  [
+   "2026-11-08",
+   "Sun AM",
+   "Kids",
+   "Children's Church (3-11)",
+   "Angel"
+  ],
+  [
+   "2026-11-08",
+   "Sun AM",
+   "Facilities",
+   "Door Unlock",
+   "Bharat"
+  ],
+  [
+   "2026-11-08",
+   "Sun PM",
+   "Song Service",
+   "Worship Lead",
+   "Bharat"
+  ],
+  [
+   "2026-11-08",
+   "Sun PM",
+   "Song Service",
+   "Singer",
+   "Paul"
+  ],
+  [
+   "2026-11-08",
+   "Sun PM",
+   "Song Service",
+   "Singer",
+   "Gracie"
+  ],
+  [
+   "2026-11-08",
+   "Sun PM",
+   "Song Service",
+   "Guitar",
+   "Suresh"
+  ],
+  [
+   "2026-11-08",
+   "Sun PM",
+   "Song Service",
+   "Keyboard",
+   "Hemanth"
+  ],
+  [
+   "2026-11-08",
+   "Sun PM",
+   "Song Service",
+   "Drums",
+   "Jabin"
+  ],
+  [
+   "2026-11-08",
+   "Sun PM",
+   "Media",
+   "ProPresenter",
+   "Nirupa"
+  ],
+  [
+   "2026-11-08",
+   "Sun PM",
+   "Media",
+   "Sound",
+   "Nirmal"
+  ],
+  [
+   "2026-11-08",
+   "Sun PM",
+   "Welcome",
+   "Greeter",
+   "Yamani"
+  ],
+  [
+   "2026-11-08",
+   "Sun PM",
+   "Ushers",
+   "Usher (Offering)",
+   "Vijay"
+  ],
+  [
+   "2026-11-08",
+   "Sun PM",
+   "Ushers",
+   "Usher (Offering)",
+   "Deepak"
+  ],
+  [
+   "2026-11-08",
+   "Sun PM",
+   "Ushers",
+   "Usher (Door)",
+   "Jayanth"
+  ],
+  [
+   "2026-11-08",
+   "Sun PM",
+   "Altar Workers",
+   "Altar Worker (Men)",
+   "Varun"
+  ],
+  [
+   "2026-11-08",
+   "Sun PM",
+   "Altar Workers",
+   "Altar Worker (Women)",
+   "Anjali"
+  ],
+  [
+   "2026-11-08",
+   "Sun PM",
+   "Facilities",
+   "Door Unlock",
+   "Bharat"
+  ],
+  [
+   "2026-11-11",
+   "Wed PM",
+   "Song Service",
+   "Worship Lead",
+   "Bharat"
+  ],
+  [
+   "2026-11-11",
+   "Wed PM",
+   "Song Service",
+   "Singer",
+   "Paul"
+  ],
+  [
+   "2026-11-11",
+   "Wed PM",
+   "Song Service",
+   "Singer",
+   "Gracie"
+  ],
+  [
+   "2026-11-11",
+   "Wed PM",
+   "Song Service",
+   "Guitar",
+   "Suresh"
+  ],
+  [
+   "2026-11-11",
+   "Wed PM",
+   "Song Service",
+   "Keyboard",
+   "Hemanth"
+  ],
+  [
+   "2026-11-11",
+   "Wed PM",
+   "Song Service",
+   "Drums",
+   "Jabin"
+  ],
+  [
+   "2026-11-11",
+   "Wed PM",
+   "Media",
+   "ProPresenter",
+   "Mona"
+  ],
+  [
+   "2026-11-11",
+   "Wed PM",
+   "Media",
+   "Sound",
+   "Nirmal"
+  ],
+  [
+   "2026-11-11",
+   "Wed PM",
+   "Welcome",
+   "Greeter",
+   "Althea"
+  ],
+  [
+   "2026-11-11",
+   "Wed PM",
+   "Ushers",
+   "Usher (Offering)",
+   "Vijay"
+  ],
+  [
+   "2026-11-11",
+   "Wed PM",
+   "Ushers",
+   "Usher (Offering)",
+   "Deepak"
+  ],
+  [
+   "2026-11-11",
+   "Wed PM",
+   "Ushers",
+   "Usher (Door)",
+   "Jayanth"
+  ],
+  [
+   "2026-11-11",
+   "Wed PM",
+   "Altar Workers",
+   "Altar Worker (Men)",
+   "Varun"
+  ],
+  [
+   "2026-11-11",
+   "Wed PM",
+   "Altar Workers",
+   "Altar Worker (Women)",
+   "Anjali"
+  ],
+  [
+   "2026-11-11",
+   "Wed PM",
+   "Facilities",
+   "Door Unlock",
+   "Bharat"
+  ],
+  [
+   "2026-11-14",
+   "Sat Cleanup",
+   "Cleanup",
+   "Cleanup",
+   "Nishal"
+  ],
+  [
+   "2026-11-14",
+   "Sat Cleanup",
+   "Cleanup",
+   "Cleanup",
+   "Paul"
+  ],
+  [
+   "2026-11-15",
+   "Sun AM",
+   "Song Service",
+   "Worship Lead",
+   "Bharat"
+  ],
+  [
+   "2026-11-15",
+   "Sun AM",
+   "Song Service",
+   "Guitar 1",
+   "Suresh"
+  ],
+  [
+   "2026-11-15",
+   "Sun AM",
+   "Song Service",
+   "Guitar 2",
+   "Eisley"
+  ],
+  [
+   "2026-11-15",
+   "Sun AM",
+   "Song Service",
+   "Singer",
+   "Mona"
+  ],
+  [
+   "2026-11-15",
+   "Sun AM",
+   "Song Service",
+   "Singer",
+   "Gracie"
+  ],
+  [
+   "2026-11-15",
+   "Sun AM",
+   "Song Service",
+   "Keyboard",
+   "Hemanth"
+  ],
+  [
+   "2026-11-15",
+   "Sun AM",
+   "Song Service",
+   "Drums",
+   "Jabin"
+  ],
+  [
+   "2026-11-15",
+   "Sun AM",
+   "Song Service",
+   "Bass",
+   ""
+  ],
+  [
+   "2026-11-15",
+   "Sun AM",
+   "Media",
+   "ProPresenter",
+   "Nirupa"
+  ],
+  [
+   "2026-11-15",
+   "Sun AM",
+   "Media",
+   "Lights",
+   "Nishal"
+  ],
+  [
+   "2026-11-15",
+   "Sun AM",
+   "Media",
+   "Sound",
+   "Nirmal"
+  ],
+  [
+   "2026-11-15",
+   "Sun AM",
+   "Media",
+   "Camera/Video",
+   "Jayanth"
+  ],
+  [
+   "2026-11-15",
+   "Sun AM",
+   "Media",
+   "Audio Recording",
+   "Joshua"
+  ],
+  [
+   "2026-11-15",
+   "Sun AM",
+   "Media",
+   "Reels",
+   "Minal"
+  ],
+  [
+   "2026-11-15",
+   "Sun AM",
+   "Welcome",
+   "Greeter",
+   "Yamani"
+  ],
+  [
+   "2026-11-15",
+   "Sun AM",
+   "Welcome",
+   "Greeter",
+   "Vijay"
+  ],
+  [
+   "2026-11-15",
+   "Sun AM",
+   "Welcome",
+   "Visitor Bags",
+   "Anjali"
+  ],
+  [
+   "2026-11-15",
+   "Sun AM",
+   "Ushers",
+   "Usher (Offering)",
+   "Deepak"
+  ],
+  [
+   "2026-11-15",
+   "Sun AM",
+   "Ushers",
+   "Usher (Offering)",
+   "Vijay"
+  ],
+  [
+   "2026-11-15",
+   "Sun AM",
+   "Ushers",
+   "Usher (Door)",
+   ""
+  ],
+  [
+   "2026-11-15",
+   "Sun AM",
+   "Altar Workers",
+   "Altar Worker (Men)",
+   "Paul"
+  ],
+  [
+   "2026-11-15",
+   "Sun AM",
+   "Altar Workers",
+   "Altar Worker (Men)",
+   "Varun"
+  ],
+  [
+   "2026-11-15",
+   "Sun AM",
+   "Altar Workers",
+   "Altar Worker (Women)",
+   "Althea"
+  ],
+  [
+   "2026-11-15",
+   "Sun AM",
+   "Altar Workers",
+   "Altar Worker (Women)",
+   "Anjali"
+  ],
+  [
+   "2026-11-15",
+   "Sun AM",
+   "Kids",
+   "Nursery (0-3)",
+   "Esther"
+  ],
+  [
+   "2026-11-15",
+   "Sun AM",
+   "Kids",
+   "Children's Church (3-11)",
+   "Sudha"
+  ],
+  [
+   "2026-11-15",
+   "Sun AM",
+   "Kids",
+   "Children's Church (3-11)",
+   "Prasanna"
+  ],
+  [
+   "2026-11-15",
+   "Sun AM",
+   "Facilities",
+   "Door Unlock",
+   "Bharat"
+  ],
+  [
+   "2026-11-15",
+   "Sun PM",
+   "Song Service",
+   "Worship Lead",
+   "Bharat"
+  ],
+  [
+   "2026-11-15",
+   "Sun PM",
+   "Song Service",
+   "Singer",
+   "Paul"
+  ],
+  [
+   "2026-11-15",
+   "Sun PM",
+   "Song Service",
+   "Singer",
+   "Gracie"
+  ],
+  [
+   "2026-11-15",
+   "Sun PM",
+   "Song Service",
+   "Guitar",
+   "Suresh"
+  ],
+  [
+   "2026-11-15",
+   "Sun PM",
+   "Song Service",
+   "Keyboard",
+   "Hemanth"
+  ],
+  [
+   "2026-11-15",
+   "Sun PM",
+   "Song Service",
+   "Drums",
+   "Jabin"
+  ],
+  [
+   "2026-11-15",
+   "Sun PM",
+   "Media",
+   "ProPresenter",
+   "Mona"
+  ],
+  [
+   "2026-11-15",
+   "Sun PM",
+   "Media",
+   "Sound",
+   "Nirmal"
+  ],
+  [
+   "2026-11-15",
+   "Sun PM",
+   "Welcome",
+   "Greeter",
+   "Yamani"
+  ],
+  [
+   "2026-11-15",
+   "Sun PM",
+   "Ushers",
+   "Usher (Offering)",
+   "Vijay"
+  ],
+  [
+   "2026-11-15",
+   "Sun PM",
+   "Ushers",
+   "Usher (Offering)",
+   "Jayanth"
+  ],
+  [
+   "2026-11-15",
+   "Sun PM",
+   "Ushers",
+   "Usher (Door)",
+   "Deepak"
+  ],
+  [
+   "2026-11-15",
+   "Sun PM",
+   "Altar Workers",
+   "Altar Worker (Men)",
+   "Varun"
+  ],
+  [
+   "2026-11-15",
+   "Sun PM",
+   "Altar Workers",
+   "Altar Worker (Women)",
+   "Althea"
+  ],
+  [
+   "2026-11-15",
+   "Sun PM",
+   "Facilities",
+   "Door Unlock",
+   "Bharat"
+  ],
+  [
+   "2026-11-18",
+   "Wed PM",
+   "Song Service",
+   "Worship Lead",
+   "Bharat"
+  ],
+  [
+   "2026-11-18",
+   "Wed PM",
+   "Song Service",
+   "Singer",
+   "Paul"
+  ],
+  [
+   "2026-11-18",
+   "Wed PM",
+   "Song Service",
+   "Singer",
+   "Gracie"
+  ],
+  [
+   "2026-11-18",
+   "Wed PM",
+   "Song Service",
+   "Guitar",
+   "Suresh"
+  ],
+  [
+   "2026-11-18",
+   "Wed PM",
+   "Song Service",
+   "Keyboard",
+   "Hemanth"
+  ],
+  [
+   "2026-11-18",
+   "Wed PM",
+   "Song Service",
+   "Drums",
+   "Jabin"
+  ],
+  [
+   "2026-11-18",
+   "Wed PM",
+   "Media",
+   "ProPresenter",
+   "Nirupa"
+  ],
+  [
+   "2026-11-18",
+   "Wed PM",
+   "Media",
+   "Sound",
+   "Nirmal"
+  ],
+  [
+   "2026-11-18",
+   "Wed PM",
+   "Welcome",
+   "Greeter",
+   "Yamani"
+  ],
+  [
+   "2026-11-18",
+   "Wed PM",
+   "Ushers",
+   "Usher (Offering)",
+   "Vijay"
+  ],
+  [
+   "2026-11-18",
+   "Wed PM",
+   "Ushers",
+   "Usher (Offering)",
+   "Jayanth"
+  ],
+  [
+   "2026-11-18",
+   "Wed PM",
+   "Ushers",
+   "Usher (Door)",
+   "Deepak"
+  ],
+  [
+   "2026-11-18",
+   "Wed PM",
+   "Altar Workers",
+   "Altar Worker (Men)",
+   "Varun"
+  ],
+  [
+   "2026-11-18",
+   "Wed PM",
+   "Altar Workers",
+   "Altar Worker (Women)",
+   "Althea"
+  ],
+  [
+   "2026-11-18",
+   "Wed PM",
+   "Facilities",
+   "Door Unlock",
+   "Bharat"
+  ],
+  [
+   "2026-11-21",
+   "Sat Cleanup",
+   "Cleanup",
+   "Cleanup",
+   "Suresh"
+  ],
+  [
+   "2026-11-21",
+   "Sat Cleanup",
+   "Cleanup",
+   "Cleanup",
+   "Jayanth"
+  ],
+  [
+   "2026-11-22",
+   "Sun AM",
+   "Song Service",
+   "Worship Lead",
+   "Bharat"
+  ],
+  [
+   "2026-11-22",
+   "Sun AM",
+   "Song Service",
+   "Guitar 1",
+   "Suresh"
+  ],
+  [
+   "2026-11-22",
+   "Sun AM",
+   "Song Service",
+   "Guitar 2",
+   "Eisley"
+  ],
+  [
+   "2026-11-22",
+   "Sun AM",
+   "Song Service",
+   "Singer",
+   "Mona"
+  ],
+  [
+   "2026-11-22",
+   "Sun AM",
+   "Song Service",
+   "Singer",
+   "Gracie"
+  ],
+  [
+   "2026-11-22",
+   "Sun AM",
+   "Song Service",
+   "Keyboard",
+   "Hemanth"
+  ],
+  [
+   "2026-11-22",
+   "Sun AM",
+   "Song Service",
+   "Drums",
+   "Jabin"
+  ],
+  [
+   "2026-11-22",
+   "Sun AM",
+   "Song Service",
+   "Bass",
+   ""
+  ],
+  [
+   "2026-11-22",
+   "Sun AM",
+   "Media",
+   "ProPresenter",
+   "Nirupa"
+  ],
+  [
+   "2026-11-22",
+   "Sun AM",
+   "Media",
+   "Lights",
+   "Nishal"
+  ],
+  [
+   "2026-11-22",
+   "Sun AM",
+   "Media",
+   "Sound",
+   "Nirmal"
+  ],
+  [
+   "2026-11-22",
+   "Sun AM",
+   "Media",
+   "Camera/Video",
+   "Varun"
+  ],
+  [
+   "2026-11-22",
+   "Sun AM",
+   "Media",
+   "Audio Recording",
+   "Joshua"
+  ],
+  [
+   "2026-11-22",
+   "Sun AM",
+   "Media",
+   "Reels",
+   "Minal"
+  ],
+  [
+   "2026-11-22",
+   "Sun AM",
+   "Welcome",
+   "Greeter",
+   "Yamani"
+  ],
+  [
+   "2026-11-22",
+   "Sun AM",
+   "Welcome",
+   "Greeter",
+   "Vijay"
+  ],
+  [
+   "2026-11-22",
+   "Sun AM",
+   "Welcome",
+   "Visitor Bags",
+   "Anjali"
+  ],
+  [
+   "2026-11-22",
+   "Sun AM",
+   "Ushers",
+   "Usher (Offering)",
+   "Jayanth"
+  ],
+  [
+   "2026-11-22",
+   "Sun AM",
+   "Ushers",
+   "Usher (Offering)",
+   "Deepak"
+  ],
+  [
+   "2026-11-22",
+   "Sun AM",
+   "Ushers",
+   "Usher (Door)",
+   "Vijay"
+  ],
+  [
+   "2026-11-22",
+   "Sun AM",
+   "Altar Workers",
+   "Altar Worker (Men)",
+   "Paul"
+  ],
+  [
+   "2026-11-22",
+   "Sun AM",
+   "Altar Workers",
+   "Altar Worker (Men)",
+   ""
+  ],
+  [
+   "2026-11-22",
+   "Sun AM",
+   "Altar Workers",
+   "Altar Worker (Women)",
+   "Althea"
+  ],
+  [
+   "2026-11-22",
+   "Sun AM",
+   "Altar Workers",
+   "Altar Worker (Women)",
+   "Anjali"
+  ],
+  [
+   "2026-11-22",
+   "Sun AM",
+   "Kids",
+   "Nursery (0-3)",
+   "Zeena"
+  ],
+  [
+   "2026-11-22",
+   "Sun AM",
+   "Kids",
+   "Children's Church (3-11)",
+   "Angel"
+  ],
+  [
+   "2026-11-22",
+   "Sun AM",
+   "Kids",
+   "Children's Church (3-11)",
+   "Sudha"
+  ],
+  [
+   "2026-11-22",
+   "Sun AM",
+   "Facilities",
+   "Door Unlock",
+   "Bharat"
+  ],
+  [
+   "2026-11-22",
+   "Sun PM",
+   "Song Service",
+   "Worship Lead",
+   "Bharat"
+  ],
+  [
+   "2026-11-22",
+   "Sun PM",
+   "Song Service",
+   "Singer",
+   "Paul"
+  ],
+  [
+   "2026-11-22",
+   "Sun PM",
+   "Song Service",
+   "Singer",
+   "Gracie"
+  ],
+  [
+   "2026-11-22",
+   "Sun PM",
+   "Song Service",
+   "Guitar",
+   "Suresh"
+  ],
+  [
+   "2026-11-22",
+   "Sun PM",
+   "Song Service",
+   "Keyboard",
+   "Hemanth"
+  ],
+  [
+   "2026-11-22",
+   "Sun PM",
+   "Song Service",
+   "Drums",
+   "Jabin"
+  ],
+  [
+   "2026-11-22",
+   "Sun PM",
+   "Media",
+   "ProPresenter",
+   "Nirupa"
+  ],
+  [
+   "2026-11-22",
+   "Sun PM",
+   "Media",
+   "Sound",
+   "Nirmal"
+  ],
+  [
+   "2026-11-22",
+   "Sun PM",
+   "Welcome",
+   "Greeter",
+   "Althea"
+  ],
+  [
+   "2026-11-22",
+   "Sun PM",
+   "Ushers",
+   "Usher (Offering)",
+   "Vijay"
+  ],
+  [
+   "2026-11-22",
+   "Sun PM",
+   "Ushers",
+   "Usher (Offering)",
+   "Deepak"
+  ],
+  [
+   "2026-11-22",
+   "Sun PM",
+   "Ushers",
+   "Usher (Door)",
+   "Jayanth"
+  ],
+  [
+   "2026-11-22",
+   "Sun PM",
+   "Altar Workers",
+   "Altar Worker (Men)",
+   "Varun"
+  ],
+  [
+   "2026-11-22",
+   "Sun PM",
+   "Altar Workers",
+   "Altar Worker (Women)",
+   "Anjali"
+  ],
+  [
+   "2026-11-22",
+   "Sun PM",
+   "Facilities",
+   "Door Unlock",
+   "Bharat"
+  ],
+  [
+   "2026-11-25",
+   "Wed PM",
+   "Song Service",
+   "Worship Lead",
+   "Bharat"
+  ],
+  [
+   "2026-11-25",
+   "Wed PM",
+   "Song Service",
+   "Singer",
+   "Paul"
+  ],
+  [
+   "2026-11-25",
+   "Wed PM",
+   "Song Service",
+   "Singer",
+   "Gracie"
+  ],
+  [
+   "2026-11-25",
+   "Wed PM",
+   "Song Service",
+   "Guitar",
+   "Suresh"
+  ],
+  [
+   "2026-11-25",
+   "Wed PM",
+   "Song Service",
+   "Keyboard",
+   "Hemanth"
+  ],
+  [
+   "2026-11-25",
+   "Wed PM",
+   "Song Service",
+   "Drums",
+   "Jabin"
+  ],
+  [
+   "2026-11-25",
+   "Wed PM",
+   "Media",
+   "ProPresenter",
+   "Mona"
+  ],
+  [
+   "2026-11-25",
+   "Wed PM",
+   "Media",
+   "Sound",
+   "Nirmal"
+  ],
+  [
+   "2026-11-25",
+   "Wed PM",
+   "Welcome",
+   "Greeter",
+   "Althea"
+  ],
+  [
+   "2026-11-25",
+   "Wed PM",
+   "Ushers",
+   "Usher (Offering)",
+   "Vijay"
+  ],
+  [
+   "2026-11-25",
+   "Wed PM",
+   "Ushers",
+   "Usher (Offering)",
+   "Deepak"
+  ],
+  [
+   "2026-11-25",
+   "Wed PM",
+   "Ushers",
+   "Usher (Door)",
+   "Jayanth"
+  ],
+  [
+   "2026-11-25",
+   "Wed PM",
+   "Altar Workers",
+   "Altar Worker (Men)",
+   "Varun"
+  ],
+  [
+   "2026-11-25",
+   "Wed PM",
+   "Altar Workers",
+   "Altar Worker (Women)",
+   "Anjali"
+  ],
+  [
+   "2026-11-25",
+   "Wed PM",
+   "Facilities",
+   "Door Unlock",
+   "Bharat"
+  ],
+  [
+   "2026-11-28",
+   "Sat Cleanup",
+   "Cleanup",
+   "Cleanup",
+   "Hemanth"
+  ],
+  [
+   "2026-11-28",
+   "Sat Cleanup",
+   "Cleanup",
+   "Cleanup",
+   "Angel"
+  ],
+  [
+   "2026-11-29",
+   "Sun AM",
+   "Song Service",
+   "Worship Lead",
+   "Bharat"
+  ],
+  [
+   "2026-11-29",
+   "Sun AM",
+   "Song Service",
+   "Guitar 1",
+   "Suresh"
+  ],
+  [
+   "2026-11-29",
+   "Sun AM",
+   "Song Service",
+   "Guitar 2",
+   "Eisley"
+  ],
+  [
+   "2026-11-29",
+   "Sun AM",
+   "Song Service",
+   "Singer",
+   "Mona"
+  ],
+  [
+   "2026-11-29",
+   "Sun AM",
+   "Song Service",
+   "Singer",
+   "Gracie"
+  ],
+  [
+   "2026-11-29",
+   "Sun AM",
+   "Song Service",
+   "Keyboard",
+   "Hemanth"
+  ],
+  [
+   "2026-11-29",
+   "Sun AM",
+   "Song Service",
+   "Drums",
+   "Paul"
+  ],
+  [
+   "2026-11-29",
+   "Sun AM",
+   "Song Service",
+   "Bass",
+   ""
+  ],
+  [
+   "2026-11-29",
+   "Sun AM",
+   "Media",
+   "ProPresenter",
+   "Nirupa"
+  ],
+  [
+   "2026-11-29",
+   "Sun AM",
+   "Media",
+   "Lights",
+   "Nishal"
+  ],
+  [
+   "2026-11-29",
+   "Sun AM",
+   "Media",
+   "Sound",
+   "Nirmal"
+  ],
+  [
+   "2026-11-29",
+   "Sun AM",
+   "Media",
+   "Camera/Video",
+   "Jayanth"
+  ],
+  [
+   "2026-11-29",
+   "Sun AM",
+   "Media",
+   "Audio Recording",
+   "Joshua"
+  ],
+  [
+   "2026-11-29",
+   "Sun AM",
+   "Media",
+   "Reels",
+   "Minal"
+  ],
+  [
+   "2026-11-29",
+   "Sun AM",
+   "Welcome",
+   "Greeter",
+   "Yamani"
+  ],
+  [
+   "2026-11-29",
+   "Sun AM",
+   "Welcome",
+   "Greeter",
+   "Vijay"
+  ],
+  [
+   "2026-11-29",
+   "Sun AM",
+   "Welcome",
+   "Visitor Bags",
+   "Anjali"
+  ],
+  [
+   "2026-11-29",
+   "Sun AM",
+   "Ushers",
+   "Usher (Offering)",
+   "Deepak"
+  ],
+  [
+   "2026-11-29",
+   "Sun AM",
+   "Ushers",
+   "Usher (Offering)",
+   "Vijay"
+  ],
+  [
+   "2026-11-29",
+   "Sun AM",
+   "Ushers",
+   "Usher (Door)",
+   ""
+  ],
+  [
+   "2026-11-29",
+   "Sun AM",
+   "Altar Workers",
+   "Altar Worker (Men)",
+   "Varun"
+  ],
+  [
+   "2026-11-29",
+   "Sun AM",
+   "Altar Workers",
+   "Altar Worker (Men)",
+   ""
+  ],
+  [
+   "2026-11-29",
+   "Sun AM",
+   "Altar Workers",
+   "Altar Worker (Women)",
+   "Althea"
+  ],
+  [
+   "2026-11-29",
+   "Sun AM",
+   "Altar Workers",
+   "Altar Worker (Women)",
+   "Anjali"
+  ],
+  [
+   "2026-11-29",
+   "Sun AM",
+   "Kids",
+   "Nursery (0-3)",
+   "Angel"
+  ],
+  [
+   "2026-11-29",
+   "Sun AM",
+   "Kids",
+   "Children's Church (3-11)",
+   "Prasanna"
+  ],
+  [
+   "2026-11-29",
+   "Sun AM",
+   "Kids",
+   "Children's Church (3-11)",
+   "Sudha"
+  ],
+  [
+   "2026-11-29",
+   "Sun AM",
+   "Facilities",
+   "Door Unlock",
+   "Bharat"
+  ],
+  [
+   "2026-11-29",
+   "Sun PM",
+   "Song Service",
+   "Worship Lead",
+   "Bharat"
+  ],
+  [
+   "2026-11-29",
+   "Sun PM",
+   "Song Service",
+   "Singer",
+   "Paul"
+  ],
+  [
+   "2026-11-29",
+   "Sun PM",
+   "Song Service",
+   "Singer",
+   "Gracie"
+  ],
+  [
+   "2026-11-29",
+   "Sun PM",
+   "Song Service",
+   "Guitar",
+   "Suresh"
+  ],
+  [
+   "2026-11-29",
+   "Sun PM",
+   "Song Service",
+   "Keyboard",
+   "Hemanth"
+  ],
+  [
+   "2026-11-29",
+   "Sun PM",
+   "Song Service",
+   "Drums",
+   "Jabin"
+  ],
+  [
+   "2026-11-29",
+   "Sun PM",
+   "Media",
+   "ProPresenter",
+   "Mona"
+  ],
+  [
+   "2026-11-29",
+   "Sun PM",
+   "Media",
+   "Sound",
+   "Nirmal"
+  ],
+  [
+   "2026-11-29",
+   "Sun PM",
+   "Welcome",
+   "Greeter",
+   "Vijay"
+  ],
+  [
+   "2026-11-29",
+   "Sun PM",
+   "Ushers",
+   "Usher (Offering)",
+   "Jayanth"
+  ],
+  [
+   "2026-11-29",
+   "Sun PM",
+   "Ushers",
+   "Usher (Offering)",
+   "Deepak"
+  ],
+  [
+   "2026-11-29",
+   "Sun PM",
+   "Ushers",
+   "Usher (Door)",
+   "Vijay"
+  ],
+  [
+   "2026-11-29",
+   "Sun PM",
+   "Altar Workers",
+   "Altar Worker (Men)",
+   "Varun"
+  ],
+  [
+   "2026-11-29",
+   "Sun PM",
+   "Altar Workers",
+   "Altar Worker (Women)",
+   "Althea"
+  ],
+  [
+   "2026-11-29",
+   "Sun PM",
+   "Facilities",
+   "Door Unlock",
+   "Bharat"
+  ],
+  [
+   "2026-12-02",
+   "Wed PM",
+   "Song Service",
+   "Worship Lead",
+   "Bharat"
+  ],
+  [
+   "2026-12-02",
+   "Wed PM",
+   "Song Service",
+   "Singer",
+   "Paul"
+  ],
+  [
+   "2026-12-02",
+   "Wed PM",
+   "Song Service",
+   "Singer",
+   "Gracie"
+  ],
+  [
+   "2026-12-02",
+   "Wed PM",
+   "Song Service",
+   "Guitar",
+   "Suresh"
+  ],
+  [
+   "2026-12-02",
+   "Wed PM",
+   "Song Service",
+   "Keyboard",
+   "Hemanth"
+  ],
+  [
+   "2026-12-02",
+   "Wed PM",
+   "Song Service",
+   "Drums",
+   "Jabin"
+  ],
+  [
+   "2026-12-02",
+   "Wed PM",
+   "Media",
+   "ProPresenter",
+   "Nirupa"
+  ],
+  [
+   "2026-12-02",
+   "Wed PM",
+   "Media",
+   "Sound",
+   "Nirmal"
+  ],
+  [
+   "2026-12-02",
+   "Wed PM",
+   "Welcome",
+   "Greeter",
+   "Vijay"
+  ],
+  [
+   "2026-12-02",
+   "Wed PM",
+   "Ushers",
+   "Usher (Offering)",
+   "Jayanth"
+  ],
+  [
+   "2026-12-02",
+   "Wed PM",
+   "Ushers",
+   "Usher (Offering)",
+   "Deepak"
+  ],
+  [
+   "2026-12-02",
+   "Wed PM",
+   "Ushers",
+   "Usher (Door)",
+   "Vijay"
+  ],
+  [
+   "2026-12-02",
+   "Wed PM",
+   "Altar Workers",
+   "Altar Worker (Men)",
+   "Varun"
+  ],
+  [
+   "2026-12-02",
+   "Wed PM",
+   "Altar Workers",
+   "Altar Worker (Women)",
+   "Althea"
+  ],
+  [
+   "2026-12-02",
+   "Wed PM",
+   "Facilities",
+   "Door Unlock",
+   "Bharat"
+  ],
+  [
+   "2026-12-05",
+   "Sat Cleanup",
+   "Cleanup",
+   "Cleanup",
+   "Bharat"
+  ],
+  [
+   "2026-12-05",
+   "Sat Cleanup",
+   "Cleanup",
+   "Cleanup",
+   "Varun"
+  ],
+  [
+   "2026-12-06",
+   "Sun AM",
+   "Song Service",
+   "Worship Lead",
+   "Bharat"
+  ],
+  [
+   "2026-12-06",
+   "Sun AM",
+   "Song Service",
+   "Guitar 1",
+   "Suresh"
+  ],
+  [
+   "2026-12-06",
+   "Sun AM",
+   "Song Service",
+   "Guitar 2",
+   "Eisley"
+  ],
+  [
+   "2026-12-06",
+   "Sun AM",
+   "Song Service",
+   "Singer",
+   "Mona"
+  ],
+  [
+   "2026-12-06",
+   "Sun AM",
+   "Song Service",
+   "Singer",
+   "Gracie"
+  ],
+  [
+   "2026-12-06",
+   "Sun AM",
+   "Song Service",
+   "Keyboard",
+   "Hemanth"
+  ],
+  [
+   "2026-12-06",
+   "Sun AM",
+   "Song Service",
+   "Drums",
+   "Paul"
+  ],
+  [
+   "2026-12-06",
+   "Sun AM",
+   "Song Service",
+   "Bass",
+   ""
+  ],
+  [
+   "2026-12-06",
+   "Sun AM",
+   "Media",
+   "ProPresenter",
+   "Nirupa"
+  ],
+  [
+   "2026-12-06",
+   "Sun AM",
+   "Media",
+   "Lights",
+   "Nishal"
+  ],
+  [
+   "2026-12-06",
+   "Sun AM",
+   "Media",
+   "Sound",
+   "Nirmal"
+  ],
+  [
+   "2026-12-06",
+   "Sun AM",
+   "Media",
+   "Camera/Video",
+   "Varun"
+  ],
+  [
+   "2026-12-06",
+   "Sun AM",
+   "Media",
+   "Audio Recording",
+   "Joshua"
+  ],
+  [
+   "2026-12-06",
+   "Sun AM",
+   "Media",
+   "Reels",
+   "Minal"
+  ],
+  [
+   "2026-12-06",
+   "Sun AM",
+   "Welcome",
+   "Greeter",
+   "Yamani"
+  ],
+  [
+   "2026-12-06",
+   "Sun AM",
+   "Welcome",
+   "Greeter",
+   "Vijay"
+  ],
+  [
+   "2026-12-06",
+   "Sun AM",
+   "Welcome",
+   "Visitor Bags",
+   "Anjali"
+  ],
+  [
+   "2026-12-06",
+   "Sun AM",
+   "Ushers",
+   "Usher (Offering)",
+   "Jayanth"
+  ],
+  [
+   "2026-12-06",
+   "Sun AM",
+   "Ushers",
+   "Usher (Offering)",
+   "Deepak"
+  ],
+  [
+   "2026-12-06",
+   "Sun AM",
+   "Ushers",
+   "Usher (Door)",
+   "Vijay"
+  ],
+  [
+   "2026-12-06",
+   "Sun AM",
+   "Altar Workers",
+   "Altar Worker (Men)",
+   ""
+  ],
+  [
+   "2026-12-06",
+   "Sun AM",
+   "Altar Workers",
+   "Altar Worker (Men)",
+   ""
+  ],
+  [
+   "2026-12-06",
+   "Sun AM",
+   "Altar Workers",
+   "Altar Worker (Women)",
+   "Althea"
+  ],
+  [
+   "2026-12-06",
+   "Sun AM",
+   "Altar Workers",
+   "Altar Worker (Women)",
+   "Anjali"
+  ],
+  [
+   "2026-12-06",
+   "Sun AM",
+   "Kids",
+   "Nursery (0-3)",
+   "Esther"
+  ],
+  [
+   "2026-12-06",
+   "Sun AM",
+   "Kids",
+   "Children's Church (3-11)",
+   "Angel"
+  ],
+  [
+   "2026-12-06",
+   "Sun AM",
+   "Kids",
+   "Children's Church (3-11)",
+   "Prasanna"
+  ],
+  [
+   "2026-12-06",
+   "Sun AM",
+   "Facilities",
+   "Door Unlock",
+   "Bharat"
+  ],
+  [
+   "2026-12-06",
+   "Sun PM",
+   "Song Service",
+   "Worship Lead",
+   "Bharat"
+  ],
+  [
+   "2026-12-06",
+   "Sun PM",
+   "Song Service",
+   "Singer",
+   "Paul"
+  ],
+  [
+   "2026-12-06",
+   "Sun PM",
+   "Song Service",
+   "Singer",
+   "Gracie"
+  ],
+  [
+   "2026-12-06",
+   "Sun PM",
+   "Song Service",
+   "Guitar",
+   "Suresh"
+  ],
+  [
+   "2026-12-06",
+   "Sun PM",
+   "Song Service",
+   "Keyboard",
+   "Hemanth"
+  ],
+  [
+   "2026-12-06",
+   "Sun PM",
+   "Song Service",
+   "Drums",
+   "Jabin"
+  ],
+  [
+   "2026-12-06",
+   "Sun PM",
+   "Media",
+   "ProPresenter",
+   "Mona"
+  ],
+  [
+   "2026-12-06",
+   "Sun PM",
+   "Media",
+   "Sound",
+   "Nirmal"
+  ],
+  [
+   "2026-12-06",
+   "Sun PM",
+   "Welcome",
+   "Greeter",
+   "Yamani"
+  ],
+  [
+   "2026-12-06",
+   "Sun PM",
+   "Ushers",
+   "Usher (Offering)",
+   "Vijay"
+  ],
+  [
+   "2026-12-06",
+   "Sun PM",
+   "Ushers",
+   "Usher (Offering)",
+   "Jayanth"
+  ],
+  [
+   "2026-12-06",
+   "Sun PM",
+   "Ushers",
+   "Usher (Door)",
+   "Deepak"
+  ],
+  [
+   "2026-12-06",
+   "Sun PM",
+   "Altar Workers",
+   "Altar Worker (Men)",
+   "Varun"
+  ],
+  [
+   "2026-12-06",
+   "Sun PM",
+   "Altar Workers",
+   "Altar Worker (Women)",
+   "Anjali"
+  ],
+  [
+   "2026-12-06",
+   "Sun PM",
+   "Facilities",
+   "Door Unlock",
+   "Bharat"
+  ],
+  [
+   "2026-12-09",
+   "Wed PM",
+   "Song Service",
+   "Worship Lead",
+   "Bharat"
+  ],
+  [
+   "2026-12-09",
+   "Wed PM",
+   "Song Service",
+   "Singer",
+   "Paul"
+  ],
+  [
+   "2026-12-09",
+   "Wed PM",
+   "Song Service",
+   "Singer",
+   "Gracie"
+  ],
+  [
+   "2026-12-09",
+   "Wed PM",
+   "Song Service",
+   "Guitar",
+   "Suresh"
+  ],
+  [
+   "2026-12-09",
+   "Wed PM",
+   "Song Service",
+   "Keyboard",
+   "Hemanth"
+  ],
+  [
+   "2026-12-09",
+   "Wed PM",
+   "Song Service",
+   "Drums",
+   "Jabin"
+  ],
+  [
+   "2026-12-09",
+   "Wed PM",
+   "Media",
+   "ProPresenter",
+   "Nirupa"
+  ],
+  [
+   "2026-12-09",
+   "Wed PM",
+   "Media",
+   "Sound",
+   "Nirmal"
+  ],
+  [
+   "2026-12-09",
+   "Wed PM",
+   "Welcome",
+   "Greeter",
+   "Althea"
+  ],
+  [
+   "2026-12-09",
+   "Wed PM",
+   "Ushers",
+   "Usher (Offering)",
+   "Vijay"
+  ],
+  [
+   "2026-12-09",
+   "Wed PM",
+   "Ushers",
+   "Usher (Offering)",
+   "Jayanth"
+  ],
+  [
+   "2026-12-09",
+   "Wed PM",
+   "Ushers",
+   "Usher (Door)",
+   "Deepak"
+  ],
+  [
+   "2026-12-09",
+   "Wed PM",
+   "Altar Workers",
+   "Altar Worker (Men)",
+   "Varun"
+  ],
+  [
+   "2026-12-09",
+   "Wed PM",
+   "Altar Workers",
+   "Altar Worker (Women)",
+   "Anjali"
+  ],
+  [
+   "2026-12-09",
+   "Wed PM",
+   "Facilities",
+   "Door Unlock",
+   "Bharat"
+  ],
+  [
+   "2026-12-12",
+   "Sat Cleanup",
+   "Cleanup",
+   "Cleanup",
+   "Deepak"
+  ],
+  [
+   "2026-12-12",
+   "Sat Cleanup",
+   "Cleanup",
+   "Cleanup",
+   "Prasanna"
+  ],
+  [
+   "2026-12-13",
+   "Sun AM",
+   "Song Service",
+   "Worship Lead",
+   "Bharat"
+  ],
+  [
+   "2026-12-13",
+   "Sun AM",
+   "Song Service",
+   "Guitar 1",
+   "Suresh"
+  ],
+  [
+   "2026-12-13",
+   "Sun AM",
+   "Song Service",
+   "Guitar 2",
+   "Eisley"
+  ],
+  [
+   "2026-12-13",
+   "Sun AM",
+   "Song Service",
+   "Singer",
+   "Mona"
+  ],
+  [
+   "2026-12-13",
+   "Sun AM",
+   "Song Service",
+   "Singer",
+   "Gracie"
+  ],
+  [
+   "2026-12-13",
+   "Sun AM",
+   "Song Service",
+   "Keyboard",
+   "Hemanth"
+  ],
+  [
+   "2026-12-13",
+   "Sun AM",
+   "Song Service",
+   "Drums",
+   "Jabin"
+  ],
+  [
+   "2026-12-13",
+   "Sun AM",
+   "Song Service",
+   "Bass",
+   ""
+  ],
+  [
+   "2026-12-13",
+   "Sun AM",
+   "Media",
+   "ProPresenter",
+   "Nirupa"
+  ],
+  [
+   "2026-12-13",
+   "Sun AM",
+   "Media",
+   "Lights",
+   "Nishal"
+  ],
+  [
+   "2026-12-13",
+   "Sun AM",
+   "Media",
+   "Sound",
+   "Nirmal"
+  ],
+  [
+   "2026-12-13",
+   "Sun AM",
+   "Media",
+   "Camera/Video",
+   "Jayanth"
+  ],
+  [
+   "2026-12-13",
+   "Sun AM",
+   "Media",
+   "Audio Recording",
+   "Joshua"
+  ],
+  [
+   "2026-12-13",
+   "Sun AM",
+   "Media",
+   "Reels",
+   "Minal"
+  ],
+  [
+   "2026-12-13",
+   "Sun AM",
+   "Welcome",
+   "Greeter",
+   "Yamani"
+  ],
+  [
+   "2026-12-13",
+   "Sun AM",
+   "Welcome",
+   "Greeter",
+   "Vijay"
+  ],
+  [
+   "2026-12-13",
+   "Sun AM",
+   "Welcome",
+   "Visitor Bags",
+   "Anjali"
+  ],
+  [
+   "2026-12-13",
+   "Sun AM",
+   "Ushers",
+   "Usher (Offering)",
+   "Deepak"
+  ],
+  [
+   "2026-12-13",
+   "Sun AM",
+   "Ushers",
+   "Usher (Offering)",
+   "Vijay"
+  ],
+  [
+   "2026-12-13",
+   "Sun AM",
+   "Ushers",
+   "Usher (Door)",
+   ""
+  ],
+  [
+   "2026-12-13",
+   "Sun AM",
+   "Altar Workers",
+   "Altar Worker (Men)",
+   "Paul"
+  ],
+  [
+   "2026-12-13",
+   "Sun AM",
+   "Altar Workers",
+   "Altar Worker (Men)",
+   "Varun"
+  ],
+  [
+   "2026-12-13",
+   "Sun AM",
+   "Altar Workers",
+   "Altar Worker (Women)",
+   "Althea"
+  ],
+  [
+   "2026-12-13",
+   "Sun AM",
+   "Altar Workers",
+   "Altar Worker (Women)",
+   "Anjali"
+  ],
+  [
+   "2026-12-13",
+   "Sun AM",
+   "Kids",
+   "Nursery (0-3)",
+   "Zeena"
+  ],
+  [
+   "2026-12-13",
+   "Sun AM",
+   "Kids",
+   "Children's Church (3-11)",
+   "Angel"
+  ],
+  [
+   "2026-12-13",
+   "Sun AM",
+   "Kids",
+   "Children's Church (3-11)",
+   "Sudha"
+  ],
+  [
+   "2026-12-13",
+   "Sun AM",
+   "Facilities",
+   "Door Unlock",
+   "Bharat"
+  ],
+  [
+   "2026-12-13",
+   "Sun PM",
+   "Song Service",
+   "Worship Lead",
+   "Bharat"
+  ],
+  [
+   "2026-12-13",
+   "Sun PM",
+   "Song Service",
+   "Singer",
+   "Paul"
+  ],
+  [
+   "2026-12-13",
+   "Sun PM",
+   "Song Service",
+   "Singer",
+   "Gracie"
+  ],
+  [
+   "2026-12-13",
+   "Sun PM",
+   "Song Service",
+   "Guitar",
+   "Suresh"
+  ],
+  [
+   "2026-12-13",
+   "Sun PM",
+   "Song Service",
+   "Keyboard",
+   "Hemanth"
+  ],
+  [
+   "2026-12-13",
+   "Sun PM",
+   "Song Service",
+   "Drums",
+   "Jabin"
+  ],
+  [
+   "2026-12-13",
+   "Sun PM",
+   "Media",
+   "ProPresenter",
+   "Nirupa"
+  ],
+  [
+   "2026-12-13",
+   "Sun PM",
+   "Media",
+   "Sound",
+   "Nirmal"
+  ],
+  [
+   "2026-12-13",
+   "Sun PM",
+   "Welcome",
+   "Greeter",
+   "Vijay"
+  ],
+  [
+   "2026-12-13",
+   "Sun PM",
+   "Ushers",
+   "Usher (Offering)",
+   "Deepak"
+  ],
+  [
+   "2026-12-13",
+   "Sun PM",
+   "Ushers",
+   "Usher (Offering)",
+   "Jayanth"
+  ],
+  [
+   "2026-12-13",
+   "Sun PM",
+   "Ushers",
+   "Usher (Door)",
+   "Vijay"
+  ],
+  [
+   "2026-12-13",
+   "Sun PM",
+   "Altar Workers",
+   "Altar Worker (Men)",
+   "Varun"
+  ],
+  [
+   "2026-12-13",
+   "Sun PM",
+   "Altar Workers",
+   "Altar Worker (Women)",
+   "Althea"
+  ],
+  [
+   "2026-12-13",
+   "Sun PM",
+   "Facilities",
+   "Door Unlock",
+   "Bharat"
+  ],
+  [
+   "2026-12-16",
+   "Wed PM",
+   "Song Service",
+   "Worship Lead",
+   "Bharat"
+  ],
+  [
+   "2026-12-16",
+   "Wed PM",
+   "Song Service",
+   "Singer",
+   "Paul"
+  ],
+  [
+   "2026-12-16",
+   "Wed PM",
+   "Song Service",
+   "Singer",
+   "Gracie"
+  ],
+  [
+   "2026-12-16",
+   "Wed PM",
+   "Song Service",
+   "Guitar",
+   "Suresh"
+  ],
+  [
+   "2026-12-16",
+   "Wed PM",
+   "Song Service",
+   "Keyboard",
+   "Hemanth"
+  ],
+  [
+   "2026-12-16",
+   "Wed PM",
+   "Song Service",
+   "Drums",
+   "Jabin"
+  ],
+  [
+   "2026-12-16",
+   "Wed PM",
+   "Media",
+   "ProPresenter",
+   "Mona"
+  ],
+  [
+   "2026-12-16",
+   "Wed PM",
+   "Media",
+   "Sound",
+   "Nirmal"
+  ],
+  [
+   "2026-12-16",
+   "Wed PM",
+   "Welcome",
+   "Greeter",
+   "Yamani"
+  ],
+  [
+   "2026-12-16",
+   "Wed PM",
+   "Ushers",
+   "Usher (Offering)",
+   "Vijay"
+  ],
+  [
+   "2026-12-16",
+   "Wed PM",
+   "Ushers",
+   "Usher (Offering)",
+   "Deepak"
+  ],
+  [
+   "2026-12-16",
+   "Wed PM",
+   "Ushers",
+   "Usher (Door)",
+   "Jayanth"
+  ],
+  [
+   "2026-12-16",
+   "Wed PM",
+   "Altar Workers",
+   "Altar Worker (Men)",
+   "Varun"
+  ],
+  [
+   "2026-12-16",
+   "Wed PM",
+   "Altar Workers",
+   "Altar Worker (Women)",
+   "Althea"
+  ],
+  [
+   "2026-12-16",
+   "Wed PM",
+   "Facilities",
+   "Door Unlock",
+   "Bharat"
+  ],
+  [
+   "2026-12-19",
+   "Sat Cleanup",
+   "Cleanup",
+   "Cleanup",
+   "Mona"
+  ],
+  [
+   "2026-12-19",
+   "Sat Cleanup",
+   "Cleanup",
+   "Cleanup",
+   "Anjali"
+  ],
+  [
+   "2026-12-20",
+   "Sun AM",
+   "Song Service",
+   "Worship Lead",
+   "Bharat"
+  ],
+  [
+   "2026-12-20",
+   "Sun AM",
+   "Song Service",
+   "Guitar 1",
+   "Suresh"
+  ],
+  [
+   "2026-12-20",
+   "Sun AM",
+   "Song Service",
+   "Guitar 2",
+   "Eisley"
+  ],
+  [
+   "2026-12-20",
+   "Sun AM",
+   "Song Service",
+   "Singer",
+   "Mona"
+  ],
+  [
+   "2026-12-20",
+   "Sun AM",
+   "Song Service",
+   "Singer",
+   "Gracie"
+  ],
+  [
+   "2026-12-20",
+   "Sun AM",
+   "Song Service",
+   "Keyboard",
+   "Hemanth"
+  ],
+  [
+   "2026-12-20",
+   "Sun AM",
+   "Song Service",
+   "Drums",
+   "Jabin"
+  ],
+  [
+   "2026-12-20",
+   "Sun AM",
+   "Song Service",
+   "Bass",
+   ""
+  ],
+  [
+   "2026-12-20",
+   "Sun AM",
+   "Media",
+   "ProPresenter",
+   "Nirupa"
+  ],
+  [
+   "2026-12-20",
+   "Sun AM",
+   "Media",
+   "Lights",
+   "Nishal"
+  ],
+  [
+   "2026-12-20",
+   "Sun AM",
+   "Media",
+   "Sound",
+   "Nirmal"
+  ],
+  [
+   "2026-12-20",
+   "Sun AM",
+   "Media",
+   "Camera/Video",
+   "Varun"
+  ],
+  [
+   "2026-12-20",
+   "Sun AM",
+   "Media",
+   "Audio Recording",
+   "Joshua"
+  ],
+  [
+   "2026-12-20",
+   "Sun AM",
+   "Media",
+   "Reels",
+   "Minal"
+  ],
+  [
+   "2026-12-20",
+   "Sun AM",
+   "Welcome",
+   "Greeter",
+   "Yamani"
+  ],
+  [
+   "2026-12-20",
+   "Sun AM",
+   "Welcome",
+   "Greeter",
+   "Vijay"
+  ],
+  [
+   "2026-12-20",
+   "Sun AM",
+   "Welcome",
+   "Visitor Bags",
+   "Anjali"
+  ],
+  [
+   "2026-12-20",
+   "Sun AM",
+   "Ushers",
+   "Usher (Offering)",
+   "Jayanth"
+  ],
+  [
+   "2026-12-20",
+   "Sun AM",
+   "Ushers",
+   "Usher (Offering)",
+   "Deepak"
+  ],
+  [
+   "2026-12-20",
+   "Sun AM",
+   "Ushers",
+   "Usher (Door)",
+   "Vijay"
+  ],
+  [
+   "2026-12-20",
+   "Sun AM",
+   "Altar Workers",
+   "Altar Worker (Men)",
+   "Paul"
+  ],
+  [
+   "2026-12-20",
+   "Sun AM",
+   "Altar Workers",
+   "Altar Worker (Men)",
+   ""
+  ],
+  [
+   "2026-12-20",
+   "Sun AM",
+   "Altar Workers",
+   "Altar Worker (Women)",
+   "Althea"
+  ],
+  [
+   "2026-12-20",
+   "Sun AM",
+   "Altar Workers",
+   "Altar Worker (Women)",
+   "Anjali"
+  ],
+  [
+   "2026-12-20",
+   "Sun AM",
+   "Kids",
+   "Nursery (0-3)",
+   "Angel"
+  ],
+  [
+   "2026-12-20",
+   "Sun AM",
+   "Kids",
+   "Children's Church (3-11)",
+   "Prasanna"
+  ],
+  [
+   "2026-12-20",
+   "Sun AM",
+   "Kids",
+   "Children's Church (3-11)",
+   "Sudha"
+  ],
+  [
+   "2026-12-20",
+   "Sun AM",
+   "Facilities",
+   "Door Unlock",
+   "Bharat"
+  ],
+  [
+   "2026-12-20",
+   "Sun PM",
+   "Song Service",
+   "Worship Lead",
+   "Bharat"
+  ],
+  [
+   "2026-12-20",
+   "Sun PM",
+   "Song Service",
+   "Singer",
+   "Paul"
+  ],
+  [
+   "2026-12-20",
+   "Sun PM",
+   "Song Service",
+   "Singer",
+   "Gracie"
+  ],
+  [
+   "2026-12-20",
+   "Sun PM",
+   "Song Service",
+   "Guitar",
+   "Suresh"
+  ],
+  [
+   "2026-12-20",
+   "Sun PM",
+   "Song Service",
+   "Keyboard",
+   "Hemanth"
+  ],
+  [
+   "2026-12-20",
+   "Sun PM",
+   "Song Service",
+   "Drums",
+   "Jabin"
+  ],
+  [
+   "2026-12-20",
+   "Sun PM",
+   "Media",
+   "ProPresenter",
+   "Mona"
+  ],
+  [
+   "2026-12-20",
+   "Sun PM",
+   "Media",
+   "Sound",
+   "Nirmal"
+  ],
+  [
+   "2026-12-20",
+   "Sun PM",
+   "Welcome",
+   "Greeter",
+   "Althea"
+  ],
+  [
+   "2026-12-20",
+   "Sun PM",
+   "Ushers",
+   "Usher (Offering)",
+   "Vijay"
+  ],
+  [
+   "2026-12-20",
+   "Sun PM",
+   "Ushers",
+   "Usher (Offering)",
+   "Deepak"
+  ],
+  [
+   "2026-12-20",
+   "Sun PM",
+   "Ushers",
+   "Usher (Door)",
+   "Jayanth"
+  ],
+  [
+   "2026-12-20",
+   "Sun PM",
+   "Altar Workers",
+   "Altar Worker (Men)",
+   "Varun"
+  ],
+  [
+   "2026-12-20",
+   "Sun PM",
+   "Altar Workers",
+   "Altar Worker (Women)",
+   "Anjali"
+  ],
+  [
+   "2026-12-20",
+   "Sun PM",
+   "Facilities",
+   "Door Unlock",
+   "Bharat"
+  ],
+  [
+   "2026-12-23",
+   "Wed PM",
+   "Song Service",
+   "Worship Lead",
+   "Bharat"
+  ],
+  [
+   "2026-12-23",
+   "Wed PM",
+   "Song Service",
+   "Singer",
+   "Paul"
+  ],
+  [
+   "2026-12-23",
+   "Wed PM",
+   "Song Service",
+   "Singer",
+   "Gracie"
+  ],
+  [
+   "2026-12-23",
+   "Wed PM",
+   "Song Service",
+   "Guitar",
+   "Suresh"
+  ],
+  [
+   "2026-12-23",
+   "Wed PM",
+   "Song Service",
+   "Keyboard",
+   "Hemanth"
+  ],
+  [
+   "2026-12-23",
+   "Wed PM",
+   "Song Service",
+   "Drums",
+   "Jabin"
+  ],
+  [
+   "2026-12-23",
+   "Wed PM",
+   "Media",
+   "ProPresenter",
+   "Nirupa"
+  ],
+  [
+   "2026-12-23",
+   "Wed PM",
+   "Media",
+   "Sound",
+   "Nirmal"
+  ],
+  [
+   "2026-12-23",
+   "Wed PM",
+   "Welcome",
+   "Greeter",
+   "Vijay"
+  ],
+  [
+   "2026-12-23",
+   "Wed PM",
+   "Ushers",
+   "Usher (Offering)",
+   "Jayanth"
+  ],
+  [
+   "2026-12-23",
+   "Wed PM",
+   "Ushers",
+   "Usher (Offering)",
+   "Deepak"
+  ],
+  [
+   "2026-12-23",
+   "Wed PM",
+   "Ushers",
+   "Usher (Door)",
+   "Vijay"
+  ],
+  [
+   "2026-12-23",
+   "Wed PM",
+   "Altar Workers",
+   "Altar Worker (Men)",
+   "Varun"
+  ],
+  [
+   "2026-12-23",
+   "Wed PM",
+   "Altar Workers",
+   "Altar Worker (Women)",
+   "Anjali"
+  ],
+  [
+   "2026-12-23",
+   "Wed PM",
+   "Facilities",
+   "Door Unlock",
+   "Bharat"
+  ],
+  [
+   "2026-12-26",
+   "Sat Cleanup",
+   "Cleanup",
+   "Cleanup",
+   "Nishal"
+  ],
+  [
+   "2026-12-26",
+   "Sat Cleanup",
+   "Cleanup",
+   "Cleanup",
+   "Paul"
+  ],
+  [
+   "2026-12-27",
+   "Sun AM",
+   "Song Service",
+   "Worship Lead",
+   "Bharat"
+  ],
+  [
+   "2026-12-27",
+   "Sun AM",
+   "Song Service",
+   "Guitar 1",
+   "Suresh"
+  ],
+  [
+   "2026-12-27",
+   "Sun AM",
+   "Song Service",
+   "Guitar 2",
+   "Eisley"
+  ],
+  [
+   "2026-12-27",
+   "Sun AM",
+   "Song Service",
+   "Singer",
+   "Mona"
+  ],
+  [
+   "2026-12-27",
+   "Sun AM",
+   "Song Service",
+   "Singer",
+   "Gracie"
+  ],
+  [
+   "2026-12-27",
+   "Sun AM",
+   "Song Service",
+   "Keyboard",
+   "Hemanth"
+  ],
+  [
+   "2026-12-27",
+   "Sun AM",
+   "Song Service",
+   "Drums",
+   "Paul"
+  ],
+  [
+   "2026-12-27",
+   "Sun AM",
+   "Song Service",
+   "Bass",
+   ""
+  ],
+  [
+   "2026-12-27",
+   "Sun AM",
+   "Media",
+   "ProPresenter",
+   "Nirupa"
+  ],
+  [
+   "2026-12-27",
+   "Sun AM",
+   "Media",
+   "Lights",
+   "Nishal"
+  ],
+  [
+   "2026-12-27",
+   "Sun AM",
+   "Media",
+   "Sound",
+   "Nirmal"
+  ],
+  [
+   "2026-12-27",
+   "Sun AM",
+   "Media",
+   "Camera/Video",
+   "Jayanth"
+  ],
+  [
+   "2026-12-27",
+   "Sun AM",
+   "Media",
+   "Audio Recording",
+   "Joshua"
+  ],
+  [
+   "2026-12-27",
+   "Sun AM",
+   "Media",
+   "Reels",
+   "Minal"
+  ],
+  [
+   "2026-12-27",
+   "Sun AM",
+   "Welcome",
+   "Greeter",
+   "Yamani"
+  ],
+  [
+   "2026-12-27",
+   "Sun AM",
+   "Welcome",
+   "Greeter",
+   "Vijay"
+  ],
+  [
+   "2026-12-27",
+   "Sun AM",
+   "Welcome",
+   "Visitor Bags",
+   "Anjali"
+  ],
+  [
+   "2026-12-27",
+   "Sun AM",
+   "Ushers",
+   "Usher (Offering)",
+   "Deepak"
+  ],
+  [
+   "2026-12-27",
+   "Sun AM",
+   "Ushers",
+   "Usher (Offering)",
+   "Vijay"
+  ],
+  [
+   "2026-12-27",
+   "Sun AM",
+   "Ushers",
+   "Usher (Door)",
+   ""
+  ],
+  [
+   "2026-12-27",
+   "Sun AM",
+   "Altar Workers",
+   "Altar Worker (Men)",
+   "Varun"
+  ],
+  [
+   "2026-12-27",
+   "Sun AM",
+   "Altar Workers",
+   "Altar Worker (Men)",
+   ""
+  ],
+  [
+   "2026-12-27",
+   "Sun AM",
+   "Altar Workers",
+   "Altar Worker (Women)",
+   "Althea"
+  ],
+  [
+   "2026-12-27",
+   "Sun AM",
+   "Altar Workers",
+   "Altar Worker (Women)",
+   "Anjali"
+  ],
+  [
+   "2026-12-27",
+   "Sun AM",
+   "Kids",
+   "Nursery (0-3)",
+   "Esther"
+  ],
+  [
+   "2026-12-27",
+   "Sun AM",
+   "Kids",
+   "Children's Church (3-11)",
+   "Angel"
+  ],
+  [
+   "2026-12-27",
+   "Sun AM",
+   "Kids",
+   "Children's Church (3-11)",
+   "Prasanna"
+  ],
+  [
+   "2026-12-27",
+   "Sun AM",
+   "Facilities",
+   "Door Unlock",
+   "Bharat"
+  ],
+  [
+   "2026-12-27",
+   "Sun PM",
+   "Song Service",
+   "Worship Lead",
+   "Bharat"
+  ],
+  [
+   "2026-12-27",
+   "Sun PM",
+   "Song Service",
+   "Singer",
+   "Paul"
+  ],
+  [
+   "2026-12-27",
+   "Sun PM",
+   "Song Service",
+   "Singer",
+   "Gracie"
+  ],
+  [
+   "2026-12-27",
+   "Sun PM",
+   "Song Service",
+   "Guitar",
+   "Suresh"
+  ],
+  [
+   "2026-12-27",
+   "Sun PM",
+   "Song Service",
+   "Keyboard",
+   "Hemanth"
+  ],
+  [
+   "2026-12-27",
+   "Sun PM",
+   "Song Service",
+   "Drums",
+   "Jabin"
+  ],
+  [
+   "2026-12-27",
+   "Sun PM",
+   "Media",
+   "ProPresenter",
+   "Nirupa"
+  ],
+  [
+   "2026-12-27",
+   "Sun PM",
+   "Media",
+   "Sound",
+   "Nirmal"
+  ],
+  [
+   "2026-12-27",
+   "Sun PM",
+   "Welcome",
+   "Greeter",
+   "Yamani"
+  ],
+  [
+   "2026-12-27",
+   "Sun PM",
+   "Ushers",
+   "Usher (Offering)",
+   "Vijay"
+  ],
+  [
+   "2026-12-27",
+   "Sun PM",
+   "Ushers",
+   "Usher (Offering)",
+   "Jayanth"
+  ],
+  [
+   "2026-12-27",
+   "Sun PM",
+   "Ushers",
+   "Usher (Door)",
+   "Deepak"
+  ],
+  [
+   "2026-12-27",
+   "Sun PM",
+   "Altar Workers",
+   "Altar Worker (Men)",
+   "Varun"
+  ],
+  [
+   "2026-12-27",
+   "Sun PM",
+   "Altar Workers",
+   "Altar Worker (Women)",
+   "Althea"
+  ],
+  [
+   "2026-12-27",
+   "Sun PM",
+   "Facilities",
+   "Door Unlock",
+   "Bharat"
+  ],
+  [
+   "2026-12-30",
+   "Wed PM",
+   "Song Service",
+   "Worship Lead",
+   "Bharat"
+  ],
+  [
+   "2026-12-30",
+   "Wed PM",
+   "Song Service",
+   "Singer",
+   "Paul"
+  ],
+  [
+   "2026-12-30",
+   "Wed PM",
+   "Song Service",
+   "Singer",
+   "Gracie"
+  ],
+  [
+   "2026-12-30",
+   "Wed PM",
+   "Song Service",
+   "Guitar",
+   "Suresh"
+  ],
+  [
+   "2026-12-30",
+   "Wed PM",
+   "Song Service",
+   "Keyboard",
+   "Hemanth"
+  ],
+  [
+   "2026-12-30",
+   "Wed PM",
+   "Song Service",
+   "Drums",
+   "Jabin"
+  ],
+  [
+   "2026-12-30",
+   "Wed PM",
+   "Media",
+   "ProPresenter",
+   "Mona"
+  ],
+  [
+   "2026-12-30",
+   "Wed PM",
+   "Media",
+   "Sound",
+   "Nirmal"
+  ],
+  [
+   "2026-12-30",
+   "Wed PM",
+   "Welcome",
+   "Greeter",
+   "Yamani"
+  ],
+  [
+   "2026-12-30",
+   "Wed PM",
+   "Ushers",
+   "Usher (Offering)",
+   "Vijay"
+  ],
+  [
+   "2026-12-30",
+   "Wed PM",
+   "Ushers",
+   "Usher (Offering)",
+   "Jayanth"
+  ],
+  [
+   "2026-12-30",
+   "Wed PM",
+   "Ushers",
+   "Usher (Door)",
+   "Deepak"
+  ],
+  [
+   "2026-12-30",
+   "Wed PM",
+   "Altar Workers",
+   "Altar Worker (Men)",
+   "Varun"
+  ],
+  [
+   "2026-12-30",
+   "Wed PM",
+   "Altar Workers",
+   "Altar Worker (Women)",
+   "Althea"
+  ],
+  [
+   "2026-12-30",
+   "Wed PM",
+   "Facilities",
+   "Door Unlock",
+   "Bharat"
+  ],
+  [
+   "2027-01-02",
+   "Sat Cleanup",
+   "Cleanup",
+   "Cleanup",
+   "Suresh"
+  ],
+  [
+   "2027-01-02",
+   "Sat Cleanup",
+   "Cleanup",
+   "Cleanup",
+   "Jayanth"
+  ],
+  [
+   "2027-01-03",
+   "Sun AM",
+   "Song Service",
+   "Worship Lead",
+   "Bharat"
+  ],
+  [
+   "2027-01-03",
+   "Sun AM",
+   "Song Service",
+   "Guitar 1",
+   "Suresh"
+  ],
+  [
+   "2027-01-03",
+   "Sun AM",
+   "Song Service",
+   "Guitar 2",
+   "Eisley"
+  ],
+  [
+   "2027-01-03",
+   "Sun AM",
+   "Song Service",
+   "Singer",
+   "Gracie"
+  ],
+  [
+   "2027-01-03",
+   "Sun AM",
+   "Song Service",
+   "Singer",
+   "Mona"
+  ],
+  [
+   "2027-01-03",
+   "Sun AM",
+   "Song Service",
+   "Keyboard",
+   "Hemanth"
+  ],
+  [
+   "2027-01-03",
+   "Sun AM",
+   "Song Service",
+   "Drums",
+   "Paul"
+  ],
+  [
+   "2027-01-03",
+   "Sun AM",
+   "Song Service",
+   "Bass",
+   ""
+  ],
+  [
+   "2027-01-03",
+   "Sun AM",
+   "Media",
+   "ProPresenter",
+   "Nirupa"
+  ],
+  [
+   "2027-01-03",
+   "Sun AM",
+   "Media",
+   "Lights",
+   "Nishal"
+  ],
+  [
+   "2027-01-03",
+   "Sun AM",
+   "Media",
+   "Sound",
+   "Nirmal"
+  ],
+  [
+   "2027-01-03",
+   "Sun AM",
+   "Media",
+   "Camera/Video",
+   "Varun"
+  ],
+  [
+   "2027-01-03",
+   "Sun AM",
+   "Media",
+   "Audio Recording",
+   "Joshua"
+  ],
+  [
+   "2027-01-03",
+   "Sun AM",
+   "Media",
+   "Reels",
+   "Minal"
+  ],
+  [
+   "2027-01-03",
+   "Sun AM",
+   "Welcome",
+   "Greeter",
+   "Yamani"
+  ],
+  [
+   "2027-01-03",
+   "Sun AM",
+   "Welcome",
+   "Greeter",
+   "Vijay"
+  ],
+  [
+   "2027-01-03",
+   "Sun AM",
+   "Welcome",
+   "Visitor Bags",
+   "Anjali"
+  ],
+  [
+   "2027-01-03",
+   "Sun AM",
+   "Ushers",
+   "Usher (Offering)",
+   "Jayanth"
+  ],
+  [
+   "2027-01-03",
+   "Sun AM",
+   "Ushers",
+   "Usher (Offering)",
+   "Deepak"
+  ],
+  [
+   "2027-01-03",
+   "Sun AM",
+   "Ushers",
+   "Usher (Door)",
+   "Vijay"
+  ],
+  [
+   "2027-01-03",
+   "Sun AM",
+   "Altar Workers",
+   "Altar Worker (Men)",
+   ""
+  ],
+  [
+   "2027-01-03",
+   "Sun AM",
+   "Altar Workers",
+   "Altar Worker (Men)",
+   ""
+  ],
+  [
+   "2027-01-03",
+   "Sun AM",
+   "Altar Workers",
+   "Altar Worker (Women)",
+   "Althea"
+  ],
+  [
+   "2027-01-03",
+   "Sun AM",
+   "Altar Workers",
+   "Altar Worker (Women)",
+   "Anjali"
+  ],
+  [
+   "2027-01-03",
+   "Sun AM",
+   "Kids",
+   "Nursery (0-3)",
+   "Angel"
+  ],
+  [
+   "2027-01-03",
+   "Sun AM",
+   "Kids",
+   "Children's Church (3-11)",
+   "Prasanna"
+  ],
+  [
+   "2027-01-03",
+   "Sun AM",
+   "Kids",
+   "Children's Church (3-11)",
+   "Sudha"
+  ],
+  [
+   "2027-01-03",
+   "Sun AM",
+   "Facilities",
+   "Door Unlock",
+   "Bharat"
+  ],
+  [
+   "2027-01-03",
+   "Sun PM",
+   "Song Service",
+   "Worship Lead",
+   "Bharat"
+  ],
+  [
+   "2027-01-03",
+   "Sun PM",
+   "Song Service",
+   "Singer",
+   "Paul"
+  ],
+  [
+   "2027-01-03",
+   "Sun PM",
+   "Song Service",
+   "Singer",
+   "Gracie"
+  ],
+  [
+   "2027-01-03",
+   "Sun PM",
+   "Song Service",
+   "Guitar",
+   "Suresh"
+  ],
+  [
+   "2027-01-03",
+   "Sun PM",
+   "Song Service",
+   "Keyboard",
+   "Hemanth"
+  ],
+  [
+   "2027-01-03",
+   "Sun PM",
+   "Song Service",
+   "Drums",
+   "Jabin"
+  ],
+  [
+   "2027-01-03",
+   "Sun PM",
+   "Media",
+   "ProPresenter",
+   "Nirupa"
+  ],
+  [
+   "2027-01-03",
+   "Sun PM",
+   "Media",
+   "Sound",
+   "Nirmal"
+  ],
+  [
+   "2027-01-03",
+   "Sun PM",
+   "Welcome",
+   "Greeter",
+   "Althea"
+  ],
+  [
+   "2027-01-03",
+   "Sun PM",
+   "Ushers",
+   "Usher (Offering)",
+   "Vijay"
+  ],
+  [
+   "2027-01-03",
+   "Sun PM",
+   "Ushers",
+   "Usher (Offering)",
+   "Deepak"
+  ],
+  [
+   "2027-01-03",
+   "Sun PM",
+   "Ushers",
+   "Usher (Door)",
+   "Jayanth"
+  ],
+  [
+   "2027-01-03",
+   "Sun PM",
+   "Altar Workers",
+   "Altar Worker (Men)",
+   "Varun"
+  ],
+  [
+   "2027-01-03",
+   "Sun PM",
+   "Altar Workers",
+   "Altar Worker (Women)",
+   "Anjali"
+  ],
+  [
+   "2027-01-03",
+   "Sun PM",
+   "Facilities",
+   "Door Unlock",
+   "Bharat"
+  ],
+  [
+   "2027-01-06",
+   "Wed PM",
+   "Song Service",
+   "Worship Lead",
+   "Bharat"
+  ],
+  [
+   "2027-01-06",
+   "Wed PM",
+   "Song Service",
+   "Singer",
+   "Paul"
+  ],
+  [
+   "2027-01-06",
+   "Wed PM",
+   "Song Service",
+   "Singer",
+   "Gracie"
+  ],
+  [
+   "2027-01-06",
+   "Wed PM",
+   "Song Service",
+   "Guitar",
+   "Suresh"
+  ],
+  [
+   "2027-01-06",
+   "Wed PM",
+   "Song Service",
+   "Keyboard",
+   "Hemanth"
+  ],
+  [
+   "2027-01-06",
+   "Wed PM",
+   "Song Service",
+   "Drums",
+   "Jabin"
+  ],
+  [
+   "2027-01-06",
+   "Wed PM",
+   "Media",
+   "ProPresenter",
+   "Mona"
+  ],
+  [
+   "2027-01-06",
+   "Wed PM",
+   "Media",
+   "Sound",
+   "Nirmal"
+  ],
+  [
+   "2027-01-06",
+   "Wed PM",
+   "Welcome",
+   "Greeter",
+   "Althea"
+  ],
+  [
+   "2027-01-06",
+   "Wed PM",
+   "Ushers",
+   "Usher (Offering)",
+   "Vijay"
+  ],
+  [
+   "2027-01-06",
+   "Wed PM",
+   "Ushers",
+   "Usher (Offering)",
+   "Deepak"
+  ],
+  [
+   "2027-01-06",
+   "Wed PM",
+   "Ushers",
+   "Usher (Door)",
+   "Jayanth"
+  ],
+  [
+   "2027-01-06",
+   "Wed PM",
+   "Altar Workers",
+   "Altar Worker (Men)",
+   "Varun"
+  ],
+  [
+   "2027-01-06",
+   "Wed PM",
+   "Altar Workers",
+   "Altar Worker (Women)",
+   "Anjali"
+  ],
+  [
+   "2027-01-06",
+   "Wed PM",
+   "Facilities",
+   "Door Unlock",
+   "Bharat"
+  ],
+  [
+   "2027-01-09",
+   "Sat Cleanup",
+   "Cleanup",
+   "Cleanup",
+   "Hemanth"
+  ],
+  [
+   "2027-01-09",
+   "Sat Cleanup",
+   "Cleanup",
+   "Cleanup",
+   "Angel"
+  ],
+  [
+   "2027-01-10",
+   "Sun AM",
+   "Song Service",
+   "Worship Lead",
+   "Bharat"
+  ],
+  [
+   "2027-01-10",
+   "Sun AM",
+   "Song Service",
+   "Guitar 1",
+   "Suresh"
+  ],
+  [
+   "2027-01-10",
+   "Sun AM",
+   "Song Service",
+   "Guitar 2",
+   "Eisley"
+  ],
+  [
+   "2027-01-10",
+   "Sun AM",
+   "Song Service",
+   "Singer",
+   "Mona"
+  ],
+  [
+   "2027-01-10",
+   "Sun AM",
+   "Song Service",
+   "Singer",
+   "Gracie"
+  ],
+  [
+   "2027-01-10",
+   "Sun AM",
+   "Song Service",
+   "Keyboard",
+   "Hemanth"
+  ],
+  [
+   "2027-01-10",
+   "Sun AM",
+   "Song Service",
+   "Drums",
+   "Jabin"
+  ],
+  [
+   "2027-01-10",
+   "Sun AM",
+   "Song Service",
+   "Bass",
+   ""
+  ],
+  [
+   "2027-01-10",
+   "Sun AM",
+   "Media",
+   "ProPresenter",
+   "Nirupa"
+  ],
+  [
+   "2027-01-10",
+   "Sun AM",
+   "Media",
+   "Lights",
+   "Nishal"
+  ],
+  [
+   "2027-01-10",
+   "Sun AM",
+   "Media",
+   "Sound",
+   "Nirmal"
+  ],
+  [
+   "2027-01-10",
+   "Sun AM",
+   "Media",
+   "Camera/Video",
+   "Jayanth"
+  ],
+  [
+   "2027-01-10",
+   "Sun AM",
+   "Media",
+   "Audio Recording",
+   "Joshua"
+  ],
+  [
+   "2027-01-10",
+   "Sun AM",
+   "Media",
+   "Reels",
+   "Minal"
+  ],
+  [
+   "2027-01-10",
+   "Sun AM",
+   "Welcome",
+   "Greeter",
+   "Yamani"
+  ],
+  [
+   "2027-01-10",
+   "Sun AM",
+   "Welcome",
+   "Greeter",
+   "Vijay"
+  ],
+  [
+   "2027-01-10",
+   "Sun AM",
+   "Welcome",
+   "Visitor Bags",
+   "Anjali"
+  ],
+  [
+   "2027-01-10",
+   "Sun AM",
+   "Ushers",
+   "Usher (Offering)",
+   "Deepak"
+  ],
+  [
+   "2027-01-10",
+   "Sun AM",
+   "Ushers",
+   "Usher (Offering)",
+   "Vijay"
+  ],
+  [
+   "2027-01-10",
+   "Sun AM",
+   "Ushers",
+   "Usher (Door)",
+   ""
+  ],
+  [
+   "2027-01-10",
+   "Sun AM",
+   "Altar Workers",
+   "Altar Worker (Men)",
+   "Paul"
+  ],
+  [
+   "2027-01-10",
+   "Sun AM",
+   "Altar Workers",
+   "Altar Worker (Men)",
+   "Varun"
+  ],
+  [
+   "2027-01-10",
+   "Sun AM",
+   "Altar Workers",
+   "Altar Worker (Women)",
+   "Althea"
+  ],
+  [
+   "2027-01-10",
+   "Sun AM",
+   "Altar Workers",
+   "Altar Worker (Women)",
+   "Anjali"
+  ],
+  [
+   "2027-01-10",
+   "Sun AM",
+   "Kids",
+   "Nursery (0-3)",
+   "Zeena"
+  ],
+  [
+   "2027-01-10",
+   "Sun AM",
+   "Kids",
+   "Children's Church (3-11)",
+   "Angel"
+  ],
+  [
+   "2027-01-10",
+   "Sun AM",
+   "Kids",
+   "Children's Church (3-11)",
+   "Sudha"
+  ],
+  [
+   "2027-01-10",
+   "Sun AM",
+   "Facilities",
+   "Door Unlock",
+   "Bharat"
+  ],
+  [
+   "2027-01-10",
+   "Sun PM",
+   "Song Service",
+   "Worship Lead",
+   "Bharat"
+  ],
+  [
+   "2027-01-10",
+   "Sun PM",
+   "Song Service",
+   "Singer",
+   "Paul"
+  ],
+  [
+   "2027-01-10",
+   "Sun PM",
+   "Song Service",
+   "Singer",
+   "Gracie"
+  ],
+  [
+   "2027-01-10",
+   "Sun PM",
+   "Song Service",
+   "Guitar",
+   "Suresh"
+  ],
+  [
+   "2027-01-10",
+   "Sun PM",
+   "Song Service",
+   "Keyboard",
+   "Hemanth"
+  ],
+  [
+   "2027-01-10",
+   "Sun PM",
+   "Song Service",
+   "Drums",
+   "Jabin"
+  ],
+  [
+   "2027-01-10",
+   "Sun PM",
+   "Media",
+   "ProPresenter",
+   "Mona"
+  ],
+  [
+   "2027-01-10",
+   "Sun PM",
+   "Media",
+   "Sound",
+   "Nirmal"
+  ],
+  [
+   "2027-01-10",
+   "Sun PM",
+   "Welcome",
+   "Greeter",
+   "Vijay"
+  ],
+  [
+   "2027-01-10",
+   "Sun PM",
+   "Ushers",
+   "Usher (Offering)",
+   "Jayanth"
+  ],
+  [
+   "2027-01-10",
+   "Sun PM",
+   "Ushers",
+   "Usher (Offering)",
+   "Deepak"
+  ],
+  [
+   "2027-01-10",
+   "Sun PM",
+   "Ushers",
+   "Usher (Door)",
+   "Vijay"
+  ],
+  [
+   "2027-01-10",
+   "Sun PM",
+   "Altar Workers",
+   "Altar Worker (Men)",
+   "Varun"
+  ],
+  [
+   "2027-01-10",
+   "Sun PM",
+   "Altar Workers",
+   "Altar Worker (Women)",
+   "Althea"
+  ],
+  [
+   "2027-01-10",
+   "Sun PM",
+   "Facilities",
+   "Door Unlock",
+   "Bharat"
+  ],
+  [
+   "2027-01-13",
+   "Wed PM",
+   "Song Service",
+   "Worship Lead",
+   "Bharat"
+  ],
+  [
+   "2027-01-13",
+   "Wed PM",
+   "Song Service",
+   "Singer",
+   "Paul"
+  ],
+  [
+   "2027-01-13",
+   "Wed PM",
+   "Song Service",
+   "Singer",
+   "Gracie"
+  ],
+  [
+   "2027-01-13",
+   "Wed PM",
+   "Song Service",
+   "Guitar",
+   "Suresh"
+  ],
+  [
+   "2027-01-13",
+   "Wed PM",
+   "Song Service",
+   "Keyboard",
+   "Hemanth"
+  ],
+  [
+   "2027-01-13",
+   "Wed PM",
+   "Song Service",
+   "Drums",
+   "Jabin"
+  ],
+  [
+   "2027-01-13",
+   "Wed PM",
+   "Media",
+   "ProPresenter",
+   "Nirupa"
+  ],
+  [
+   "2027-01-13",
+   "Wed PM",
+   "Media",
+   "Sound",
+   "Nirmal"
+  ],
+  [
+   "2027-01-13",
+   "Wed PM",
+   "Welcome",
+   "Greeter",
+   "Vijay"
+  ],
+  [
+   "2027-01-13",
+   "Wed PM",
+   "Ushers",
+   "Usher (Offering)",
+   "Jayanth"
+  ],
+  [
+   "2027-01-13",
+   "Wed PM",
+   "Ushers",
+   "Usher (Offering)",
+   "Deepak"
+  ],
+  [
+   "2027-01-13",
+   "Wed PM",
+   "Ushers",
+   "Usher (Door)",
+   "Vijay"
+  ],
+  [
+   "2027-01-13",
+   "Wed PM",
+   "Altar Workers",
+   "Altar Worker (Men)",
+   "Varun"
+  ],
+  [
+   "2027-01-13",
+   "Wed PM",
+   "Altar Workers",
+   "Altar Worker (Women)",
+   "Althea"
+  ],
+  [
+   "2027-01-13",
+   "Wed PM",
+   "Facilities",
+   "Door Unlock",
+   "Bharat"
+  ],
+  [
+   "2027-01-16",
+   "Sat Cleanup",
+   "Cleanup",
+   "Cleanup",
+   "Bharat"
+  ],
+  [
+   "2027-01-16",
+   "Sat Cleanup",
+   "Cleanup",
+   "Cleanup",
+   "Varun"
+  ],
+  [
+   "2027-01-17",
+   "Sun AM",
+   "Song Service",
+   "Worship Lead",
+   "Bharat"
+  ],
+  [
+   "2027-01-17",
+   "Sun AM",
+   "Song Service",
+   "Guitar 1",
+   "Suresh"
+  ],
+  [
+   "2027-01-17",
+   "Sun AM",
+   "Song Service",
+   "Guitar 2",
+   "Eisley"
+  ],
+  [
+   "2027-01-17",
+   "Sun AM",
+   "Song Service",
+   "Singer",
+   "Mona"
+  ],
+  [
+   "2027-01-17",
+   "Sun AM",
+   "Song Service",
+   "Singer",
+   "Gracie"
+  ],
+  [
+   "2027-01-17",
+   "Sun AM",
+   "Song Service",
+   "Keyboard",
+   "Hemanth"
+  ],
+  [
+   "2027-01-17",
+   "Sun AM",
+   "Song Service",
+   "Drums",
+   "Jabin"
+  ],
+  [
+   "2027-01-17",
+   "Sun AM",
+   "Song Service",
+   "Bass",
+   ""
+  ],
+  [
+   "2027-01-17",
+   "Sun AM",
+   "Media",
+   "ProPresenter",
+   "Nirupa"
+  ],
+  [
+   "2027-01-17",
+   "Sun AM",
+   "Media",
+   "Lights",
+   "Nishal"
+  ],
+  [
+   "2027-01-17",
+   "Sun AM",
+   "Media",
+   "Sound",
+   "Nirmal"
+  ],
+  [
+   "2027-01-17",
+   "Sun AM",
+   "Media",
+   "Camera/Video",
+   "Varun"
+  ],
+  [
+   "2027-01-17",
+   "Sun AM",
+   "Media",
+   "Audio Recording",
+   "Joshua"
+  ],
+  [
+   "2027-01-17",
+   "Sun AM",
+   "Media",
+   "Reels",
+   "Minal"
+  ],
+  [
+   "2027-01-17",
+   "Sun AM",
+   "Welcome",
+   "Greeter",
+   "Yamani"
+  ],
+  [
+   "2027-01-17",
+   "Sun AM",
+   "Welcome",
+   "Greeter",
+   "Vijay"
+  ],
+  [
+   "2027-01-17",
+   "Sun AM",
+   "Welcome",
+   "Visitor Bags",
+   "Anjali"
+  ],
+  [
+   "2027-01-17",
+   "Sun AM",
+   "Ushers",
+   "Usher (Offering)",
+   "Jayanth"
+  ],
+  [
+   "2027-01-17",
+   "Sun AM",
+   "Ushers",
+   "Usher (Offering)",
+   "Deepak"
+  ],
+  [
+   "2027-01-17",
+   "Sun AM",
+   "Ushers",
+   "Usher (Door)",
+   "Vijay"
+  ],
+  [
+   "2027-01-17",
+   "Sun AM",
+   "Altar Workers",
+   "Altar Worker (Men)",
+   "Paul"
+  ],
+  [
+   "2027-01-17",
+   "Sun AM",
+   "Altar Workers",
+   "Altar Worker (Men)",
+   ""
+  ],
+  [
+   "2027-01-17",
+   "Sun AM",
+   "Altar Workers",
+   "Altar Worker (Women)",
+   "Althea"
+  ],
+  [
+   "2027-01-17",
+   "Sun AM",
+   "Altar Workers",
+   "Altar Worker (Women)",
+   "Anjali"
+  ],
+  [
+   "2027-01-17",
+   "Sun AM",
+   "Kids",
+   "Nursery (0-3)",
+   "Esther"
+  ],
+  [
+   "2027-01-17",
+   "Sun AM",
+   "Kids",
+   "Children's Church (3-11)",
+   "Angel"
+  ],
+  [
+   "2027-01-17",
+   "Sun AM",
+   "Kids",
+   "Children's Church (3-11)",
+   "Prasanna"
+  ],
+  [
+   "2027-01-17",
+   "Sun AM",
+   "Facilities",
+   "Door Unlock",
+   "Bharat"
+  ],
+  [
+   "2027-01-17",
+   "Sun PM",
+   "Song Service",
+   "Worship Lead",
+   "Bharat"
+  ],
+  [
+   "2027-01-17",
+   "Sun PM",
+   "Song Service",
+   "Singer",
+   "Paul"
+  ],
+  [
+   "2027-01-17",
+   "Sun PM",
+   "Song Service",
+   "Singer",
+   "Gracie"
+  ],
+  [
+   "2027-01-17",
+   "Sun PM",
+   "Song Service",
+   "Guitar",
+   "Suresh"
+  ],
+  [
+   "2027-01-17",
+   "Sun PM",
+   "Song Service",
+   "Keyboard",
+   "Hemanth"
+  ],
+  [
+   "2027-01-17",
+   "Sun PM",
+   "Song Service",
+   "Drums",
+   "Jabin"
+  ],
+  [
+   "2027-01-17",
+   "Sun PM",
+   "Media",
+   "ProPresenter",
+   "Nirupa"
+  ],
+  [
+   "2027-01-17",
+   "Sun PM",
+   "Media",
+   "Sound",
+   "Nirmal"
+  ],
+  [
+   "2027-01-17",
+   "Sun PM",
+   "Welcome",
+   "Greeter",
+   "Yamani"
+  ],
+  [
+   "2027-01-17",
+   "Sun PM",
+   "Ushers",
+   "Usher (Offering)",
+   "Vijay"
+  ],
+  [
+   "2027-01-17",
+   "Sun PM",
+   "Ushers",
+   "Usher (Offering)",
+   "Jayanth"
+  ],
+  [
+   "2027-01-17",
+   "Sun PM",
+   "Ushers",
+   "Usher (Door)",
+   "Deepak"
+  ],
+  [
+   "2027-01-17",
+   "Sun PM",
+   "Altar Workers",
+   "Altar Worker (Men)",
+   "Varun"
+  ],
+  [
+   "2027-01-17",
+   "Sun PM",
+   "Altar Workers",
+   "Altar Worker (Women)",
+   "Anjali"
+  ],
+  [
+   "2027-01-17",
+   "Sun PM",
+   "Facilities",
+   "Door Unlock",
+   "Bharat"
+  ],
+  [
+   "2027-01-20",
+   "Wed PM",
+   "Song Service",
+   "Worship Lead",
+   "Bharat"
+  ],
+  [
+   "2027-01-20",
+   "Wed PM",
+   "Song Service",
+   "Singer",
+   "Paul"
+  ],
+  [
+   "2027-01-20",
+   "Wed PM",
+   "Song Service",
+   "Singer",
+   "Gracie"
+  ],
+  [
+   "2027-01-20",
+   "Wed PM",
+   "Song Service",
+   "Guitar",
+   "Suresh"
+  ],
+  [
+   "2027-01-20",
+   "Wed PM",
+   "Song Service",
+   "Keyboard",
+   "Hemanth"
+  ],
+  [
+   "2027-01-20",
+   "Wed PM",
+   "Song Service",
+   "Drums",
+   "Jabin"
+  ],
+  [
+   "2027-01-20",
+   "Wed PM",
+   "Media",
+   "ProPresenter",
+   "Mona"
+  ],
+  [
+   "2027-01-20",
+   "Wed PM",
+   "Media",
+   "Sound",
+   "Nirmal"
+  ],
+  [
+   "2027-01-20",
+   "Wed PM",
+   "Welcome",
+   "Greeter",
+   "Yamani"
+  ],
+  [
+   "2027-01-20",
+   "Wed PM",
+   "Ushers",
+   "Usher (Offering)",
+   "Vijay"
+  ],
+  [
+   "2027-01-20",
+   "Wed PM",
+   "Ushers",
+   "Usher (Offering)",
+   "Jayanth"
+  ],
+  [
+   "2027-01-20",
+   "Wed PM",
+   "Ushers",
+   "Usher (Door)",
+   "Deepak"
+  ],
+  [
+   "2027-01-20",
+   "Wed PM",
+   "Altar Workers",
+   "Altar Worker (Men)",
+   "Varun"
+  ],
+  [
+   "2027-01-20",
+   "Wed PM",
+   "Altar Workers",
+   "Altar Worker (Women)",
+   "Anjali"
+  ],
+  [
+   "2027-01-20",
+   "Wed PM",
+   "Facilities",
+   "Door Unlock",
+   "Bharat"
+  ],
+  [
+   "2027-01-23",
+   "Sat Cleanup",
+   "Cleanup",
+   "Cleanup",
+   "Deepak"
+  ],
+  [
+   "2027-01-23",
+   "Sat Cleanup",
+   "Cleanup",
+   "Cleanup",
+   "Prasanna"
+  ],
+  [
+   "2027-01-24",
+   "Sun AM",
+   "Song Service",
+   "Worship Lead",
+   "Bharat"
+  ],
+  [
+   "2027-01-24",
+   "Sun AM",
+   "Song Service",
+   "Guitar 1",
+   "Suresh"
+  ],
+  [
+   "2027-01-24",
+   "Sun AM",
+   "Song Service",
+   "Guitar 2",
+   "Eisley"
+  ],
+  [
+   "2027-01-24",
+   "Sun AM",
+   "Song Service",
+   "Singer",
+   "Mona"
+  ],
+  [
+   "2027-01-24",
+   "Sun AM",
+   "Song Service",
+   "Singer",
+   "Gracie"
+  ],
+  [
+   "2027-01-24",
+   "Sun AM",
+   "Song Service",
+   "Keyboard",
+   "Hemanth"
+  ],
+  [
+   "2027-01-24",
+   "Sun AM",
+   "Song Service",
+   "Drums",
+   "Paul"
+  ],
+  [
+   "2027-01-24",
+   "Sun AM",
+   "Song Service",
+   "Bass",
+   ""
+  ],
+  [
+   "2027-01-24",
+   "Sun AM",
+   "Media",
+   "ProPresenter",
+   "Nirupa"
+  ],
+  [
+   "2027-01-24",
+   "Sun AM",
+   "Media",
+   "Lights",
+   "Nishal"
+  ],
+  [
+   "2027-01-24",
+   "Sun AM",
+   "Media",
+   "Sound",
+   "Nirmal"
+  ],
+  [
+   "2027-01-24",
+   "Sun AM",
+   "Media",
+   "Camera/Video",
+   "Jayanth"
+  ],
+  [
+   "2027-01-24",
+   "Sun AM",
+   "Media",
+   "Audio Recording",
+   "Joshua"
+  ],
+  [
+   "2027-01-24",
+   "Sun AM",
+   "Media",
+   "Reels",
+   "Minal"
+  ],
+  [
+   "2027-01-24",
+   "Sun AM",
+   "Welcome",
+   "Greeter",
+   "Yamani"
+  ],
+  [
+   "2027-01-24",
+   "Sun AM",
+   "Welcome",
+   "Greeter",
+   "Vijay"
+  ],
+  [
+   "2027-01-24",
+   "Sun AM",
+   "Welcome",
+   "Visitor Bags",
+   "Anjali"
+  ],
+  [
+   "2027-01-24",
+   "Sun AM",
+   "Ushers",
+   "Usher (Offering)",
+   "Deepak"
+  ],
+  [
+   "2027-01-24",
+   "Sun AM",
+   "Ushers",
+   "Usher (Offering)",
+   "Vijay"
+  ],
+  [
+   "2027-01-24",
+   "Sun AM",
+   "Ushers",
+   "Usher (Door)",
+   ""
+  ],
+  [
+   "2027-01-24",
+   "Sun AM",
+   "Altar Workers",
+   "Altar Worker (Men)",
+   "Varun"
+  ],
+  [
+   "2027-01-24",
+   "Sun AM",
+   "Altar Workers",
+   "Altar Worker (Men)",
+   ""
+  ],
+  [
+   "2027-01-24",
+   "Sun AM",
+   "Altar Workers",
+   "Altar Worker (Women)",
+   "Althea"
+  ],
+  [
+   "2027-01-24",
+   "Sun AM",
+   "Altar Workers",
+   "Altar Worker (Women)",
+   "Anjali"
+  ],
+  [
+   "2027-01-24",
+   "Sun AM",
+   "Kids",
+   "Nursery (0-3)",
+   "Zeena"
+  ],
+  [
+   "2027-01-24",
+   "Sun AM",
+   "Kids",
+   "Children's Church (3-11)",
+   "Angel"
+  ],
+  [
+   "2027-01-24",
+   "Sun AM",
+   "Kids",
+   "Children's Church (3-11)",
+   "Sudha"
+  ],
+  [
+   "2027-01-24",
+   "Sun AM",
+   "Facilities",
+   "Door Unlock",
+   "Bharat"
+  ],
+  [
+   "2027-01-24",
+   "Sun PM",
+   "Song Service",
+   "Worship Lead",
+   "Bharat"
+  ],
+  [
+   "2027-01-24",
+   "Sun PM",
+   "Song Service",
+   "Singer",
+   "Paul"
+  ],
+  [
+   "2027-01-24",
+   "Sun PM",
+   "Song Service",
+   "Singer",
+   "Gracie"
+  ],
+  [
+   "2027-01-24",
+   "Sun PM",
+   "Song Service",
+   "Guitar",
+   "Suresh"
+  ],
+  [
+   "2027-01-24",
+   "Sun PM",
+   "Song Service",
+   "Keyboard",
+   "Hemanth"
+  ],
+  [
+   "2027-01-24",
+   "Sun PM",
+   "Song Service",
+   "Drums",
+   "Jabin"
+  ],
+  [
+   "2027-01-24",
+   "Sun PM",
+   "Media",
+   "ProPresenter",
+   "Mona"
+  ],
+  [
+   "2027-01-24",
+   "Sun PM",
+   "Media",
+   "Sound",
+   "Nirmal"
+  ],
+  [
+   "2027-01-24",
+   "Sun PM",
+   "Welcome",
+   "Greeter",
+   "Vijay"
+  ],
+  [
+   "2027-01-24",
+   "Sun PM",
+   "Ushers",
+   "Usher (Offering)",
+   "Deepak"
+  ],
+  [
+   "2027-01-24",
+   "Sun PM",
+   "Ushers",
+   "Usher (Offering)",
+   "Jayanth"
+  ],
+  [
+   "2027-01-24",
+   "Sun PM",
+   "Ushers",
+   "Usher (Door)",
+   "Vijay"
+  ],
+  [
+   "2027-01-24",
+   "Sun PM",
+   "Altar Workers",
+   "Altar Worker (Men)",
+   "Varun"
+  ],
+  [
+   "2027-01-24",
+   "Sun PM",
+   "Altar Workers",
+   "Altar Worker (Women)",
+   "Althea"
+  ],
+  [
+   "2027-01-24",
+   "Sun PM",
+   "Facilities",
+   "Door Unlock",
+   "Bharat"
+  ],
+  [
+   "2027-01-27",
+   "Wed PM",
+   "Song Service",
+   "Worship Lead",
+   "Bharat"
+  ],
+  [
+   "2027-01-27",
+   "Wed PM",
+   "Song Service",
+   "Singer",
+   "Paul"
+  ],
+  [
+   "2027-01-27",
+   "Wed PM",
+   "Song Service",
+   "Singer",
+   "Gracie"
+  ],
+  [
+   "2027-01-27",
+   "Wed PM",
+   "Song Service",
+   "Guitar",
+   "Suresh"
+  ],
+  [
+   "2027-01-27",
+   "Wed PM",
+   "Song Service",
+   "Keyboard",
+   "Hemanth"
+  ],
+  [
+   "2027-01-27",
+   "Wed PM",
+   "Song Service",
+   "Drums",
+   "Jabin"
+  ],
+  [
+   "2027-01-27",
+   "Wed PM",
+   "Media",
+   "ProPresenter",
+   "Nirupa"
+  ],
+  [
+   "2027-01-27",
+   "Wed PM",
+   "Media",
+   "Sound",
+   "Nirmal"
+  ],
+  [
+   "2027-01-27",
+   "Wed PM",
+   "Welcome",
+   "Greeter",
+   "Vijay"
+  ],
+  [
+   "2027-01-27",
+   "Wed PM",
+   "Ushers",
+   "Usher (Offering)",
+   "Deepak"
+  ],
+  [
+   "2027-01-27",
+   "Wed PM",
+   "Ushers",
+   "Usher (Offering)",
+   "Jayanth"
+  ],
+  [
+   "2027-01-27",
+   "Wed PM",
+   "Ushers",
+   "Usher (Door)",
+   "Vijay"
+  ],
+  [
+   "2027-01-27",
+   "Wed PM",
+   "Altar Workers",
+   "Altar Worker (Men)",
+   "Varun"
+  ],
+  [
+   "2027-01-27",
+   "Wed PM",
+   "Altar Workers",
+   "Altar Worker (Women)",
+   "Althea"
+  ],
+  [
+   "2027-01-27",
+   "Wed PM",
+   "Facilities",
+   "Door Unlock",
+   "Bharat"
+  ],
+  [
+   "2027-01-30",
+   "Sat Cleanup",
+   "Cleanup",
+   "Cleanup",
+   "Mona"
+  ],
+  [
+   "2027-01-30",
+   "Sat Cleanup",
+   "Cleanup",
+   "Cleanup",
+   "Anjali"
+  ],
+  [
+   "2027-01-31",
+   "Sun AM",
+   "Song Service",
+   "Worship Lead",
+   "Bharat"
+  ],
+  [
+   "2027-01-31",
+   "Sun AM",
+   "Song Service",
+   "Guitar 1",
+   "Suresh"
+  ],
+  [
+   "2027-01-31",
+   "Sun AM",
+   "Song Service",
+   "Guitar 2",
+   "Eisley"
+  ],
+  [
+   "2027-01-31",
+   "Sun AM",
+   "Song Service",
+   "Singer",
+   "Mona"
+  ],
+  [
+   "2027-01-31",
+   "Sun AM",
+   "Song Service",
+   "Singer",
+   "Gracie"
+  ],
+  [
+   "2027-01-31",
+   "Sun AM",
+   "Song Service",
+   "Keyboard",
+   "Hemanth"
+  ],
+  [
+   "2027-01-31",
+   "Sun AM",
+   "Song Service",
+   "Drums",
+   "Jabin"
+  ],
+  [
+   "2027-01-31",
+   "Sun AM",
+   "Song Service",
+   "Bass",
+   ""
+  ],
+  [
+   "2027-01-31",
+   "Sun AM",
+   "Media",
+   "ProPresenter",
+   "Nirupa"
+  ],
+  [
+   "2027-01-31",
+   "Sun AM",
+   "Media",
+   "Lights",
+   "Nishal"
+  ],
+  [
+   "2027-01-31",
+   "Sun AM",
+   "Media",
+   "Sound",
+   "Nirmal"
+  ],
+  [
+   "2027-01-31",
+   "Sun AM",
+   "Media",
+   "Camera/Video",
+   "Varun"
+  ],
+  [
+   "2027-01-31",
+   "Sun AM",
+   "Media",
+   "Audio Recording",
+   "Joshua"
+  ],
+  [
+   "2027-01-31",
+   "Sun AM",
+   "Media",
+   "Reels",
+   "Minal"
+  ],
+  [
+   "2027-01-31",
+   "Sun AM",
+   "Welcome",
+   "Greeter",
+   "Yamani"
+  ],
+  [
+   "2027-01-31",
+   "Sun AM",
+   "Welcome",
+   "Greeter",
+   "Vijay"
+  ],
+  [
+   "2027-01-31",
+   "Sun AM",
+   "Welcome",
+   "Visitor Bags",
+   "Anjali"
+  ],
+  [
+   "2027-01-31",
+   "Sun AM",
+   "Ushers",
+   "Usher (Offering)",
+   "Jayanth"
+  ],
+  [
+   "2027-01-31",
+   "Sun AM",
+   "Ushers",
+   "Usher (Offering)",
+   "Deepak"
+  ],
+  [
+   "2027-01-31",
+   "Sun AM",
+   "Ushers",
+   "Usher (Door)",
+   "Vijay"
+  ],
+  [
+   "2027-01-31",
+   "Sun AM",
+   "Altar Workers",
+   "Altar Worker (Men)",
+   "Paul"
+  ],
+  [
+   "2027-01-31",
+   "Sun AM",
+   "Altar Workers",
+   "Altar Worker (Men)",
+   ""
+  ],
+  [
+   "2027-01-31",
+   "Sun AM",
+   "Altar Workers",
+   "Altar Worker (Women)",
+   "Althea"
+  ],
+  [
+   "2027-01-31",
+   "Sun AM",
+   "Altar Workers",
+   "Altar Worker (Women)",
+   "Anjali"
+  ],
+  [
+   "2027-01-31",
+   "Sun AM",
+   "Kids",
+   "Nursery (0-3)",
+   "Angel"
+  ],
+  [
+   "2027-01-31",
+   "Sun AM",
+   "Kids",
+   "Children's Church (3-11)",
+   "Prasanna"
+  ],
+  [
+   "2027-01-31",
+   "Sun AM",
+   "Kids",
+   "Children's Church (3-11)",
+   "Sudha"
+  ],
+  [
+   "2027-01-31",
+   "Sun AM",
+   "Facilities",
+   "Door Unlock",
+   "Bharat"
+  ],
+  [
+   "2027-01-31",
+   "Sun PM",
+   "Song Service",
+   "Worship Lead",
+   "Bharat"
+  ],
+  [
+   "2027-01-31",
+   "Sun PM",
+   "Song Service",
+   "Singer",
+   "Paul"
+  ],
+  [
+   "2027-01-31",
+   "Sun PM",
+   "Song Service",
+   "Singer",
+   "Gracie"
+  ],
+  [
+   "2027-01-31",
+   "Sun PM",
+   "Song Service",
+   "Guitar",
+   "Suresh"
+  ],
+  [
+   "2027-01-31",
+   "Sun PM",
+   "Song Service",
+   "Keyboard",
+   "Hemanth"
+  ],
+  [
+   "2027-01-31",
+   "Sun PM",
+   "Song Service",
+   "Drums",
+   "Jabin"
+  ],
+  [
+   "2027-01-31",
+   "Sun PM",
+   "Media",
+   "ProPresenter",
+   "Nirupa"
+  ],
+  [
+   "2027-01-31",
+   "Sun PM",
+   "Media",
+   "Sound",
+   "Nirmal"
+  ],
+  [
+   "2027-01-31",
+   "Sun PM",
+   "Welcome",
+   "Greeter",
+   "Althea"
+  ],
+  [
+   "2027-01-31",
+   "Sun PM",
+   "Ushers",
+   "Usher (Offering)",
+   "Vijay"
+  ],
+  [
+   "2027-01-31",
+   "Sun PM",
+   "Ushers",
+   "Usher (Offering)",
+   "Deepak"
+  ],
+  [
+   "2027-01-31",
+   "Sun PM",
+   "Ushers",
+   "Usher (Door)",
+   "Jayanth"
+  ],
+  [
+   "2027-01-31",
+   "Sun PM",
+   "Altar Workers",
+   "Altar Worker (Men)",
+   "Varun"
+  ],
+  [
+   "2027-01-31",
+   "Sun PM",
+   "Altar Workers",
+   "Altar Worker (Women)",
+   "Anjali"
+  ],
+  [
+   "2027-01-31",
+   "Sun PM",
+   "Facilities",
+   "Door Unlock",
+   "Bharat"
+  ]
+ ]
+}
