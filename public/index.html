@@ -151,6 +151,14 @@ textarea.field{min-height:96px;resize:none}
 .week b{font:700 16px/20px var(--font)}
 .week i{width:6px;height:6px;border-radius:50%;background:var(--accent)}.week i.none{background:transparent}
 .att{margin-top:8px}.att button{padding:5px 10px;font-size:13px}
+/* The real app: the phone screen is the whole window */
+body{background:var(--ground);padding:0}
+.page{display:block;max-width:none}
+.top,.switch,.side,.sb{display:none}
+.stage{display:block}
+.phone{width:auto;max-width:none;height:auto;padding:0;border-radius:0;background:none;box-shadow:none}
+.screen{position:fixed;inset:0;height:auto;border-radius:0;padding:env(safe-area-inset-top,0px) env(safe-area-inset-right,0px) env(safe-area-inset-bottom,0px) env(safe-area-inset-left,0px)}
+@media (min-width:640px){body{background:var(--page)}.screen{left:50%;right:auto;width:480px;transform:translateX(-50%);box-shadow:0 0 0 1px color-mix(in srgb,var(--ink) 10%,transparent)}}
 </style>
 
 <div class="page">
@@ -895,7 +903,7 @@ SCREENS["vol:more"] = function(){
     + '<div class="lbl">Settings</div><div class="grp">'
     + (on("notify") ? row("Notifications", "What we tell you about", "push", "notifSettings") : '')
     + row("Calendar sync", S.settings.cal ? "On, your phone calendar" : "Off", "push", "notifSettings") + '</div>'
-    + '<div class="lbl">HCC</div><div class="grp">' + row("HCC Hub home", "", "hub", "") + row("Not " + ME + "?", "Pick your name", "whoami", "") + '</div>';
+    + '<div class="lbl">HCC</div><div class="grp">' + row("HCC Hub home", "", "hub", "") + row("Not " + ME + "?", "Pick your name", "whoami", "") + row("Leader view", "For team leaders, needs the leader PIN", "toAdmin", "") + '</div>';
   return { head: header("More"), body: body };
 };
 SCREENS.myReqs = function(){
@@ -1005,7 +1013,8 @@ SCREENS["admin:more"] = function(){
     + (on("checklists") ? row("Checklists", "Setup lists per team and service", "push", "checklistsAdmin") : '')
     + (on("events") ? row("Events", S.events.length + " coming up", "push", "eventsAdmin") : '')
     + row("Services and roles", Object.keys(SVC).join(", "), "toast", "Services and roles come from the Google Sheet.") + '</div>'
-    + '<div class="lbl">Settings</div><div class="grp">' + row("Features", nOn + " of " + FEATS.length + " on", "push", "features") + (on("notify") ? row("Notifications", "", "push", "notifSettings") : '') + row("HCC Hub home", "", "hub", "") + '</div>';
+    + '<div class="lbl">Settings</div><div class="grp">' + row("Features", nOn + " of " + FEATS.length + " on", "push", "features") + (on("notify") ? row("Notifications", "", "push", "notifSettings") : '') + row("HCC Hub home", "", "hub", "") + '</div>'
+    + '<div class="lbl">This phone</div><div class="grp">' + row("Volunteer view", "See the roster as a volunteer", "toVol", "") + row("Lock Admin", "Asks for the leader PIN next time", "lockAdmin", "") + '</div>';
   return { head: header("More"), body: body };
 };
 SCREENS.features = function(){
@@ -1275,7 +1284,7 @@ SCREENS.who = function(){
   var ps = everyone();
   return { head: plainHead("Who are you?"), noTabs: true, body: '<p class="small" style="margin:0 4px 12px">Pick your name to see your serves. This phone remembers you.</p><div class="grp">'
     + ps.map(function(p){ return '<div class="row tap" data-a="setMe" data-id="' + esc(p) + '"><span class="av">' + initials(p) + '</span><div class="m"><div class="t">' + esc(p) + '</div><div class="s">' + esc(teamsOf(p).join(" · ") || "Volunteer") + '</div></div><span class="chev">›</span></div>'; }).join("")
-    + '</div><p class="small mt" style="margin-left:4px">Not on the list? Ask your team leader to add you to the roster.</p>' };
+    + '</div><p class="small mt" style="margin-left:4px">Not on the list? Ask your team leader to add you to the roster.</p><div class="grp mt">' + row("Leader view", "For team leaders, needs the leader PIN", "toAdmin", "") + '</div>' };
 };
 function adminOk(){ return !!S.pinHash && LS.get("roster.admin") === S.pinHash; }
 SCREENS.pin = function(){
@@ -1301,6 +1310,7 @@ A.pinGo = function(){
     S.stack = []; render();
   });
 };
+A.toAdmin = function(){ S.view = "admin"; S.stack = []; S.sheet = null; render(); };
 A.toVol = function(){ S.view = "vol"; S.stack = []; S.sheet = null; render(); };
 A.lockAdmin = function(){ LS.set("roster.admin", null); S.stack = []; render(); };
 A.setMe = function(d){ ME = d.id; LS.set("roster.me", ME); bindMe(); S.stack = []; S.tab.vol = "home"; render(); };
