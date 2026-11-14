@@ -2,6 +2,7 @@
   "name": "hcc-roster",
   "main": "src/worker.js",
   "compatibility_date": "2025-09-01",
+  "vars": { "SEVENSHIFTS_COMPANY_ID": "444506", "SEVENSHIFTS_LOCATION_ID": "538073" },
   "assets": { "directory": "./public", "binding": "ASSETS" },
   "durable_objects": { "bindings": [{ "name": "ROSTER", "class_name": "RosterStore" }] },
   "migrations": [{ "tag": "v1", "new_sqlite_classes": ["RosterStore"] }]

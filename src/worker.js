@@ -1,6 +1,7 @@
 // HCC Roster: serves the app page and keeps one shared copy of the roster
 // in a Durable Object (SQLite storage, no setup needed on Cloudflare).
 import { DurableObject } from "cloudflare:workers";
+import { rowsForWeek, syncRows, TEST_ROWS } from "./sevenshifts.js";
 
 const MAX = 1_000_000;
 
@@ -43,9 +44,38 @@ export async function handleState(request, store) {
   return new Response("Method not allowed", { status: 405 });
 }
 
+/**
+ * /api/7shifts/preview?week=SUNDAY   GET: what a sync would create (reads 7shifts only)
+ * /api/7shifts/sync?week=SUNDAY      POST: creates missing draft shifts, up to 40 a call
+ * /api/7shifts/test                  POST: creates the one approved test shift as a draft
+ * Nothing here publishes or notifies; the week is published in 7shifts.
+ */
+export async function handleSevenShifts(request, env, loadRoster, fetchFn) {
+  const url = new URL(request.url);
+  const action = url.pathname.split("/")[3];
+  if (!env.SEVENSHIFTS_TOKEN) return json({ error: "The 7shifts token isn't set up yet." }, 503);
+  const isTest = action === "test";
+  if (!["preview", "sync", "test"].includes(action)) return new Response("Not found", { status: 404 });
+  if (action === "preview" ? request.method !== "GET" : request.method !== "POST") return new Response("Method not allowed", { status: 405 });
+  const roster = await loadRoster();
+  const week = isTest ? TEST_ROWS[0][0] : url.searchParams.get("week");
+  const rows = isTest ? TEST_ROWS : rowsForWeek(roster, week);
+  if (!rows) return json({ error: "week must be a Sunday, like 2026-11-15" }, 400);
+  if (week < new Date(Date.now() - 7 * 86400e3).toISOString().slice(0, 10)) return json({ error: "That week is in the past." }, 400);
+  try {
+    return json(await syncRows(env, roster, rows, week, { create: action !== "preview", fetchFn }));
+  } catch (e) {
+    return json({ error: String(e.message || e) }, 502);
+  }
+}
+
 export default {
   async fetch(request, env) {
     const url = new URL(request.url);
+    if (url.pathname.startsWith("/api/7shifts/")) {
+      const loadRoster = async () => (await env.ASSETS.fetch(new URL("/roster-data.json", url))).json();
+      return handleSevenShifts(request, env, loadRoster);
+    }
     if (url.pathname === "/api/state") {
       const store = env.ROSTER.get(env.ROSTER.idFromName("hcc"));
       return handleState(request, store);
