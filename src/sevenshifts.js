@@ -150,3 +150,20 @@ export async function syncRows(env, roster, rows, sunday, { create, fetchFn } = 
     unmatched,
   };
 }
+
+/** Publishes only the test shift (sets draft false on it). Returns what 7shifts reports. */
+export async function publishTest(env, roster, { fetchFn } = {}) {
+  const api = client(env, fetchFn);
+  const loc = env.SEVENSHIFTS_LOCATION_ID;
+  const look = await lookups(api, loc);
+  const { ready, unmatched } = plan(TEST_ROWS, roster.services, look);
+  if (!ready.length) return { error: "Test shift not matched: " + unmatched.map((u) => u.why).join("; ") };
+  const want = shiftKey(ready[0].body);
+  const days = weekDates(TEST_ROWS[0][0]);
+  const shifts = await api.all(`/shifts?location_id=${loc}&start[gte]=${utc(days[0], 0, 0)}&start[lte]=${utc(days[6], 23, 59)}&include_draft=true`);
+  const s = shifts.find((x) => !x.deleted && shiftKey(x) === want);
+  if (!s) return { error: "Test shift isn't in 7shifts yet. Add it first." };
+  const r = await api.call("PUT", `/shifts/${s.id}`, { draft: false });
+  const d = r.data || {};
+  return { published: ready[0].label, publish_status: d.publish_status ?? null, notified: d.notified ?? null, draft: d.draft ?? null };
+}

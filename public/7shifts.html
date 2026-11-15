@@ -32,6 +32,7 @@
     <button id="preview">Preview</button>
     <button id="sync" class="primary">Add to 7shifts</button>
     <button id="test">Add test shift</button>
+    <button id="pubtest">Publish test shift</button>
   </div>
   <div id="out" class="muted">Pick a week, then Preview.</div>
 </main>
@@ -40,7 +41,7 @@
   var esc = function (s) { return String(s).replace(/[&<>"]/g, function (c) { return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]; }); };
   var list = function (items) { return "<ul>" + items.map(function (x) { return "<li>" + esc(x) + "</li>"; }).join("") + "</ul>"; };
   (function () { var d = new Date(); d.setDate(d.getDate() + ((7 - d.getDay()) % 7)); $("week").value = d.toISOString().slice(0, 10); })();
-  function busy(on) { ["preview", "sync", "test"].forEach(function (id) { $(id).disabled = on; }); }
+  function busy(on) { ["preview", "sync", "test", "pubtest"].forEach(function (id) { $(id).disabled = on; }); }
   function show(r, totals) {
     if (r.error) { $("out").innerHTML = '<p class="bad">' + esc(r.error) + "</p>"; return; }
     var h = "";
@@ -75,6 +76,14 @@
   }
   $("sync").onclick = function () { create("/api/7shifts/sync?week=" + $("week").value); };
   $("test").onclick = function () { create("/api/7shifts/test"); };
+  $("pubtest").onclick = async function () {
+    busy(true); $("out").textContent = "Publishing the test shift...";
+    try {
+      var r = await go("POST", "/api/7shifts/publish-test");
+      $("out").innerHTML = r.error ? '<p class="bad">' + esc(r.error) + "</p>" : '<p class="ok">Published: ' + esc(r.published) + "</p><p class=\"muted\">7shifts says: " + esc(r.publish_status) + ", notified " + esc(r.notified) + ".</p>";
+    } catch (e) { show({ error: "Couldn't reach 7shifts." }); }
+    busy(false);
+  };
 </script>
 </body>
 </html>

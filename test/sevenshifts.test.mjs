@@ -1,7 +1,7 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
-import { parseTime, shiftTimes, weekDates, rowsForWeek, syncRows, TEST_ROWS } from "../src/sevenshifts.js";
+import { parseTime, shiftTimes, weekDates, rowsForWeek, syncRows, publishTest, TEST_ROWS } from "../src/sevenshifts.js";
 
 const roster = JSON.parse(readFileSync(new URL("../public/roster-data.json", import.meta.url), "utf8"));
 const env = { SEVENSHIFTS_TOKEN: "t", SEVENSHIFTS_COMPANY_ID: "444506", SEVENSHIFTS_LOCATION_ID: "538073" };
@@ -15,6 +15,7 @@ function fake({ shifts = [], extraUsers = [] } = {}) {
     calls.push({ method: init.method, path, query: u.search, body: init.body ? JSON.parse(init.body) : null, auth: init.headers.authorization });
     let body;
     if (init.method === "POST") body = { object: "shift", data: { id: calls.length } };
+    else if (init.method === "PUT") body = { object: "shift", data: { id: 9, draft: false, publish_status: "published", notified: true } };
     else if (path === "/departments") body = page([{ id: 1, name: "Song Service" }, { id: 2, name: "Media" }]);
     else if (path === "/roles") body = page([{ id: 10, name: "Song Leader", department_id: 1 }, { id: 11, name: "Singer", department_id: 1 }, { id: 20, name: "Sound", department_id: 2 }]);
     else if (path === "/users") body = page([
@@ -93,4 +94,21 @@ test("creates at most 40 a call and says how many are left", async () => {
   const r = await syncRows(env, roster, rows, "2026-11-15", { create: true, fetchFn: f.fn });
   assert.equal(r.created.length, 40);
   assert.equal(r.remaining, 5);
+});
+
+test("publish-test publishes only the matching test shift", async () => {
+  const f = fake({ shifts: [{ id: 8, user_id: 101, role_id: 10, start: "2026-11-22T04:30:00Z" }, { id: 9, user_id: 100, role_id: 10, start: "2026-11-22T04:30:00+00:00" }] });
+  const r = await publishTest(env, roster, { fetchFn: f.fn });
+  const puts = f.calls.filter((c) => c.method === "PUT");
+  assert.equal(puts.length, 1);
+  assert.equal(puts[0].path, "/shifts/9");
+  assert.deepEqual(puts[0].body, { draft: false });
+  assert.equal(r.publish_status, "published");
+});
+
+test("publish-test does nothing when the test shift isn't there", async () => {
+  const f = fake();
+  const r = await publishTest(env, roster, { fetchFn: f.fn });
+  assert.match(r.error, /isn't in 7shifts yet/);
+  assert.equal(f.calls.filter((c) => c.method === "PUT").length, 0);
 });

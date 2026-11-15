@@ -1,7 +1,7 @@
 // HCC Roster: serves the app page and keeps one shared copy of the roster
 // in a Durable Object (SQLite storage, no setup needed on Cloudflare).
 import { DurableObject } from "cloudflare:workers";
-import { rowsForWeek, syncRows, TEST_ROWS } from "./sevenshifts.js";
+import { rowsForWeek, syncRows, publishTest, TEST_ROWS } from "./sevenshifts.js";
 
 const MAX = 1_000_000;
 
@@ -48,14 +48,24 @@ export async function handleState(request, store) {
  * /api/7shifts/preview?week=SUNDAY   GET: what a sync would create (reads 7shifts only)
  * /api/7shifts/sync?week=SUNDAY      POST: creates missing draft shifts, up to 40 a call
  * /api/7shifts/test                  POST: creates the one approved test shift as a draft
- * Nothing here publishes or notifies; the week is published in 7shifts.
+ * /api/7shifts/publish-test          POST: publishes that one test shift, nothing else
+ * Roster weeks are only ever added as drafts; a leader publishes them in 7shifts.
  */
 export async function handleSevenShifts(request, env, loadRoster, fetchFn) {
   const url = new URL(request.url);
   const action = url.pathname.split("/")[3];
   if (!env.SEVENSHIFTS_TOKEN) return json({ error: "The 7shifts token isn't set up yet." }, 503);
   const isTest = action === "test";
-  if (!["preview", "sync", "test"].includes(action)) return new Response("Not found", { status: 404 });
+  if (!["preview", "sync", "test", "publish-test"].includes(action)) return new Response("Not found", { status: 404 });
+  if (action === "publish-test") {
+    if (request.method !== "POST") return new Response("Method not allowed", { status: 405 });
+    try {
+      const r = await publishTest(env, await loadRoster(), { fetchFn });
+      return json(r, r.error ? 409 : 200);
+    } catch (e) {
+      return json({ error: String(e.message || e) }, 502);
+    }
+  }
   if (action === "preview" ? request.method !== "GET" : request.method !== "POST") return new Response("Method not allowed", { status: 405 });
   const roster = await loadRoster();
   const week = isTest ? TEST_ROWS[0][0] : url.searchParams.get("week");
