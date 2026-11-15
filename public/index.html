@@ -1758,6 +1758,14 @@ SHEETS.cover = function(o){ var x = slot(o.id), sv = svc(x.sid);
     + (on("openspots") ? '<div class="row tap" data-a="giveaway" data-id="' + x.id + '"><div class="m"><div class="t">Give it away</div><div class="s">Post it to Open spots for ' + esc(x.team) + '</div></div><span class="chev">›</span></div>' : '')
     + '<div class="row tap" data-a="sheet" data-s="cant" data-id="' + x.id + '"><div class="m"><div class="t">Ask my leader to find someone</div><div class="s">Your leader is told right away</div></div><span class="chev">›</span></div></div>'
     + '<p class="small mt">Your leader approves before anything changes.</p>'; };
+
+/* switch: "Services I usually serve" on Availability (Nov 15) */
+FEATS.push(["usual","Usual services","On Availability, volunteers pick which services they usually serve. Off hides it, and leaders see everyone as available."]);
+var baseAvail7 = SCREENS.avail;
+SCREENS.avail = function(o){ var r = baseAvail7(o); if (on("usual")) return r;
+  var i = r.body.indexOf('<div class="lbl">Blockout dates'); if (i > 0) r.body = r.body.slice(i); return r; };
+var baseFill7 = SHEETS.fill;
+SHEETS.fill = function(o){ if (on("usual")) return baseFill7(o); var keep = S.regularBy; S.regularBy = {}; try { return baseFill7(o); } finally { S.regularBy = keep; } };
 var baseLocal7 = localDefaults;
 localDefaults = function(){ var o = baseLocal7(); o.msgTab = "chats"; return o; };
 var baseRender7 = render;
