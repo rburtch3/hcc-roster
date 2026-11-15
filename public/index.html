@@ -251,6 +251,8 @@ body{background:#fff}
 .ascancel{display:block;width:100%;margin-top:10px;border:0;border-radius:14px;background:#fff;box-shadow:inset 0 0 0 1px var(--line);padding:16px;font:600 20px/24px var(--font);color:#2F6BF0;cursor:pointer}
 .mb{margin-bottom:12px}
 .stats{grid-template-columns:repeat(3,1fr)}
+button.stat{border:1px solid var(--line);font:inherit;color:inherit;cursor:pointer;width:100%}
+button.stat:active{background:var(--track)}
 .three{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}
 </style>
 
@@ -651,12 +653,11 @@ SCREENS["admin:dash"] = function(){
   var body = '<p class="small" style="margin:0 4px">' + todayLong() + '</p><h2 class="big">' + dashTitle(sv) + '</h2>'
     + '<div class="card"><div style="display:flex;justify-content:space-between;align-items:baseline"><div class="t" style="font:600 16px/21px var(--font)">' + esc(SVC[sv.svc].name) + ' · ' + dm(sv.date) + '</div><span class="small">' + sl.length + ' spots</span></div>'
     + '<div class="bar" style="margin:10px 0 12px"><i style="width:' + (c.confirmed/tot*100) + '%;background:var(--ok)"></i><i style="width:' + (c.pending/tot*100) + '%;background:var(--chevron)"></i><i style="width:' + (c.open/tot*100) + '%;background:var(--warn)"></i><i style="width:' + (c.declined/tot*100) + '%;background:var(--late)"></i></div>'
-    + '<div class="stats"><div class="stat ok"><b>' + c.confirmed + '</b><span>Confirmed</span></div><div class="stat warn"><b>' + c.open + '</b><span>Open</span></div><div class="stat late"><b>' + c.declined + '</b><span>Can\'t</span></div></div>'
+    + '<div class="stats"><button class="stat ok" data-a="sheet" data-s="statList" data-id="confirmed"><b>' + c.confirmed + '</b><span>Confirmed</span></button><button class="stat warn" data-a="sheet" data-s="statList" data-id="open"><b>' + c.open + '</b><span>Open</span></button><button class="stat late" data-a="sheet" data-s="statList" data-id="declined"><b>' + c.declined + '</b><span>Can\'t</span></button></div>'
     + '<div class="btns"><button class="btn sm soft" style="width:100%" data-a="openSvc" data-id="' + sv.id + '">Open schedule</button></div></div>';
   var pr = pendingReqs();
   body += '<div class="lbl">Needs you<a data-a="tab" data-v="reqs">' + pr.length + ' requests</a></div><div class="grp">' + pr.slice(0,3).map(reqRowShort).join("") + (pr.length ? '' : '<div class="empty">All caught up.</div>') + '</div>';
   var lots = PEOPLE.concat(Object.keys(POOL).reduce(function(a, t){ return a.concat(POOL[t]); }, [])).filter(function(p, i, a){ return a.indexOf(p) === i && wk(p) >= 3; });
-  if (lots.length) body += '<div class="lbl">Heads up</div>' + lots.slice(0,3).map(function(p){ return '<div class="warnbox" style="margin-bottom:8px"><span>⚠︎</span><span><b>' + esc(p) + ' serves ' + wk(p) + ' times this week.</b> Give them a break?</span></div>'; }).join("");
   body += '<div class="lbl">Who\'s serving</div><div class="grp">' + upc().slice(0,3).map(function(s){ var sl = S.slots.filter(function(x){ return x.sid === s.id; }), f = sl.filter(function(x){ return x.person && x.status !== "declined"; }).length; return '<div class="row tap" data-a="openSvc" data-id="' + s.id + '"><div class="m"><div class="t">' + dShort(s.date) + ' · ' + s.svc + '</div><div class="s">' + f + ' of ' + sl.length + ' spots filled</div></div>' + (f === sl.length ? '<span class="chip c-ok">Full</span>' : '<span class="chip c-warn">' + (sl.length - f) + ' open</span>') + '<span class="chev">›</span></div>'; }).join("") + '</div>';
   return { head: header("", { left: '<span class="small" style="padding-left:6px">HCC · All ministries ▾</span>', right: '<span class="av" style="width:34px;height:34px;font-size:12px">PR</span>' }), body: body };
 };
@@ -1765,6 +1766,18 @@ SCREENS.avail = function(o){ var r = baseAvail7(o); if (on("usual")) return r;
   var i = r.body.indexOf('<div class="lbl">Blockout dates'); if (i > 0) r.body = r.body.slice(i); return r; };
 var baseFill7 = SHEETS.fill;
 SHEETS.fill = function(o){ if (on("usual")) return baseFill7(o); var keep = S.regularBy; S.regularBy = {}; try { return baseFill7(o); } finally { S.regularBy = keep; } };
+
+/* dashboard counts open their list (Nov 15) */
+SHEETS.statList = function(o){
+  var sv = dashSvc(), st = o.id, T = { confirmed: "Confirmed", open: "Open spots", declined: "Can't make it" };
+  var list = S.slots.filter(function(x){ return x.sid === sv.id && (st === "open" ? !x.person || x.status === "open" : x.person && x.status === st); })
+    .sort(function(a, b){ return (a.team + a.role).localeCompare(b.team + b.role); });
+  return '<h4>' + T[st] + '</h4><p class="s">' + esc(SVC[sv.svc].name) + ' · ' + dShort(sv.date) + '</p>'
+    + (list.length ? '<div class="grp">' + list.map(function(x){
+        var act = st === "confirmed" ? 'data-a="push" data-s="person" data-id="' + esc(x.person) + '"' : 'data-a="sheet" data-s="fill" data-id="' + x.id + '"';
+        return '<div class="row tap" ' + act + '>' + (x.person ? ava(x.person, 36) : '<span class="ava open" style="width:36px;height:36px">?</span>') + '<div class="m"><div class="t">' + esc(st === "open" ? x.role : x.person) + '</div><div class="s">' + (st === "open" ? '' : esc(x.role) + ' | ') + esc(x.team) + '</div></div>' + (st === "confirmed" ? '' : '<span class="chip c-acc">Fill</span>') + '<span class="chev">›</span></div>'; }).join("") + '</div>'
+      : '<div class="empty">' + (st === "open" ? "Every spot is filled." : st === "declined" ? "No one has said they can't make it." : "No one yet.") + '</div>');
+};
 var baseLocal7 = localDefaults;
 localDefaults = function(){ var o = baseLocal7(); o.msgTab = "chats"; return o; };
 var baseRender7 = render;
