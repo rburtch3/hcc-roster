@@ -250,7 +250,19 @@ body{background:#fff}
 .pform .two{display:grid;grid-template-columns:1fr 1fr;gap:12px}
 .tlist .lbl.sm{margin-top:18px}
 .tpick{display:flex;align-items:center;gap:14px;padding:10px 0;cursor:pointer}
-.tpick .tic{flex:none;width:40px;height:40px;border-radius:50%;display:grid;place-items:center;color:#fff;font:500 17px/1 var(--font)}
+.tpick .tic{flex:none;width:40px;height:40px;border-radius:50%;display:grid;place-items:center;color:rgba(30,30,40,.72);font:600 17px/1 var(--font)}
+a.btn{text-decoration:none;color:#fff}
+a.btn.sec{color:var(--ink)}
+.invite{display:grid;gap:10px;margin-top:6px}
+.invite a{display:flex;align-items:center;justify-content:center;min-height:50px;border-radius:10px;text-decoration:none;font:500 17px/22px var(--font)}
+.invite a.p{background:var(--accent);color:#fff}
+.invite a.s{background:#fff;color:var(--ink);box-shadow:inset 0 0 0 1px #CFCFD6}
+.cline{display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid var(--line);font:400 16px/21px var(--font);color:#2B2B2F;overflow-wrap:anywhere}
+.cline span{color:#6E6E76;min-width:52px}
+.chk{display:flex;gap:12px;align-items:flex-start;margin-top:18px;cursor:pointer}
+.chk input{flex:none;width:22px;height:22px;margin:1px 0 0;accent-color:var(--accent)}
+.chk b{display:block;font:500 17px/22px var(--font);color:#2B2B2F}
+.chk small{display:block;font:400 14px/19px var(--font);color:#6E6E76;margin-top:2px}
 .tpick .m{flex:1;min-width:0}
 .tpick .t{font:400 17px/22px var(--font);color:#2B2B2F}
 .tpick .s{font:400 13px/17px var(--font);color:#6E6E76}
@@ -1850,7 +1862,7 @@ dashSvc = function(){
 };
 
 /* Team page: search and add people (Nov 16) */
-var TCOL = ["#F28C28","#22C55E","#D63384","#3B5BDB","#2DD4BF","#FF6B5E","#7C4DFF","#0EA5E9","#A16207"];
+var TCOL = PAL;
 var SRCH = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><circle cx="10.5" cy="10.5" r="6.5"/><path d="M15.5 15.5 21 21"/></svg>';
 function teamPositions(t){ var a = []; Object.keys(ROLES[t] || {}).forEach(function(k){ (ROLES[t][k] || []).forEach(function(r){ if (a.indexOf(r) < 0) a.push(r); }); }); return a; }
 function leadsOf(p){ return Object.keys(LEADERS).filter(function(t){ return LEADERS[t] === p; }); }
@@ -1959,6 +1971,112 @@ A.rmRole = function(d){
     if (open) { S.slots.splice(S.slots.indexOf(open), 1); gone++; } else if (mine.length) kept++; });
   toast(r + " removed" + (gone ? ", " + gone + " open spot" + (gone > 1 ? "s" : "") + " taken off" : "") + (kept ? ". " + kept + " filled spot" + (kept > 1 ? "s" : "") + " stay until you change them on Schedule." : "."));
   render.same = true; render();
+};
+
+/* Leader PIN checked by the server; phone, email and invites for leaders (Nov 16) */
+var APP_URL = "https://hcc-roster.flat-glade-359b.workers.dev/";
+adminOk = function(){ var k = LS.get("roster.admin"); return !!S.pinHash && !!k && (S.pinHash === "set" || k === S.pinHash); };
+A.pinGo = function(){
+  var p1 = (document.getElementById("pin1").value || "").trim(), e2 = document.getElementById("pin2"), first = !S.pinHash;
+  if (!/^\d{4,8}$/.test(p1)) { toast("Use 4 to 8 digits."); render(); return; }
+  if (first && e2.value.trim() !== p1) { toast("The two PINs don't match."); render(); return; }
+  function open(k, msg){ LS.set("roster.admin", k); CONTACTS = null; toast(msg); S.stack = []; render(); }
+  if (first) { hashPin(p1).then(function(h){ S.pinHash = h; open(h, "PIN saved. Admin is open on this phone."); clearTimeout(saveTimer); saveNow(); }); return; }
+  fetch("/api/unlock", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ pin: p1 }) })
+    .then(function(r){ return r.json().then(function(j){ return { st: r.status, j: j }; }); })
+    .then(function(x){ if (x.j && x.j.ok) open(x.j.key, "Admin is open on this phone.");
+      else { toast(x.st === 429 ? "Too many wrong tries. Wait 15 minutes and try again." : "That PIN isn't right."); render(); } })
+    .catch(function(){ toast("Couldn't check the PIN. Check your connection and try again."); render(); });
+};
+var baseLock8 = A.lockAdmin; A.lockAdmin = function(d, el){ CONTACTS = null; baseLock8(d, el); };
+var CONTACTS = null, contactsBusy = false;
+function contactsKey(){ return LS.get("roster.admin") || ""; }
+function loadContacts(){
+  if (CONTACTS || contactsBusy || !adminOk()) return; contactsBusy = true;
+  fetch("/api/contacts", { headers: { "x-roster-key": contactsKey() } }).then(function(r){ return r.ok ? r.json() : { contacts: {} }; })
+    .then(function(j){ CONTACTS = (j && j.contacts) || {}; contactsBusy = false; render.same = true; render(); })
+    .catch(function(){ CONTACTS = {}; contactsBusy = false; });
+}
+function saveContacts(tries){
+  tries = tries || 0;
+  return fetch("/api/contacts", { method: "PUT", headers: { "content-type": "application/json", "x-roster-key": contactsKey() }, body: JSON.stringify({ contacts: CONTACTS || {} }) })
+    .then(function(r){ if (!r.ok) throw new Error(r.status); })
+    .catch(function(){ if (tries < 2) { clearTimeout(saveTimer); saveNow(); setTimeout(function(){ saveContacts(tries + 1); }, 1500); return; }
+      toast("Phone and email didn't save. Lock and reopen Admin, then try again."); render(); });
+}
+function ct(p){ return (CONTACTS && CONTACTS[p]) || {}; }
+function digits(ph){ var d = String(ph || "").replace(/\D/g, ""); if (d.length === 10) d = "91" + d; if (d.length === 11 && d.charAt(0) === "0") d = "91" + d.slice(1); return d; }
+function okEmail(e){ return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(e); }
+function inviteText(p){ return "Hi " + p.split(" ")[0] + "! You're on the HCC Roster. Open " + APP_URL + " on your phone, pick your name, and you'll see when you're serving. You can add it to your home screen too."; }
+
+/* Add person: email, phone and an Invite option */
+SHEETS.addPerson = function(){
+  return '<h4>Add a person</h4><p class="s">They show up on Team and can be put on the roster right away.</p><div class="pform">'
+    + '<div class="two"><div><label class="fl" for="apFirst">First name</label><input class="field" id="apFirst" autocomplete="off"></div><div><label class="fl" for="apLast">Last name</label><input class="field" id="apLast" autocomplete="off"></div></div>'
+    + '<label class="fl" for="apEmail">Email</label><input class="field" id="apEmail" type="email" inputmode="email" autocomplete="off">'
+    + '<label class="fl" for="apPhone">Phone number</label><input class="field" id="apPhone" type="tel" inputmode="tel" autocomplete="off" placeholder="Like: 98765 43210">'
+    + teamPicker([])
+    + '<label class="chk"><input type="checkbox" id="apInvite" checked><span><b>Invite to Roster</b><small>After adding, pick WhatsApp, text or email to send them the app link from your phone.</small></span></label>'
+    + '</div><p class="small mt">Phone and email are only seen by leaders.</p><div class="btns"><button class="btn" data-a="addPerson">Add person</button><button class="btn sec" data-a="closeSheet">Cancel</button></div>';
+};
+var baseAddPerson8 = A.addPerson;
+A.addPerson = function(d, el){
+  var em = (document.getElementById("apEmail").value || "").trim(), ph = (document.getElementById("apPhone").value || "").trim(), inv = document.getElementById("apInvite").checked;
+  if (em && !okEmail(em)) { toast("That email doesn't look right."); render(); return; }
+  if (ph && digits(ph).length < 10) { toast("That phone number looks too short."); render(); return; }
+  var f = (document.getElementById("apFirst").value || "").trim().replace(/\s+/g, " "), l = (document.getElementById("apLast").value || "").trim().replace(/\s+/g, " "), name = l ? f + " " + l : f;
+  var had = everyone().length;
+  baseAddPerson8(d, el);
+  if (everyone().length === had) return;
+  if (em || ph) { if (!CONTACTS) CONTACTS = {}; CONTACTS[name] = { phone: ph, email: em }; saveContacts(); }
+  if (inv) { S.stack.push({ s: "person", id: name }); S.sheet = { s: "invite", id: name }; render.same = true; render(); }
+};
+SHEETS.invite = function(o){
+  var p = o.id, c = ct(p), w = digits(c.phone), msg = encodeURIComponent(inviteText(p)), links = [];
+  if (w) links.push('<a class="p" data-inv="' + esc(p) + '" href="https://wa.me/' + w + '?text=' + msg + '" target="_blank" rel="noopener">WhatsApp</a>');
+  if (w) links.push('<a class="s" data-inv="' + esc(p) + '" href="sms:+' + w + '?&body=' + msg + '">Text message</a>');
+  if (c.email) links.push('<a class="' + (w ? 's' : 'p') + '" data-inv="' + esc(p) + '" href="mailto:' + encodeURIComponent(c.email) + '?subject=' + encodeURIComponent("You're on the HCC Roster") + '&body=' + msg + '">Email</a>');
+  return '<h4>Invite ' + esc(p) + '</h4><p class="s">Opens a message on your phone with the app link. Nothing is sent until you press send there.</p>'
+    + (links.length ? '<div class="card small" style="color:var(--ink);margin-bottom:12px">' + esc(inviteText(p)) + '</div><div class="invite">' + links.join("") + '</div>'
+      : '<div class="empty">Add a phone number or email for ' + esc(p) + ' first.</div><div class="btns"><button class="btn" data-a="sheet" data-s="editContact" data-id="' + esc(p) + '">Add phone or email</button></div>')
+    + '<div class="btns"><button class="btn sec" data-a="closeSheet">' + (links.length ? 'Done' : 'Not now') + '</button></div>';
+};
+app.addEventListener("click", function(e){
+  var a = e.target.closest && e.target.closest("a[data-inv]"); if (!a) return;
+  var p = a.getAttribute("data-inv"); if (!CONTACTS) CONTACTS = {}; CONTACTS[p] = Object.assign({}, ct(p), { invited: TODAY }); saveContacts();
+});
+SHEETS.editContact = function(o){
+  var p = o.id, c = ct(p);
+  return '<h4>' + esc(p) + '\'s details</h4><p class="s">Only leaders see these.</p>'
+    + '<label class="fl" for="ecEmail">Email</label><input class="field" id="ecEmail" type="email" inputmode="email" autocomplete="off" value="' + esc(c.email || "") + '">'
+    + '<label class="fl" for="ecPhone">Phone number</label><input class="field" id="ecPhone" type="tel" inputmode="tel" autocomplete="off" value="' + esc(c.phone || "") + '">'
+    + '<div class="btns"><button class="btn" data-a="saveContact" data-id="' + esc(p) + '">Save</button><button class="btn sec" data-a="closeSheet">Cancel</button></div>';
+};
+A.saveContact = function(d){
+  var em = (document.getElementById("ecEmail").value || "").trim(), ph = (document.getElementById("ecPhone").value || "").trim();
+  if (em && !okEmail(em)) { toast("That email doesn't look right."); render(); return; }
+  if (ph && digits(ph).length < 10) { toast("That phone number looks too short."); render(); return; }
+  if (!CONTACTS) CONTACTS = {}; CONTACTS[d.id] = Object.assign({}, ct(d.id), { phone: ph, email: em }); saveContacts();
+  S.sheet = null; toast(d.id + "'s details saved."); render.same = true; render();
+};
+
+/* Team list and person page show contact details to leaders */
+var baseContacts9 = SCREENS.contacts;
+SCREENS.contacts = function(o){ if (S.view === "admin") loadContacts(); var r = baseContacts9(o);
+  return r; };
+var basePerson9 = SCREENS.person;
+SCREENS.person = function(o){
+  var r = basePerson9(o), p = o.id; if (S.view !== "admin") return r;
+  loadContacts(); var c = ct(p), w = digits(c.phone);
+  var acts = '<div class="two">' + (w ? '<a class="btn wa" href="https://wa.me/' + w + '" target="_blank" rel="noopener">WhatsApp</a><a class="btn sec" href="tel:+' + w + '">Call</a>'
+    : '<button class="btn wa" data-a="sheet" data-s="editContact" data-id="' + esc(p) + '">WhatsApp</button><button class="btn sec" data-a="sheet" data-s="editContact" data-id="' + esc(p) + '">Call</button>') + '</div>';
+  r.body = r.body.replace(/<div class="two"><button class="btn wa" data-a="toast"[\s\S]*?<\/button><button class="btn sec" data-a="toast"[\s\S]*?<\/button><\/div>/, acts);
+  var info = '<div class="lbl sm">Contact</div>'
+    + (CONTACTS === null ? '<div class="small">Loading…</div>' : '<div class="cline"><span>Phone</span>' + esc(c.phone || "Not added") + '</div><div class="cline"><span>Email</span>' + esc(c.email || "Not added") + '</div>')
+    + '<div class="btns two"><button class="btn sec" data-a="sheet" data-s="editContact" data-id="' + esc(p) + '">Edit details</button><button class="btn soft" data-a="sheet" data-s="invite" data-id="' + esc(p) + '">' + (c.invited ? 'Invite again' : 'Invite to app') + '</button></div>'
+    + (c.invited ? '<p class="small" style="margin:6px 0 0">Invite opened ' + esc(dShort(c.invited)) + '.</p>' : '');
+  r.body = r.body.replace('<div class="btns"><button class="btn sec" data-a="sheet" data-s="editTeams"', info + '<div class="btns"><button class="btn sec" data-a="sheet" data-s="editTeams"');
+  return r;
 };
 var baseLocal7 = localDefaults;
 localDefaults = function(){ var o = baseLocal7(); o.msgTab = "chats"; return o; };

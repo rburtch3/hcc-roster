@@ -52,3 +52,42 @@ test("page says Roster, never Rota", () => {
   assert.equal(/rota/i.test(html), false);
   assert.match(html, /<title>HCC Roster<\/title>/);
 });
+
+// --- leader PIN and contacts ---
+const mod = await import("data:text/javascript," + encodeURIComponent(src));
+function mem2() {
+  const s = mem(), kv = {};
+  return Object.assign(s, { getItem: async (k) => kv[k] ?? null, putItem: async (k, v) => { kv[k] = v; } });
+}
+const post = (path, body, headers) => new Request("https://x" + path, { method: "POST", body: JSON.stringify(body), headers });
+
+test("the PIN hash is never sent back, and a save can't change it", async () => {
+  const s = mem2(), h = await mod.hashPin("1234");
+  await put(s, 0, { slots: [], pinHash: h });
+  const got = await (await handleState(req("GET"), s)).json();
+  assert.equal(got.data.pinHash, "set");
+  await put(s, 1, { slots: [], pinHash: "set" });
+  await put(s, 2, { slots: [], pinHash: await mod.hashPin("9999") });
+  assert.equal((await mod.handleUnlock(post("/api/unlock", { pin: "1234" }), s)).status, 200);
+});
+
+test("unlock checks the PIN and locks after 10 wrong tries", async () => {
+  const s = mem2();
+  await put(s, 0, { slots: [], pinHash: await mod.hashPin("2468") });
+  const ok = await (await mod.handleUnlock(post("/api/unlock", { pin: "2468" }), s, 1000)).json();
+  assert.equal(ok.ok, true);
+  for (let i = 0; i < 10; i++) assert.equal((await mod.handleUnlock(post("/api/unlock", { pin: "0000" }), s, 2000)).status, 403);
+  assert.equal((await mod.handleUnlock(post("/api/unlock", { pin: "2468" }), s, 3000)).status, 429);
+  assert.equal((await mod.handleUnlock(post("/api/unlock", { pin: "2468" }), s, 3000 + 16 * 60_000)).status, 200);
+});
+
+test("contacts are for leaders only", async () => {
+  const s = mem2(), h = await mod.hashPin("1357");
+  await put(s, 0, { slots: [], pinHash: h });
+  const r = (method, key, body) => mod.handleContacts(new Request("https://x/api/contacts", { method, body, headers: key ? { "x-roster-key": key } : {} }), s);
+  assert.equal((await r("GET")).status, 403);
+  assert.equal((await r("GET", "set")).status, 403);
+  assert.equal((await r("PUT", h, JSON.stringify({ contacts: { Ana: { phone: "1" } } }))).status, 200);
+  assert.deepEqual(await (await r("GET", h)).json(), { contacts: { Ana: { phone: "1" } } });
+  assert.equal(JSON.stringify(await (await handleState(req("GET"), s)).json()).includes("Ana"), false);
+});
