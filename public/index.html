@@ -1905,6 +1905,61 @@ SCREENS.person = function(o){
   if (S.view === "admin") r.body = r.body.replace('<div class="lbl">Coming up</div>', '<div class="btns"><button class="btn sec" data-a="sheet" data-s="editTeams" data-id="' + esc(o.id) + '">Edit teams</button></div><div class="lbl">Coming up</div>');
   return r;
 };
+
+/* Services and roles: edit teams and positions in the app (Nov 16) */
+var baseMore8 = SCREENS["admin:more"];
+SCREENS["admin:more"] = function(){
+  var r = baseMore8();
+  r.body = r.body.replace(/<div class="row tap" data-a="toast" data-s="Services and roles[^>]*>/, '<div class="row tap" data-a="push" data-s="svcRoles">');
+  return r;
+};
+function rolesCfg(){ if (!S.cfg) S.cfg = {}; if (!S.cfg.roles) S.cfg.roles = ROLES; if (!S.cfg.pool) S.cfg.pool = POOL; }
+SCREENS.svcRoles = function(){
+  var body = '<p class="small" style="margin:12px 0 4px">Tap a team to add or remove positions. Service times are under More &gt; Service times.</p><div class="list7">'
+    + Object.keys(ROLES).map(function(t, i){ var per = Object.keys(SVC).filter(function(k){ return (ROLES[t][k] || []).length; }).map(function(k){ return k + " " + ROLES[t][k].length; });
+      return '<div class="tpick" data-a="push" data-s="teamRoles" data-id="' + esc(t) + '"><span class="tic" style="background:' + TCOL[i % TCOL.length] + '">' + esc(t.charAt(0)) + '</span><span class="m"><span class="t" style="display:block">' + esc(t) + '</span><span class="s" style="display:block">' + esc(per.join(" · ") || "No positions yet") + ' · ' + (POOL[t] || []).length + ' people</span></span><span class="chev">›</span></div>'; }).join("") + '</div>';
+  return { head: header("Services and roles", { right: '<button class="ic" data-a="sheet" data-s="addTeam" aria-label="Add a team" style="font-size:30px">+</button>' }), body: body };
+};
+SCREENS.teamRoles = function(o){
+  var t = o.id, R = ROLES[t] || {};
+  var body = Object.keys(SVC).map(function(k, si){ var list = R[k] || [];
+    return '<div class="lbl">' + esc(SVC[k].name || k) + '</div><div class="grp">'
+      + (list.length ? list.map(function(r, i){ return '<div class="row"><span class="m"><span class="t">' + dot(r) + esc(r) + '</span></span><button class="btn sm sec" style="width:auto;padding:0 14px" data-a="rmRole" data-id="' + esc(t) + '" data-v="' + esc(k) + '" data-p="' + i + '">Remove</button></div>'; }).join("") : '<div class="row"><span class="m"><span class="s">No positions on ' + esc(SVC[k].name || k) + ' yet.</span></span></div>')
+      + '<div class="row"><input class="field" id="ar' + si + '" placeholder="New position, like Bass" style="flex:1;min-height:42px"><button class="btn sm" style="width:auto;padding:0 16px" data-a="addRole" data-id="' + esc(t) + '" data-v="' + esc(k) + '" data-p="' + si + '">Add</button></div></div>'; }).join("")
+    + '<p class="small mt">Adding a position puts an open spot on every upcoming ' + esc(t) + ' service of that kind. Removing one takes away an open spot; anyone already in that position stays on the roster.</p>';
+  return { head: header(t), body: body };
+};
+SHEETS.addTeam = function(){
+  return '<h4>Add a team</h4><p class="s">Then add its positions and people.</p><label class="fl" for="atName">Team name</label><input class="field" id="atName" placeholder="Like: Prayer Team" autocomplete="off"><div class="btns"><button class="btn" data-a="addTeam">Add team</button><button class="btn sec" data-a="closeSheet">Cancel</button></div>';
+};
+A.addTeam = function(){
+  var n = (document.getElementById("atName").value || "").trim().replace(/\s+/g, " ");
+  if (!n) { toast("Add a team name."); render(); return; }
+  if (Object.keys(ROLES).concat(Object.keys(POOL)).some(function(t){ return t.toLowerCase() === n.toLowerCase(); })) { toast("There's already a team called " + n + "."); render(); return; }
+  rolesCfg(); ROLES[n] = {}; POOL[n] = [];
+  S.sheet = null; push("teamRoles", { id: n }); toast(n + " added. Add its positions here, and its people from Team.");
+};
+A.addRole = function(d){
+  var t = d.id, k = d.v, el = document.getElementById("ar" + d.p), r = el ? el.value.trim().replace(/\s+/g, " ") : "";
+  if (!r) { toast("Type a position first."); render(); return; }
+  rolesCfg(); if (!ROLES[t]) ROLES[t] = {}; if (!ROLES[t][k]) ROLES[t][k] = []; ROLES[t][k].push(r);
+  var n = 0;
+  upc().filter(function(sv){ return sv.svc === k; }).forEach(function(sv){ var base = sv.id + "|" + t + "|" + r, i = 0; while (S.slots.some(function(x){ return x.id === base + "|" + i; })) i++;
+    S.slots.push({ id: base + "|" + i, sid: sv.id, team: t, role: r, person: null, status: "open", dirty: true }); n++; });
+  toast(r + " added to " + t + (n ? ": " + n + " open spot" + (n > 1 ? "s" : "") + " on upcoming services. Publish from Schedule." : "."));
+  render.same = true; render();
+};
+A.rmRole = function(d){
+  var t = d.id, k = d.v, i = +d.p, list = (ROLES[t] || {})[k] || [], r = list[i]; if (r == null) return;
+  rolesCfg(); list.splice(i, 1);
+  var gone = 0, kept = 0;
+  upc().filter(function(sv){ return sv.svc === k; }).forEach(function(sv){
+    var mine = S.slots.filter(function(x){ return x.sid === sv.id && x.team === t && x.role === r; });
+    var open = mine.filter(function(x){ return !x.person; })[0];
+    if (open) { S.slots.splice(S.slots.indexOf(open), 1); gone++; } else if (mine.length) kept++; });
+  toast(r + " removed" + (gone ? ", " + gone + " open spot" + (gone > 1 ? "s" : "") + " taken off" : "") + (kept ? ". " + kept + " filled spot" + (kept > 1 ? "s" : "") + " stay until you change them on Schedule." : "."));
+  render.same = true; render();
+};
 var baseLocal7 = localDefaults;
 localDefaults = function(){ var o = baseLocal7(); o.msgTab = "chats"; return o; };
 var baseRender7 = render;
