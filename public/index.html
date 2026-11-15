@@ -733,7 +733,7 @@ SCREENS.reqDetail = function(o){
 };
 SCREENS["admin:sched"] = function(){
   var sv = svc(S.adminSid), dirty = S.slots.filter(function(x){ return x.dirty; }).length;
-  var body = '<div class="strip">' + upc().map(function(s){ var d = dt(s.date); return '<button data-a="openSvc" data-id="' + s.id + '"' + (s.id === sv.id ? ' aria-current="true"' : '') + '><small>' + DOW[d.getUTCDay()] + ' ' + s.svc.split(" ")[1] + '</small>' + d.getUTCDate() + (s.published ? '' : '<small>Draft</small>') + '</button>'; }).join("") + '</div>';
+  var body = '<div class="strip">' + upc().map(function(s){ var d = dt(s.date); return '<button data-a="openSvc" data-id="' + s.id + '"' + (s.id === sv.id ? ' aria-current="true"' : '') + '><small>' + DOW[d.getUTCDay()] + ' ' + (s.svc.split(" ")[1] || s.svc) + '</small>' + d.getUTCDate() + (s.published ? '' : '<small>Draft</small>') + '</button>'; }).join("") + '</div>';
   body += '<div style="display:flex;justify-content:space-between;align-items:center;margin:14px 4px 4px"><div><div class="t" style="font:700 20px/26px var(--font)">' + SVC[sv.svc].name + '</div><div class="small">' + dLong(sv.date) + ' · ' + SVC[sv.svc].time + (sv.published ? '' : ' · <b style="color:var(--warn)">Draft, volunteers can\'t see it</b>') + '</div></div></div>';
   body += '<div class="pick mt"><button data-a="sheet" data-s="copy">Copy last week</button><button data-a="sheet" data-s="templates">Templates</button><button data-a="autofill">Auto-fill open</button></div>';
   Object.keys(ROLES).forEach(function(team){
@@ -1123,7 +1123,7 @@ SCREENS.reqDetail = function(o){
 };
 SCREENS["admin:sched"] = function(){
   var sv = svc(S.adminSid), dirty = S.slots.filter(function(x){ return x.dirty && x.sid === sv.id; }).length;
-  var body = '<div class="strip">' + upc().map(function(s){ var d = dt(s.date); return '<button data-a="openSvc" data-id="' + s.id + '"' + (s.id === sv.id ? ' aria-current="true"' : '') + '><small>' + DOW[d.getUTCDay()] + ' ' + s.svc.split(" ")[1] + '</small>' + d.getUTCDate() + (s.published ? '' : '<small>Draft</small>') + '</button>'; }).join("") + '</div>';
+  var body = '<div class="strip">' + upc().map(function(s){ var d = dt(s.date); return '<button data-a="openSvc" data-id="' + s.id + '"' + (s.id === sv.id ? ' aria-current="true"' : '') + '><small>' + DOW[d.getUTCDay()] + ' ' + (s.svc.split(" ")[1] || s.svc) + '</small>' + d.getUTCDate() + (s.published ? '' : '<small>Draft</small>') + '</button>'; }).join("") + '</div>';
   body += '<div style="display:flex;justify-content:space-between;align-items:center;margin:14px 4px 8px"><div><div class="t" style="font:700 20px/26px var(--font)">' + SVC[sv.svc].name + '</div><div class="small">' + dLong(sv.date) + ' · ' + SVC[sv.svc].time + (sv.published ? '' : ' · <b style="color:var(--warn)">Draft, volunteers can\'t see it</b>') + '</div></div></div>';
   body += evBanner(sv.date);
   body += '<div class="pick mt"><button data-a="sheet" data-s="copy">Copy last week</button>' + (on("templates") ? '<button data-a="sheet" data-s="templates">Templates</button>' : '') + '<button data-a="autofill">Auto-fill open</button>' + (on("events") ? '<button data-a="sheet" data-s="addEvent">Add event</button>' : '') + '</div>';
@@ -1218,7 +1218,7 @@ SHEETS.templates = function(){ var sv = svc(S.adminSid);
     + '<label class="fl" for="tplName">Save this service as a template</label><input class="field" id="tplName" placeholder="Like: Sunday AM, Band C"><div class="btns"><button class="btn sec" data-a="saveTemplate">Save template</button></div>'; };
 SHEETS.announce = function(){
   var groups = [["Everyone"]].concat(Object.keys(ROLES).map(function(t){ return [t]; })).concat([["Leaders"]]);
-  if (on("audience")) upc().filter(function(s){ return s.published; }).slice(0,4).forEach(function(s){ var n = S.slots.filter(function(x){ return x.sid === s.id && x.person && x.status !== "declined"; }).length; groups.push(["Serving " + dShort(s.date) + " " + s.svc.split(" ")[1] + " (" + n + ")", s.id]); });
+  if (on("audience")) upc().filter(function(s){ return s.published; }).slice(0,4).forEach(function(s){ var n = S.slots.filter(function(x){ return x.sid === s.id && x.person && x.status !== "declined"; }).length; groups.push(["Serving " + dShort(s.date) + " " + (s.svc.split(" ")[1] || s.svc) + " (" + n + ")", s.id]); });
   return '<h4>New announcement</h4><label class="fl" for="anTo">To</label><div class="pick" id="anTo">' + groups.map(function(g, i){ return '<button data-a="pickReason"' + (g[1] ? ' data-sid="' + g[1] + '"' : '') + ' aria-pressed="' + (i === 0) + '">' + esc(g[0]) + '</button>'; }).join("") + '</div>'
   + '<label class="fl" for="anTitle">Title</label><input class="field" id="anTitle" placeholder="Short headline">'
   + '<label class="fl" for="anText">Message</label><textarea class="field" id="anText" placeholder="What everyone should know"></textarea>'
@@ -2078,6 +2078,48 @@ SCREENS.person = function(o){
   r.body = r.body.replace('<div class="btns"><button class="btn sec" data-a="sheet" data-s="editTeams"', info + '<div class="btns"><button class="btn sec" data-a="sheet" data-s="editTeams"');
   return r;
 };
+
+/* One-off services on chosen dates, like a Mon to Wed revival (Nov 16) */
+function isoAdd(iso, n){ return new Date(dt(iso).getTime() + n * 864e5).toISOString().slice(0, 10); }
+SHEETS.newOneOff = function(){
+  return '<h4>Add a one-off service</h4><p class="s">For a service on certain dates only, like a revival from Monday to Wednesday. Every date starts as a draft until you publish it.</p><div class="svcf">'
+    + '<label class="fl" for="ooName">Name</label><input class="field" id="ooName" placeholder="Like: Revival">'
+    + '<div class="pform"><div class="two"><div><label class="fl" for="ooFrom">First day</label><input class="field" id="ooFrom" type="date" value="' + TODAY + '" min="' + TODAY + '"></div><div><label class="fl" for="ooTo">Last day</label><input class="field" id="ooTo" type="date" value="' + TODAY + '" min="' + TODAY + '"></div></div></div>'
+    + '<p class="small" style="margin:6px 0 0">Same first and last day for a single service.</p>'
+    + '<div class="three"><div><label class="fl" for="ooC">Arrive</label><input class="field" id="ooC" placeholder="7:30 PM"></div><div><label class="fl" for="ooT">Starts</label><input class="field" id="ooT" placeholder="8:00 PM"></div><div><label class="fl" for="ooE">Ends</label><input class="field" id="ooE" placeholder="9:30 PM"></div></div>'
+    + '<label class="fl" for="ooLike">Positions</label><select class="field" id="ooLike">' + Object.keys(SVC).map(function(k){ return '<option value="' + esc(k) + '"' + (k === "Wed PM" ? ' selected' : '') + '>Same as ' + esc(SVC[k].name || k) + '</option>'; }).join("") + '</select>'
+    + '</div><div class="btns"><button class="btn" data-a="addOneOff">Add service</button><button class="btn sec" data-a="closeSheet">Cancel</button></div>'
+    + '<p class="small mt">Happens every week? <a href="#" data-a="sheet" data-s="newSvc" style="color:var(--accent)">Add a weekly service</a> instead.</p>';
+};
+A.addOneOff = function(){
+  var g = function(id){ return (document.getElementById(id) || {}).value || ""; };
+  var name = g("ooName").trim().replace(/\s+/g, " "), from = g("ooFrom"), to = g("ooTo") || from, call = fixT(g("ooC")), time = fixT(g("ooT")), end = fixT(g("ooE")), like = g("ooLike");
+  if (!name) { toast("Give the service a name."); render(); return; }
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(from)) { toast("Pick the first day."); render(); return; }
+  if (from < TODAY) { toast("The first day can't be in the past."); render(); return; }
+  if (to < from) { toast("The last day is before the first day."); render(); return; }
+  if ((dt(to) - dt(from)) / 864e5 > 30) { toast("Keep it to 31 days or fewer. For something every week, add a weekly service."); render(); return; }
+  if (!time) { toast("Write the start time like 8:00 PM."); render(); return; }
+  var code = name, n = 2; while (SVC[code]) code = name + " " + n++;
+  var clash = S.services.some(function(sv){ return sv.svc === code; }); if (clash) { toast("Pick another name."); render(); return; }
+  SVC[code] = { name: name, call: call || time, time: time, end: end || fmtMins(minsOf(time) + 120), oneoff: true };
+  if (like) Object.keys(ROLES).forEach(function(t){ if (ROLES[t][like]) ROLES[t][code] = ROLES[t][like].slice(); });
+  var made = 0, first = "";
+  for (var iso = from; iso <= to; iso = isoAdd(iso, 1)) {
+    var sv = { id: iso + "|" + code, date: iso, svc: code, published: false }; S.services.push(sv); made++; if (!first) first = sv.id;
+    Object.keys(ROLES).forEach(function(t){ var c = {}; (ROLES[t][code] || []).forEach(function(r){ var k = sv.id + "|" + t + "|" + r; c[k] = (c[k] || 0) + 1;
+      S.slots.push({ id: k + "|" + (c[k] - 1), sid: sv.id, team: t, role: r, person: null, status: "open", dirty: true }); }); }); }
+  S.services.sort(function(a, b){ return a.date < b.date ? -1 : a.date > b.date ? 1 : 0; });
+  S.adminSid = first; S.sheet = null; S.stack = []; S.tab.admin = "sched";
+  toast(name + " added on " + made + " date" + (made > 1 ? "s" : "") + " as drafts. Fill the spots, then publish."); render.same = true; render();
+};
+var baseSched9 = SCREENS["admin:sched"];
+SCREENS["admin:sched"] = function(){
+  var r = baseSched9();
+  if (r && r.head && r.head.indexOf('data-s="newOneOff"') < 0) r.head = r.head.replace(/^<div class="hd">(<span style="width:40px"><\/span>)?/, '<div class="hd"><button class="ic" data-a="sheet" data-s="newOneOff" aria-label="Add a service" style="font-size:30px">+</button>');
+  return r;
+};
+SHEETS.newSvc = (function(base){ return function(o){ return base(o) + '<p class="small mt">Only on certain dates? <a href="#" data-a="sheet" data-s="newOneOff" style="color:var(--accent)">Add a one-off service</a> instead.</p>'; }; })(SHEETS.newSvc);
 var baseLocal7 = localDefaults;
 localDefaults = function(){ var o = baseLocal7(); o.msgTab = "chats"; return o; };
 var baseRender7 = render;
