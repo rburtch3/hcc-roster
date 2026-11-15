@@ -83,7 +83,7 @@ export default {
   async fetch(request, env) {
     const url = new URL(request.url);
     if (url.pathname.startsWith("/api/7shifts/")) {
-      const loadRoster = async () => (await env.ASSETS.fetch(new URL("/roster-data.json", url))).json();
+      const loadRoster = async () => (await env.ASSETS.fetch(new URL("/sheet-shifts.json", url))).json();
       return handleSevenShifts(request, env, loadRoster);
     }
     if (url.pathname === "/api/state") {
