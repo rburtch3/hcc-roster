@@ -1810,6 +1810,17 @@ A.addSvc = function(){
   S.services.sort(function(a, b){ return a.date < b.date ? -1 : a.date > b.date ? 1 : 0; });
   S.sheet = null; toast(name + " added: " + made + " dates as drafts. Fill them and publish from Schedule."); render.same = true; render();
 };
+
+/* dashboard shows the next service of any kind (Nov 15), skipping today's ones that have ended */
+dashSvc = function(){
+  var now = new Date(Date.now() + 330 * 60000), nowM = now.getUTCHours() * 60 + now.getUTCMinutes();
+  function st(sv){ var c = SVC[sv.svc] || {}; try { return minsOf(c.time || "12:00 AM"); } catch (e) { return 0; } }
+  function en(sv){ var c = SVC[sv.svc] || {}; try { return c.end ? minsOf(c.end) : st(sv) + 120; } catch (e) { return st(sv) + 120; } }
+  var u = upc().filter(function(sv){ return sv.date > TODAY || en(sv) > nowM; });
+  if (!u.length) u = upc();
+  u = u.slice().sort(function(a, b){ return a.date < b.date ? -1 : a.date > b.date ? 1 : st(a) - st(b); });
+  return u[0];
+};
 var baseLocal7 = localDefaults;
 localDefaults = function(){ var o = baseLocal7(); o.msgTab = "chats"; return o; };
 var baseRender7 = render;
