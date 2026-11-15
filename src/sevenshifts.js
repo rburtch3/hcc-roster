@@ -10,8 +10,8 @@ export const MAX_CREATES = 40; // stay under the Worker's per-request subrequest
 // Roster position names that are called something else in 7shifts.
 const ROLE_ALIASES = { "Song Service|Worship Lead": "Song Leader" };
 
-// The one test shift the user approved on 14 Nov 2026.
-export const TEST_ROWS = [["2026-11-15", "Sun AM", "Song Service", "Song Leader", "Ps Ryan Volunteer"]];
+// The one test shift for Ps Ryan Volunteer (first set for 15 Nov, moved to 22 Nov after that date passed).
+export const TEST_ROWS = [["2026-11-22", "Sun AM", "Song Service", "Song Leader", "Ps Ryan Volunteer"]];
 
 const norm = (s) => String(s || "").trim().toLowerCase().replace(/\s+/g, " ");
 

@@ -46,20 +46,20 @@ test("weeks must start on a Sunday", () => {
   assert.ok(rows.length > 0 && rows.every((r) => r[0] >= "2026-11-15" && r[0] <= "2026-11-21" && r[4]));
 });
 
-test("test shift: one draft for Ps Ryan Volunteer as Song Leader, Sun 15 Nov 10 AM", async () => {
+test("test shift: one draft for Ps Ryan Volunteer as Song Leader, Sun 22 Nov 10 AM", async () => {
   const f = fake();
-  const r = await syncRows(env, roster, TEST_ROWS, "2026-11-15", { create: true, fetchFn: f.fn });
+  const r = await syncRows(env, roster, TEST_ROWS, "2026-11-22", { create: true, fetchFn: f.fn });
   assert.deepEqual(r.unmatched, []);
   assert.equal(r.created.length, 1);
   const post = f.calls.filter((c) => c.method === "POST");
   assert.equal(post.length, 1);
-  assert.deepEqual(post[0].body, { location_id: 538073, user_id: 100, department_id: 1, role_id: 10, start: "2026-11-15T04:30:00Z", end: "2026-11-15T07:30:00Z", draft: true, notes: "From HCC Roster" });
+  assert.deepEqual(post[0].body, { location_id: 538073, user_id: 100, department_id: 1, role_id: 10, start: "2026-11-22T04:30:00Z", end: "2026-11-22T07:30:00Z", draft: true, notes: "From HCC Roster" });
   assert.equal(post[0].auth, "Bearer t");
 });
 
 test("never makes a shift twice", async () => {
-  const f = fake({ shifts: [{ id: 9, user_id: 100, role_id: 10, start: "2026-11-15T04:30:00+00:00" }] });
-  const r = await syncRows(env, roster, TEST_ROWS, "2026-11-15", { create: true, fetchFn: f.fn });
+  const f = fake({ shifts: [{ id: 9, user_id: 100, role_id: 10, start: "2026-11-22T04:30:00+00:00" }] });
+  const r = await syncRows(env, roster, TEST_ROWS, "2026-11-22", { create: true, fetchFn: f.fn });
   assert.equal(r.created.length, 0);
   assert.equal(r.already, 1);
   assert.equal(f.calls.filter((c) => c.method === "POST").length, 0);
