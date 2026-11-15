@@ -253,6 +253,8 @@ body{background:#fff}
 .stats{grid-template-columns:repeat(3,1fr)}
 button.stat{border:1px solid var(--line);font:inherit;color:inherit;cursor:pointer;width:100%}
 button.stat:active{background:var(--track)}
+.svcf{display:grid;gap:4px}
+.svcf select.field{appearance:auto}
 .three{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}
 </style>
 
@@ -1738,7 +1740,7 @@ SCREENS.svcTimes = function(){
   var body = '<p class="small" style="margin:8px 0 0">Shown on everyone\'s serves as arrive → end. Write times like 9:00 AM.</p>' + Object.keys(SVC).map(function(k){ var x = SVC[k], i = k.replace(/\W/g, "");
     return '<div class="lbl">' + esc(x.name || k) + '</div><div class="three"><div><label class="fl" for="c' + i + '">Arrive</label><input class="field" id="c' + i + '" value="' + esc(x.call || "") + '"></div><div><label class="fl" for="t' + i + '">Starts</label><input class="field" id="t' + i + '" value="' + esc(x.time || "") + '"></div><div><label class="fl" for="e' + i + '">Ends</label><input class="field" id="e' + i + '" value="' + esc(svcEnd(k)) + '"></div></div>'; }).join("")
     + '<div class="btns"><button class="btn" data-a="saveTimes">Save</button></div>';
-  return { head: header("Service times"), body: body };
+  return { head: header("Service times", { right: '<button class="ic" data-a="sheet" data-s="newSvc" aria-label="Add a service" style="font-size:30px">+</button>' }), body: body };
 };
 A.saveTimes = function(){
   var bad = 0;
@@ -1777,6 +1779,36 @@ SHEETS.statList = function(o){
         var act = st === "confirmed" ? 'data-a="push" data-s="person" data-id="' + esc(x.person) + '"' : 'data-a="sheet" data-s="fill" data-id="' + x.id + '"';
         return '<div class="row tap" ' + act + '>' + (x.person ? ava(x.person, 36) : '<span class="ava open" style="width:36px;height:36px">?</span>') + '<div class="m"><div class="t">' + esc(st === "open" ? x.role : x.person) + '</div><div class="s">' + (st === "open" ? '' : esc(x.role) + ' | ') + esc(x.team) + '</div></div>' + (st === "confirmed" ? '' : '<span class="chip c-acc">Fill</span>') + '<span class="chev">›</span></div>'; }).join("") + '</div>'
       : '<div class="empty">' + (st === "open" ? "Every spot is filled." : st === "declined" ? "No one has said they can't make it." : "No one yet.") + '</div>');
+};
+
+/* add a service from Service times (Nov 15) */
+var DAYS7 = ["Sunday","Monday","Tuesday","Wednesday","Thursday","Friday","Saturday"];
+SHEETS.newSvc = function(){
+  return '<h4>Add a service</h4><p class="s">It repeats every week on the day you pick. New dates start as drafts until you publish them.</p><div class="svcf">'
+    + '<label class="fl" for="nsName">Name</label><input class="field" id="nsName" placeholder="Like: Friday Prayer">'
+    + '<label class="fl" for="nsDay">Day</label><select class="field" id="nsDay">' + DAYS7.map(function(d, i){ return '<option value="' + i + '"' + (i === 5 ? ' selected' : '') + '>' + d + '</option>'; }).join("") + '</select>'
+    + '<div class="three"><div><label class="fl" for="nsC">Arrive</label><input class="field" id="nsC" placeholder="6:30 PM"></div><div><label class="fl" for="nsT">Starts</label><input class="field" id="nsT" placeholder="7:00 PM"></div><div><label class="fl" for="nsE">Ends</label><input class="field" id="nsE" placeholder="8:30 PM"></div></div>'
+    + '<label class="fl" for="nsLike">Positions</label><select class="field" id="nsLike">' + Object.keys(SVC).map(function(k){ return '<option value="' + esc(k) + '">Same as ' + esc(SVC[k].name || k) + '</option>'; }).join("") + '</select>'
+    + '</div><div class="btns"><button class="btn" data-a="addSvc">Add service</button><button class="btn sec" data-a="closeSheet">Cancel</button></div>';
+};
+function fixT(v){ v = String(v || "").trim().toUpperCase().replace(/\s+/g, " ").replace(/^(\d{1,2}:\d{2})(AM|PM)$/, "$1 $2"); return /^\d{1,2}:\d{2} (AM|PM)$/.test(v) ? v : ""; }
+A.addSvc = function(){
+  var g = function(id){ return (document.getElementById(id) || {}).value || ""; };
+  var name = g("nsName").trim(), day = +g("nsDay"), call = fixT(g("nsC")), time = fixT(g("nsT")), end = fixT(g("nsE")), like = g("nsLike");
+  if (!name) { toast("Give the service a name."); render(); return; }
+  if (!time) { toast("Write the start time like 7:00 PM."); render(); return; }
+  if (Object.keys(SVC).some(function(k){ return (SVC[k].name || k).toLowerCase() === name.toLowerCase(); })) { toast("There's already a service called " + name + "."); render(); return; }
+  var code = name, n = 2; while (SVC[code]) code = name + " " + n++;
+  SVC[code] = { name: name, call: call || time, time: time, end: end || fmtMins(minsOf(time) + 120), day: DAYS7[day] };
+  if (like) Object.keys(ROLES).forEach(function(t){ if (ROLES[t][like]) ROLES[t][code] = ROLES[t][like].slice(); });
+  var last = S.services.reduce(function(m, v){ return v.date > m ? v.date : m; }, TODAY), d = dt(TODAY), made = 0;
+  var stop = dt(last); if (stop - d < 27 * 864e5) stop = new Date(d.getTime() + 27 * 864e5);
+  for (; d <= stop; d = new Date(d.getTime() + 864e5)) { if (d.getUTCDay() !== day) continue;
+    var iso = d.toISOString().slice(0, 10), sv = { id: iso + "|" + code, date: iso, svc: code, published: false }; S.services.push(sv); made++;
+    Object.keys(ROLES).forEach(function(t){ var c = {}; (ROLES[t][code] || []).forEach(function(r){ var k = sv.id + "|" + t + "|" + r; c[k] = (c[k] || 0) + 1;
+      S.slots.push({ id: k + "|" + (c[k] - 1), sid: sv.id, team: t, role: r, person: null, status: "open", dirty: true }); }); }); }
+  S.services.sort(function(a, b){ return a.date < b.date ? -1 : a.date > b.date ? 1 : 0; });
+  S.sheet = null; toast(name + " added: " + made + " dates as drafts. Fill them and publish from Schedule."); render.same = true; render();
 };
 var baseLocal7 = localDefaults;
 localDefaults = function(){ var o = baseLocal7(); o.msgTab = "chats"; return o; };
