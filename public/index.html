@@ -238,6 +238,24 @@ body{background:#fff}
 .ava{flex:none;display:grid;place-items:center;border-radius:50%;overflow:hidden;color:#fff;font:600 16px/1 var(--font)}
 .ava svg{width:100%;height:100%}
 .ava.open{background:var(--track);color:var(--muted)}
+/* Team page and Add person (Nov 16) */
+.tsearch{position:relative;margin:16px 0 8px}
+.tsearch svg{position:absolute;left:14px;top:50%;width:22px;height:22px;transform:translateY(-50%);color:#6E6E76;pointer-events:none}
+.tsearch input{width:100%;box-sizing:border-box;min-height:50px;padding:12px 14px 12px 46px;border:1px solid #D9D9DF;border-radius:10px;background:#fff;color:var(--ink);font:400 17px/22px var(--font)}
+.trow{display:flex;align-items:center;gap:16px;padding:12px 0;cursor:pointer}
+.trow[hidden]{display:none}
+.trow .m{flex:1;min-width:0}
+.trow .t{font:400 18px/23px var(--font);color:#2B2B2F}
+.trow .s{font:400 14px/18px var(--font);color:#6E6E76;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.pform .two{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.tlist .lbl.sm{margin-top:18px}
+.tpick{display:flex;align-items:center;gap:14px;padding:10px 0;cursor:pointer}
+.tpick .tic{flex:none;width:40px;height:40px;border-radius:50%;display:grid;place-items:center;color:#fff;font:500 17px/1 var(--font)}
+.tpick .m{flex:1;min-width:0}
+.tpick .t{font:400 17px/22px var(--font);color:#2B2B2F}
+.tpick .s{font:400 13px/17px var(--font);color:#6E6E76}
+.tpick input{flex:none;appearance:none;-webkit-appearance:none;width:26px;height:26px;margin:0;border:1.5px solid #C4C4CC;border-radius:50%;background:#fff;cursor:pointer}
+.tpick input:checked{border:7px solid var(--accent)}
 /* Schedule date strip in the 7shifts look (Nov 15) */
 .strip{gap:8px;margin:0 -20px;padding:14px 20px 12px;border-bottom:1px solid var(--line)}
 .strip button{min-width:62px;padding:8px 6px 9px;border:1px solid var(--line);border-radius:12px;background:#fff;color:#2B2B2F;font:500 19px/23px var(--font);box-shadow:0 1px 2px rgba(20,20,40,.04)}
@@ -1829,6 +1847,63 @@ dashSvc = function(){
   if (!u.length) u = upc();
   u = u.slice().sort(function(a, b){ return a.date < b.date ? -1 : a.date > b.date ? 1 : st(a) - st(b); });
   return u[0];
+};
+
+/* Team page: search and add people (Nov 16) */
+var TCOL = ["#F28C28","#22C55E","#D63384","#3B5BDB","#2DD4BF","#FF6B5E","#7C4DFF","#0EA5E9","#A16207"];
+var SRCH = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><circle cx="10.5" cy="10.5" r="6.5"/><path d="M15.5 15.5 21 21"/></svg>';
+function teamPositions(t){ var a = []; Object.keys(ROLES[t] || {}).forEach(function(k){ (ROLES[t][k] || []).forEach(function(r){ if (a.indexOf(r) < 0) a.push(r); }); }); return a; }
+function leadsOf(p){ return Object.keys(LEADERS).filter(function(t){ return LEADERS[t] === p; }); }
+var baseContacts8 = SCREENS.contacts;
+SCREENS.contacts = function(o){
+  if (S.view !== "admin") return baseContacts8(o);
+  var people = everyone().concat(Object.keys(LEADERS).map(function(t){ return LEADERS[t]; })).filter(function(p, i, a){ return p && a.indexOf(p) === i; }).sort(function(x, y){ return x.toLowerCase() < y.toLowerCase() ? -1 : 1; });
+  var body = '<div class="tsearch">' + SRCH + '<input id="teamSearch" type="search" placeholder="Search" aria-label="Search people" autocomplete="off"></div>'
+    + '<div class="small" style="margin:0 0 4px">' + people.length + ' people</div><div class="list7" id="teamList">'
+    + people.map(function(p){ var t = teamsOf(p), l = leadsOf(p);
+      return '<div class="trow" data-a="push" data-s="person" data-id="' + esc(p) + '" data-n="' + esc(p.toLowerCase()) + '">' + ava(p, 48) + '<div class="m"><div class="t">' + esc(p) + '</div><div class="s">' + esc((l.length ? "Leads " + l.join(", ") + (t.length ? " · " : "") : "") + (t.join(", ") || (l.length ? "" : "No team yet"))) + '</div></div></div>'; }).join("")
+    + '</div><div class="empty" id="teamNone" hidden>No one matches.</div>';
+  return { head: header("Team", { right: '<button class="ic" data-a="sheet" data-s="addPerson" aria-label="Add a person" style="font-size:30px">+</button>' }), body: body };
+};
+app.addEventListener("input", function(e){
+  if (!e.target || e.target.id !== "teamSearch") return;
+  var q = e.target.value.trim().toLowerCase(), n = 0;
+  app.querySelectorAll("#teamList .trow").forEach(function(r){ var hit = !q || r.dataset.n.indexOf(q) >= 0; r.hidden = !hit; if (hit) n++; });
+  var none = document.getElementById("teamNone"); if (none) none.hidden = n > 0;
+});
+function teamPicker(sel){
+  return '<div class="lbl sm">Teams</div><p class="small" style="margin:0 0 4px">They can be put in any position on the teams you tick.</p><div class="tlist">'
+    + Object.keys(POOL).map(function(t, i){ var pos = teamPositions(t);
+      return '<label class="tpick"><span class="tic" style="background:' + TCOL[i % TCOL.length] + '">' + esc(t.charAt(0)) + '</span><span class="m"><span class="t" style="display:block">' + esc(t) + '</span><span class="s" style="display:block">' + esc(pos.slice(0, 4).join(", ") + (pos.length > 4 ? " and " + (pos.length - 4) + " more" : "")) + '</span></span><input type="checkbox" name="pTeam" value="' + esc(t) + '"' + (sel.indexOf(t) >= 0 ? ' checked' : '') + '></label>'; }).join("") + '</div>';
+}
+SHEETS.addPerson = function(){
+  return '<h4>Add a person</h4><p class="s">They show up on Team and can be put on the roster right away.</p><div class="pform">'
+    + '<div class="two"><div><label class="fl" for="apFirst">First name</label><input class="field" id="apFirst" autocomplete="off"></div><div><label class="fl" for="apLast">Last name</label><input class="field" id="apLast" autocomplete="off"></div></div>'
+    + teamPicker([]) + '</div><div class="btns"><button class="btn" data-a="addPerson">Add person</button><button class="btn sec" data-a="closeSheet">Cancel</button></div>';
+};
+SHEETS.editTeams = function(o){
+  return '<h4>' + esc(o.id) + '\'s teams</h4><p class="s">Untick a team to take them off it. Serves already on the roster stay.</p>' + teamPicker(teamsOf(o.id))
+    + '<div class="btns"><button class="btn" data-a="saveTeams" data-id="' + esc(o.id) + '">Save</button><button class="btn sec" data-a="closeSheet">Cancel</button></div>';
+};
+function pickedTeams(){ return Array.prototype.map.call(app.querySelectorAll('input[name="pTeam"]:checked'), function(i){ return i.value; }); }
+function setTeams(p, ts){ Object.keys(POOL).forEach(function(t){ var a = POOL[t], i = a.indexOf(p); if (ts.indexOf(t) >= 0) { if (i < 0) a.push(p); } else if (i >= 0) a.splice(i, 1); }); }
+A.addPerson = function(){
+  var f = (document.getElementById("apFirst").value || "").trim().replace(/\s+/g, " "), l = (document.getElementById("apLast").value || "").trim().replace(/\s+/g, " ");
+  if (!f) { toast("Add a first name."); render(); return; }
+  var name = l ? f + " " + l : f, ts = pickedTeams();
+  var all = everyone().concat(Object.keys(LEADERS).map(function(t){ return LEADERS[t]; }));
+  if (all.some(function(p){ return p && p.toLowerCase() === name.toLowerCase(); })) { toast(name + " is already on Team. Add a last name to tell them apart."); render(); return; }
+  if (!S.cfg) S.cfg = {}; if (!S.cfg.people) S.cfg.people = PEOPLE; if (!S.cfg.pool) S.cfg.pool = POOL;
+  if (PEOPLE.indexOf(name) < 0) PEOPLE.push(name);
+  setTeams(name, ts);
+  S.sheet = null; toast(name + " added" + (ts.length ? " to " + ts.join(", ") + "." : ". Add them to a team from their page so you can roster them.")); render.same = true; render();
+};
+A.saveTeams = function(d){ var p = d.id, ts = pickedTeams(); if (PEOPLE.indexOf(p) < 0) PEOPLE.push(p); setTeams(p, ts); S.sheet = null; toast(p + "'s teams saved."); render.same = true; render(); };
+var basePerson8 = SCREENS.person;
+SCREENS.person = function(o){
+  var r = basePerson8(o);
+  if (S.view === "admin") r.body = r.body.replace('<div class="lbl">Coming up</div>', '<div class="btns"><button class="btn sec" data-a="sheet" data-s="editTeams" data-id="' + esc(o.id) + '">Edit teams</button></div><div class="lbl">Coming up</div>');
+  return r;
 };
 var baseLocal7 = localDefaults;
 localDefaults = function(){ var o = baseLocal7(); o.msgTab = "chats"; return o; };
