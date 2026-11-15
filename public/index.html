@@ -238,6 +238,15 @@ body{background:#fff}
 .ava{flex:none;display:grid;place-items:center;border-radius:50%;overflow:hidden;color:#fff;font:600 16px/1 var(--font)}
 .ava svg{width:100%;height:100%}
 .ava.open{background:var(--track);color:var(--muted)}
+/* Schedule date strip in the 7shifts look (Nov 15) */
+.strip{gap:8px;margin:0 -20px;padding:14px 20px 12px;border-bottom:1px solid var(--line)}
+.strip button{min-width:62px;padding:8px 6px 9px;border:1px solid var(--line);border-radius:12px;background:#fff;color:#2B2B2F;font:500 19px/23px var(--font);box-shadow:0 1px 2px rgba(20,20,40,.04)}
+.strip button small{font:400 13px/16px var(--font);color:#6E6E76;text-transform:none;letter-spacing:0}
+.strip button small:last-child:not(:first-child){font-weight:500;color:var(--badge)}
+.strip button[aria-current]{background:var(--band);border-color:var(--accent);color:#1D1D1F}
+.strip button[aria-current] small{color:#2F4A9A}
+.strip button[aria-current] small:last-child:not(:first-child){color:var(--badge)}
+.strip+div .t{font-weight:500!important;font-size:22px!important;line-height:28px!important}
 .foot7{flex:none;padding:12px 20px 26px;background:#fff}
 .crow{display:flex;align-items:flex-start;gap:16px;padding:14px 0;cursor:pointer}
 .cic{flex:none;width:48px;height:48px;border-radius:50%;display:grid;place-items:center;font:500 22px/1 var(--font);color:#fff}
