@@ -1755,7 +1755,6 @@ ensureShape = function(){ baseEnsure7(); noPending(); };
 SHEETS.cover = function(o){ var x = slot(o.id), sv = svc(x.sid);
   return '<h4>Request Coverage</h4><p class="s">' + esc(x.role) + ', ' + dShort(sv.date) + ' · ' + esc(rangeTxt(sv.svc)) + '</p><div class="grp">'
     + (on("swaps") ? '<div class="row tap" data-a="sheet" data-s="swap" data-id="' + x.id + '"><div class="m"><div class="t">Swap with someone</div><div class="s">They take this, you take one of theirs</div></div><span class="chev">›</span></div>' : '')
-    + (on("openspots") ? '<div class="row tap" data-a="giveaway" data-id="' + x.id + '"><div class="m"><div class="t">Give it away</div><div class="s">Post it to Open spots for ' + esc(x.team) + '</div></div><span class="chev">›</span></div>' : '')
     + '<div class="row tap" data-a="sheet" data-s="cant" data-id="' + x.id + '"><div class="m"><div class="t">Ask my leader to find someone</div><div class="s">Your leader is told right away</div></div><span class="chev">›</span></div></div>'
     + '<p class="small mt">Your leader approves before anything changes.</p>'; };
 
