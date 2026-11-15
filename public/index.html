@@ -159,6 +159,99 @@ body{background:var(--ground);padding:0}
 .phone{width:auto;max-width:none;height:auto;padding:0;border-radius:0;background:none;box-shadow:none}
 .screen{position:fixed;inset:0;height:auto;border-radius:0;padding:env(safe-area-inset-top,0px) env(safe-area-inset-right,0px) env(safe-area-inset-bottom,0px) env(safe-area-inset-left,0px)}
 @media (min-width:640px){body{background:var(--page)}.screen{left:50%;right:auto;width:480px;transform:translateX(-50%);box-shadow:0 0 0 1px color-mix(in srgb,var(--ink) 10%,transparent)}}
+
+/* ---------- 7shifts look (Nov 15) ---------- */
+:root{--ground:#FFFFFF;--surface:#FFFFFF;--ink:#2B2B2F;--muted:#6E6E76;--line:#E7E7EC;--track:#F2F2F5;--field:#D9D9DF;--chevron:#9B9BA3;--accent:#4A72FF;--accent-soft:#EAF0FF;--pop:#4A72FF;--band:#D7E0FD;--badge:#FF5B1F}
+body{background:#fff}
+.screen{background:#fff}
+.hd{min-height:56px;border-bottom:1px solid var(--line);padding:0 10px}
+.hd h3{font:500 20px/26px var(--font)}
+.hd .ic{color:var(--ink)}
+.hd .ic svg{width:28px;height:28px}
+.body{padding:4px 20px 28px}
+.big{font:500 30px/36px var(--font)}
+.lbl{margin:28px 0 12px;font:500 22px/28px var(--font);letter-spacing:-.2px;text-transform:none;color:var(--ink)}
+.lbl a{font:400 17px/22px var(--font);color:var(--ink)}
+.lbl.sm{font:500 14px/18px var(--font);letter-spacing:.04em;text-transform:uppercase;color:var(--muted);margin:24px 0 4px}
+.card{border:1px solid var(--line);border-radius:12px;box-shadow:0 1px 2px rgba(20,20,40,.04)}
+.grp{background:#fff;border:1px solid var(--line);border-radius:12px}
+.row .t{font-weight:500}
+.av{background:#C9D6F7;color:#2F4A9A}
+.btn{border-radius:10px;box-shadow:none;font:500 17px/22px var(--font);min-height:52px}
+.btn.sec{box-shadow:inset 0 0 0 1px #CFCFD6}
+.btn.sm{border-radius:8px;min-height:40px}
+.seg{background:#F1F1F3;border-radius:10px;padding:3px}
+.seg button{min-height:38px;font:500 16px/20px var(--font);color:var(--ink)}
+.seg button[aria-current]{background:#2F2F33;color:#fff;box-shadow:none}
+.tabs{background:#F7F7F8;border-top:1px solid var(--line);padding:8px 6px 26px;backdrop-filter:none}
+.tabs button{font:400 13px/16px var(--font);color:#6B6B72;gap:4px}
+.tabs button svg{width:28px;height:28px}
+.tabs button[aria-current]{color:#1D1D1F;font-weight:600}
+.tabs button[aria-current] svg .f{fill:currentColor}
+.tabs .dot{background:var(--badge);left:calc(50% + 10px)}
+.sheet{background:#fff}
+.field{background:#F4F4F7}
+.bubble.them{background:#F1F1F4}
+.compose input{background:#F1F1F4}
+.band{margin:-4px -20px 0;padding:18px 20px 28px;background:var(--band);color:#2B2B2F}
+.btop{display:flex;justify-content:space-between;align-items:center;margin-bottom:22px;min-height:56px}
+.btop .me{border:0;background:none;padding:0;cursor:pointer;border-radius:50%}
+.btop .org{font:500 15px/20px var(--font);color:#45454B}
+.bell{position:relative;border:0;background:none;color:#4B4B52;width:52px;height:52px;display:grid;place-items:center;cursor:pointer}
+.bell svg{width:34px;height:34px}
+.bdg{position:absolute;top:0;right:0;min-width:24px;height:24px;padding:0 6px;border-radius:99px;background:var(--badge);color:#fff;font:600 14px/24px var(--font);box-shadow:0 0 0 2px #fff;box-sizing:border-box;text-align:center}
+.bdate{display:flex;align-items:center;gap:14px;font:500 15px/20px var(--font);letter-spacing:.04em}
+.wx{display:inline-flex;align-items:center;gap:8px;letter-spacing:0;font-weight:400}
+.wx svg{width:28px;height:28px}
+.bgreet{font:400 22px/28px var(--font);margin-top:16px}
+.bhead{font:500 34px/40px var(--font);letter-spacing:-.5px;margin:24px 0 4px;text-wrap:balance}
+.bhead.sm{font-size:26px;line-height:32px}
+.bhead .evb{margin-top:10px}
+.scard{display:block;background:#fff;border:1px solid #DADDE6;border-radius:12px;margin-top:16px;cursor:pointer;overflow:hidden}
+.scard>.trange{padding:18px 18px 0}
+.trange{display:flex;align-items:baseline;gap:4px 10px;flex-wrap:wrap;color:#2B2B2F}
+.trange b{font-weight:400;font-size:clamp(30px,9.5vw,46px);line-height:1;letter-spacing:-1px}
+.trange small{font-weight:400;font-size:clamp(18px,5vw,26px);line-height:1;margin-left:4px;color:#45454B}
+.trange .arr{font-size:20px;color:#45454B}
+.sline{display:flex;align-items:center;gap:10px;padding:10px 18px 0;font:400 16px/21px var(--font);color:#3A3A40;white-space:nowrap;overflow:hidden}
+.sline>span{overflow:hidden;text-overflow:ellipsis}
+.sline.wrap{white-space:normal;padding:14px 0 0;align-items:flex-start}
+.sline.wrap .rdot{margin-top:4px}
+.rdot{flex:none;display:inline-block;width:13px;height:13px;border-radius:50%;margin-right:8px;vertical-align:-1px}
+.sline .rdot{margin-right:0}
+.sfoot{display:flex;align-items:center;gap:8px;margin-top:16px;padding:14px 18px;border-top:1px solid var(--line);font:400 16px/21px var(--font);color:#3A3A40}
+.sfoot svg{flex:none;width:22px;height:22px}
+.h7{margin:32px 0 16px;font:500 24px/30px var(--font);letter-spacing:-.3px}
+.w7{width:auto;padding:0 44px;display:inline-flex}
+.list7{display:grid}
+.urow{display:flex;align-items:center;gap:16px;padding:12px 0;cursor:pointer}
+.ud{flex:none;width:48px;display:grid;justify-items:center;gap:2px;color:#45454B}
+.ud small{font:400 14px/17px var(--font)}
+.ud b{font:500 19px/23px var(--font);color:#2B2B2F}
+.um{flex:1;min-width:0;display:grid;gap:4px}
+.ut{font:400 17px/22px var(--font);color:#2B2B2F}
+.us{font:400 15px/20px var(--font);color:#45454B;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.us.cl{white-space:normal;color:#6E6E76}
+.ddate{display:flex;align-items:center;gap:12px;margin:12px 0 10px;font:400 18px/24px var(--font)}
+.wrow{display:flex;align-items:flex-start;gap:16px;padding:12px 0}
+.wt{font:400 18px/24px var(--font);color:#2B2B2F}
+.ava{flex:none;display:grid;place-items:center;border-radius:50%;overflow:hidden;color:#fff;font:600 16px/1 var(--font)}
+.ava svg{width:100%;height:100%}
+.ava.open{background:var(--track);color:var(--muted)}
+.foot7{flex:none;padding:12px 20px 26px;background:#fff}
+.crow{display:flex;align-items:flex-start;gap:16px;padding:14px 0;cursor:pointer}
+.cic{flex:none;width:48px;height:48px;border-radius:50%;display:grid;place-items:center;font:500 22px/1 var(--font);color:#fff}
+.cic svg{width:26px;height:26px}
+.scard7{display:block;width:100%;text-align:left;border:0;background:#fff;border-radius:12px;padding:18px 20px;box-shadow:0 2px 12px rgba(20,20,40,.10);margin:12px 0 8px;cursor:pointer;font:inherit;color:inherit}
+.scard7 .st{font:500 22px/28px var(--font)}
+.scard7 .ss{font:400 16px/21px var(--font);color:#6E6E76;margin-top:6px}
+.as{background:#F2F2F4;border-radius:14px;overflow:hidden;display:grid;margin-top:4px}
+.ash{padding:14px;text-align:center;font:400 14px/18px var(--font);color:#6E6E76}
+.as button{border:0;border-top:1px solid #DCDCE0;background:none;padding:16px;font:400 20px/24px var(--font);color:#2F6BF0;cursor:pointer}
+.ascancel{display:block;width:100%;margin-top:10px;border:0;border-radius:14px;background:#fff;box-shadow:inset 0 0 0 1px var(--line);padding:16px;font:600 20px/24px var(--font);color:#2F6BF0;cursor:pointer}
+.mb{margin-bottom:12px}
+.stats{grid-template-columns:repeat(3,1fr)}
+.three{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}
 </style>
 
 <div class="page">
@@ -558,8 +651,8 @@ SCREENS["admin:dash"] = function(){
   var body = '<p class="small" style="margin:0 4px">' + todayLong() + '</p><h2 class="big">' + dashTitle(sv) + '</h2>'
     + '<div class="card"><div style="display:flex;justify-content:space-between;align-items:baseline"><div class="t" style="font:600 16px/21px var(--font)">' + esc(SVC[sv.svc].name) + ' · ' + dm(sv.date) + '</div><span class="small">' + sl.length + ' spots</span></div>'
     + '<div class="bar" style="margin:10px 0 12px"><i style="width:' + (c.confirmed/tot*100) + '%;background:var(--ok)"></i><i style="width:' + (c.pending/tot*100) + '%;background:var(--chevron)"></i><i style="width:' + (c.open/tot*100) + '%;background:var(--warn)"></i><i style="width:' + (c.declined/tot*100) + '%;background:var(--late)"></i></div>'
-    + '<div class="stats"><div class="stat ok"><b>' + c.confirmed + '</b><span>Confirmed</span></div><div class="stat"><b>' + c.pending + '</b><span>Not yet</span></div><div class="stat warn"><b>' + c.open + '</b><span>Open</span></div><div class="stat late"><b>' + c.declined + '</b><span>Can\'t</span></div></div>'
-    + '<div class="btns two"><button class="btn sm soft" style="width:100%" data-a="openSvc" data-id="' + sv.id + '">Open schedule</button><button class="btn sm sec" style="width:100%" data-a="sheet" data-s="nudge">Remind not yet</button></div></div>';
+    + '<div class="stats"><div class="stat ok"><b>' + c.confirmed + '</b><span>Confirmed</span></div><div class="stat warn"><b>' + c.open + '</b><span>Open</span></div><div class="stat late"><b>' + c.declined + '</b><span>Can\'t</span></div></div>'
+    + '<div class="btns"><button class="btn sm soft" style="width:100%" data-a="openSvc" data-id="' + sv.id + '">Open schedule</button></div></div>';
   var pr = pendingReqs();
   body += '<div class="lbl">Needs you<a data-a="tab" data-v="reqs">' + pr.length + ' requests</a></div><div class="grp">' + pr.slice(0,3).map(reqRowShort).join("") + (pr.length ? '' : '<div class="empty">All caught up.</div>') + '</div>';
   var lots = PEOPLE.concat(Object.keys(POOL).reduce(function(a, t){ return a.concat(POOL[t]); }, [])).filter(function(p, i, a){ return a.indexOf(p) === i && wk(p) >= 3; });
@@ -691,11 +784,11 @@ var A = {
     S.notifs.unshift({ t: { swap: "Swap approved", pickup: "You're on!", giveaway: "Give-away approved", cant: "Your leader saw it", blockout: "Blockout approved" }[r.kind], s: reqTitle(r)[1], when: "Now" });
     if (S.stack.length) S.stack.pop(); toast("Approved. " + r.from + " is told."); render.same = true; render(); },
   decline: function(d){ var r = req(d.id); r.state = "declined"; if (r.kind === "pickup") delete S.pendingMine[r.slot]; if (S.stack.length) S.stack.pop(); toast("Declined. " + r.from + " is told."); render.same = true; render(); },
-  assignCover: function(d){ var r = req(d.id), x = slot(r.slot); x.person = d.p; x.status = "pending"; x.dirty = true; r.state = "approved"; S.stack.pop(); toast(d.p + " is on. Publish to tell them."); render(); },
-  assign: function(d){ var x = slot(d.id); x.person = d.p; x.status = "pending"; x.dirty = true; S.sheet = null; toast(d.p + " added. Publish to tell them."); render.same = true; render(); },
+  assignCover: function(d){ var r = req(d.id), x = slot(r.slot); x.person = d.p; x.status = "confirmed"; x.dirty = true; r.state = "approved"; S.stack.pop(); toast(d.p + " is on. Publish to tell them."); render(); },
+  assign: function(d){ var x = slot(d.id); x.person = d.p; x.status = "confirmed"; x.dirty = true; S.sheet = null; toast(d.p + " added. Publish to tell them."); render.same = true; render(); },
   clearSlot: function(d){ var x = slot(d.id); x.person = null; x.status = "open"; x.dirty = true; S.sheet = null; render.same = true; render(); },
   postOpen: function(d){ var x = slot(d.id); x.person = null; x.status = "open"; S.sheet = null; toast("Posted. Volunteers on " + x.team + " can say I can serve."); render.same = true; render(); },
-  autofill: function(d){ var sv = svc(S.adminSid), n = 0; S.slots.forEach(function(x){ if (x.sid === sv.id && (!x.person || x.status === "declined")) { var pick = POOL[x.team].filter(function(p){ return !servingAt(sv.id, p) && !blockedOn(p, sv); })[0]; if (pick) { x.person = pick; x.status = "pending"; x.dirty = true; n++; } } }); S.sheet = null; toast(n ? "Filled " + n + " spot" + (n > 1 ? "s" : "") + " with people who are free. Check, then publish." : "No one free for the open spots."); render.same = true; render(); },
+  autofill: function(d){ var sv = svc(S.adminSid), n = 0; S.slots.forEach(function(x){ if (x.sid === sv.id && (!x.person || x.status === "declined")) { var pick = POOL[x.team].filter(function(p){ return !servingAt(sv.id, p) && !blockedOn(p, sv); })[0]; if (pick) { x.person = pick; x.status = "confirmed"; x.dirty = true; n++; } } }); S.sheet = null; toast(n ? "Filled " + n + " spot" + (n > 1 ? "s" : "") + " with people who are free. Check, then publish." : "No one free for the open spots."); render.same = true; render(); },
   useTemplate: function(d){ S.sheet = null; toast("Applied \"" + d.t + "\" to empty spots (test copy)"); render.same = true; render(); },
   publish: function(){ var sv = svc(S.adminSid); sv.published = true; var n = S.slots.filter(function(x){ return x.dirty; }).length; S.slots.forEach(function(x){ x.dirty = false; }); S.sheet = null; toast("Published. " + (n ? n + " volunteer" + (n > 1 ? "s" : "") + " notified." : "Volunteers can see it now.")); render.same = true; render(); },
   postAnn: function(){ var to = document.querySelector("#anTo [aria-pressed=true]"); S.announcements.unshift({ id: "a" + Date.now(), who: ADMIN, to: to ? to.textContent : "Everyone", when: "Just now", title: document.getElementById("anTitle").value || "Announcement", text: document.getElementById("anText").value }); S.notifs.unshift({ t: "New announcement", s: document.getElementById("anTitle").value, when: "Now" }); S.sheet = null; S.msgTab = "ann"; toast("Posted. Switch to Volunteer to see it."); render(); },
@@ -716,7 +809,7 @@ app.addEventListener("click", function(e){
   var f = A[el.dataset.a]; if (f) f(el.dataset, el);
 });
 app.addEventListener("change", function(e){ var el = e.target; if (el.dataset && A[el.dataset.a]) A[el.dataset.a](el.dataset, el); });
-app.addEventListener("submit", function(e){ e.preventDefault(); var f = e.target, c = S.chats.filter(function(c){ return c.id === f.dataset.id; })[0], v = f.querySelector('input').value.trim(); if (!v) return; c.msgs.push({ who: S.view === "admin" ? ADMIN : ME, t: v }); render(); var b = document.getElementById("body"); b.scrollTop = b.scrollHeight; var i = app.querySelector(".compose input"); if (i) i.focus(); });
+app.addEventListener("submit", function(e){ e.preventDefault(); var f = e.target, c = S.chats.filter(function(c){ return c.id === f.dataset.id; })[0], v = f.querySelector('input').value.trim(); if (!v) return; c.msgs.push({ who: meName(), t: v, at: Date.now() }); render(); var b = document.getElementById("body"); b.scrollTop = b.scrollHeight; var i = app.querySelector(".compose input"); if (i) i.focus(); });
 
 /* ---------------- view switch and jump list ---------------- */
 document.querySelectorAll(".switch button").forEach(function(b){ b.addEventListener("click", function(){ S.view = b.dataset.v; S.stack = []; S.sheet = null; render(); }); });
@@ -1077,7 +1170,6 @@ SHEETS.publish = function(){ var sv = svc(S.adminSid), changed = S.slots.filter(
   return '<h4>Publish ' + dShort(sv.date) + ' ' + sv.svc + '?</h4><p class="s">' + (on("drafts") ? (changed.length ? changed.length + ' spot' + (changed.length > 1 ? 's' : '') + ' changed since you last published.' : 'No changes since you last published.') : 'Volunteers will see this service.') + '</p>'
     + (names.length ? '<div class="card small" style="color:var(--ink)"><b>' + (on("drafts") ? 'Only these people are told' : 'Everyone on this service is told') + ':</b> ' + esc(names.join(", ")) + '.' + (on("drafts") ? ' Everyone else already knows, so they won\'t hear again.' : '') + '</div>' : '')
     + (skip.length ? '<div class="warnbox mt"><span>ⓘ</span><span>' + esc(skip.join(", ")) + ' turned off schedule messages, so they\'ll only see it in the app.</span></div>' : '')
-    + '<div class="grp mt"><label class="row tap"><div class="m"><div class="t">Ask them to confirm</div></div><input type="checkbox" class="tog" checked></label></div>'
     + '<div class="btns"><button class="btn" data-a="publish">Publish</button><button class="btn sec" data-a="closeSheet">Not yet</button></div>'; };
 SHEETS.templates = function(){ var sv = svc(S.adminSid);
   return '<h4>Templates</h4><p class="s">Drop a saved line-up onto ' + dShort(sv.date) + ' ' + sv.svc + '. It only fills empty spots.</p>' + (S.templates.length ? '' : '<p class="small">No templates saved yet.</p>') + '<div class="grp">' + S.templates.map(function(t, i){ return '<div class="row tap" data-a="useTemplate" data-id="' + i + '"><div class="m"><div class="t">' + esc(t.name) + '</div><div class="s">' + esc(t.sv) + ' · ' + Object.keys(t.lines).length + ' spots · saved by ' + esc(t.by) + '</div></div><span class="chev">›</span></div>'; }).join("") + '</div>'
@@ -1106,7 +1198,7 @@ A.feat = function(d, el){ S.feat[d.k] = el.checked; toast(FEATS.filter(function(
 A.flag = function(d){ var ls = lastSvc(); if (!ls) return; var k = ls.id + "|" + d.p; if (S.attend[k] === d.v) delete S.attend[k]; else S.attend[k] = d.v; render.same = true; render(); };
 A.saveSpotNote = function(d){ var x = slot(d.id); x.note = (document.getElementById("spotNote").value || "").trim(); S.sheet = null; toast(x.note ? "Note saved. " + (x.person || "Whoever serves") + " sees it on their card." : "Note removed."); render.same = true; render(); };
 A.useTemplate = function(d){ var t = S.templates[+d.id], n = 0, sv = svc(S.adminSid);
-  S.slots.forEach(function(x){ if (x.sid !== sv.id || (x.person && x.status !== "declined")) return; var p = t.lines[x.team + "|" + x.role]; if (p && !servingAt(sv.id, p) && !blockedOn(p, sv)) { x.person = p; x.status = "pending"; x.dirty = true; n++; } });
+  S.slots.forEach(function(x){ if (x.sid !== sv.id || (x.person && x.status !== "declined")) return; var p = t.lines[x.team + "|" + x.role]; if (p && !servingAt(sv.id, p) && !blockedOn(p, sv)) { x.person = p; x.status = "confirmed"; x.dirty = true; n++; } });
   S.sheet = null; toast(n ? "Filled " + n + " empty spot" + (n > 1 ? "s" : "") + " from \"" + t.name + "\". Check, then publish." : "\"" + t.name + "\" had nobody free for the empty spots."); render.same = true; render(); };
 A.saveTemplate = function(){ var sv = svc(S.adminSid), name = (document.getElementById("tplName").value || "").trim() || (sv.svc + " line-up"), lines = {};
   S.slots.forEach(function(x){ if (x.sid === sv.id && x.person && x.status !== "declined") lines[x.team + "|" + x.role] = x.person; });
@@ -1158,7 +1250,7 @@ function seedReal(D){
   D.schedule.forEach(function(r){ var id = r[0] + "|" + r[1]; if (!byId[id]) { byId[id] = { id: id, date: r[0], svc: r[1], published: true }; services.push(byId[id]); } });
   services.sort(function(a, b){ return a.date < b.date ? -1 : a.date > b.date ? 1 : order.indexOf(a.svc) - order.indexOf(b.svc); });
   function add(sv, team, role, person){ var key = sv.id + "|" + team + "|" + role; count[key] = (count[key] || 0) + 1;
-    slots.push({ id: key + "|" + (count[key] - 1), sid: sv.id, team: team, role: role, person: person || null, status: person ? (sv.date < TODAY ? "confirmed" : "pending") : "open", dirty: false }); }
+    slots.push({ id: key + "|" + (count[key] - 1), sid: sv.id, team: team, role: role, person: person || null, status: person ? "confirmed" : "open", dirty: false }); }
   var rows = {}; D.schedule.forEach(function(r){ var k = r[0] + "|" + r[1]; (rows[k] = rows[k] || []).push(r); });
   services.forEach(function(sv){
     var have = {};
@@ -1376,6 +1468,300 @@ JUMPS = {
     ["Shout-outs", function(){ A.tab({ v: "msgs" }); S.msgTab = "ann"; render(); }]]
 };
 drawJumps.v = null;
+
+
+/* ---------- 7shifts look (Nov 15): Home, serve details, Messaging, open spots switch ---------- */
+FEATS.push(["openspots","Open spots","Open spots up for grabs on Home, and the list where volunteers take a spot."]);
+var ORG = "Hyderabad Christian Center";
+var PAL = ["#E8B4D2","#8FCFC2","#B5CB8C","#F3B1A2","#A6BDF2","#EFCB82","#C6B1EA","#93D1E8"];
+var DOTS = ["#E9A6CF","#16B2D6","#2DD4B4","#F59E0B","#7C83F7","#F06A6A","#5BBE6A","#C084FC"];
+var NUM = ["no","one","two","three","four","five"];
+function hashN(t){ var h = 0; t = String(t || ""); for (var i = 0; i < t.length; i++) h = (h * 31 + t.charCodeAt(i)) >>> 0; return h; }
+function dot(role){ return '<i class="rdot" style="background:' + DOTS[hashN(role) % DOTS.length] + '"></i>'; }
+var PERSON = '<svg viewBox="0 0 40 40" aria-hidden="true"><circle cx="20" cy="15.5" r="7.5" fill="rgba(255,255,255,.88)"/><path d="M5 38c1.5-8.5 8-12.5 15-12.5S33.5 29.5 35 38z" fill="rgba(255,255,255,.88)"/></svg>';
+function ava(p, size){ size = size || 44; return '<span class="ava" style="width:' + size + 'px;height:' + size + 'px;background:' + PAL[hashN(p) % PAL.length] + '" aria-hidden="true">' + PERSON + '</span>'; }
+function SV(d, inner, w){ return '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="' + (w || 1.6) + '" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">' + inner + '</svg>'; }
+var ICON7 = {
+  home: SV(0, '<path class="f" d="M4 11.2 12 4.5l8 6.7V20h-5.2v-5.4H9.2V20H4z"/>'),
+  cal: SV(0, '<rect x="4" y="5" width="16" height="15" rx="2"/><path d="M8 3v4M16 3v4M4 9.5h16"/><path d="M8.5 13h.01M12 13h.01M15.5 13h.01M8.5 16.5h.01M12 16.5h.01M15.5 16.5h.01" stroke-width="2.4"/>'),
+  chat: SV(0, '<path class="f" d="M12 4.5c4.7 0 8.5 3 8.5 6.7s-3.8 6.7-8.5 6.7c-.9 0-1.8-.1-2.6-.3L5 19.5l1.1-3.3c-1.6-1.2-2.6-3-2.6-5 0-3.7 3.8-6.7 8.5-6.7z"/>'),
+  more: SV(0, '<path d="M4 7h16M4 12h16M4 17h16"/>')
+};
+var BELL = SV(0, '<path d="M6 16.5v-5a6 6 0 0 1 12 0v5l1.6 2H4.4z"/><path d="M10 20.5a2 2 0 0 0 4 0"/>', 1.5);
+var CHECK = SV(0, '<path d="M20 11.5v.5a8 8 0 1 1-4.7-7.3"/><path d="M8.5 11.5l3 3L20 6"/>', 1.8);
+var PENCIL = SV(0, '<path d="M12 4H6.5A2.5 2.5 0 0 0 4 6.5v11A2.5 2.5 0 0 0 6.5 20h11a2.5 2.5 0 0 0 2.5-2.5V12"/><path d="M18.5 3.5l2 2L12 14l-3 1 1-3z"/>', 1.6);
+var CH_ICON = {
+  team: SV(0, '<rect x="9.5" y="3.5" width="5" height="4" rx="1"/><rect x="3.5" y="15.5" width="5" height="4" rx="1"/><rect x="9.5" y="15.5" width="5" height="4" rx="1"/><rect x="15.5" y="15.5" width="5" height="4" rx="1"/><path d="M12 7.5v4M6 15.5v-4h12v4M12 11.5v4"/>'),
+  shouts: SV(0, '<path d="M8 3h8l-2 6h-4z"/><circle cx="12" cy="15" r="5.5"/><path d="M12 12.3l.9 1.8 2 .3-1.4 1.4.3 2-1.8-.9-1.8.9.3-2-1.4-1.4 2-.3z"/>'),
+  all: SV(0, '<path d="M12 21s-6.5-5.6-6.5-11a6.5 6.5 0 0 1 13 0C18.5 15.4 12 21 12 21z"/><circle cx="12" cy="10" r="2.4"/>')
+};
+var CH_COLOR = { team: "#2BB39B", shouts: "#F26A21", all: "#3D6EF5" };
+
+/* times: arrive -> end; a service with no end time ends 2 hours after it starts */
+function minsOf(t){ var a = to24(t); return a[0] * 60 + a[1]; }
+function fmtMins(m){ m = ((m % 1440) + 1440) % 1440; var h = Math.floor(m / 60), mm = m % 60; return (h % 12 || 12) + ":" + ("0" + mm).slice(-2) + " " + (h < 12 ? "AM" : "PM"); }
+function svcStart(k){ var x = SVC[k] || {}; return x.call || x.time || ""; }
+function svcEnd(k){ var x = SVC[k] || {}; return x.end || (x.time ? fmtMins(minsOf(x.time) + 120) : ""); }
+function rangeTxt(k){ return svcStart(k) + " – " + svcEnd(k); }
+function bigT(t){ var m = String(t).match(/^(\S+)\s*(AM|PM)$/i); return m ? '<span><b>' + esc(m[1]) + '</b><small>' + m[2].toUpperCase() + '</small></span>' : '<span><b>' + esc(t) + '</b></span>'; }
+function bigRange(k){ return '<div class="trange">' + bigT(svcStart(k)) + '<span class="arr">→</span>' + bigT(svcEnd(k)) + '</div>'; }
+function upperDate(iso){ var d = dt(iso); return (DOW[d.getUTCDay()] + ", " + MON[d.getUTCMonth()] + " " + d.getUTCDate()).toUpperCase(); }
+
+/* weather for Hyderabad, from Open-Meteo; nothing shows if it can't load */
+var WX = {}, wxAsked = false;
+function wxLoad(){
+  if (wxAsked || typeof fetch !== "function") return; wxAsked = true;
+  fetch("https://api.open-meteo.com/v1/forecast?latitude=17.385&longitude=78.4867&daily=weather_code,temperature_2m_max&timezone=Asia%2FKolkata&forecast_days=16")
+    .then(function(r){ return r.ok ? r.json() : null; })
+    .then(function(j){ if (!j || !j.daily || !j.daily.time) return; j.daily.time.forEach(function(d, i){ WX[d] = { c: j.daily.weather_code[i], t: Math.round(j.daily.temperature_2m_max[i]) }; }); render.same = true; render(); })
+    .catch(function(){});
+}
+function wxIcon(c){
+  var cloud = '<path d="M7 17h10.5a3.5 3.5 0 0 0 .3-7A5.5 5.5 0 0 0 7.2 9 4 4 0 0 0 7 17z"/>', cloudHi = '<path d="M7 14h10.5a3.5 3.5 0 0 0 .3-7A5.5 5.5 0 0 0 7.2 6 4 4 0 0 0 7 14z"/>';
+  if (c <= 1) return SV(0, '<circle cx="12" cy="12" r="4"/><path d="M12 2.5v2M12 19.5v2M5.3 5.3l1.4 1.4M17.3 17.3l1.4 1.4M2.5 12h2M19.5 12h2M5.3 18.7l1.4-1.4M17.3 6.7l1.4-1.4"/>');
+  if (c >= 95) return SV(0, cloudHi + '<path d="M12.5 15l-2 3.5h3l-2 3.5"/>');
+  if ((c >= 51 && c <= 67) || (c >= 80 && c <= 82)) return SV(0, cloudHi + '<path d="M8.5 17.5v2.5M12 17.5v2.5M15.5 17.5v2.5"/>');
+  if (c === 45 || c === 48) return SV(0, cloudHi + '<path d="M5 18h14M7 21h10"/>');
+  return SV(0, cloud);
+}
+function wx(d){ var w = WX[d]; return w ? '<span class="wx">' + wxIcon(w.c) + w.t + '°C</span>' : ''; }
+
+/* the bell: new notifications since this phone last looked */
+function seenKey(){ return "roster.seen." + (S.view === "admin" ? "admin" : ME); }
+function unread(){ var n = +(LS.get(seenKey()) || 0); return Math.max(0, S.notifs.length - n); }
+function bellBtn(){ var n = unread(); return '<button class="bell" data-a="push" data-s="notifs" aria-label="Notifications' + (n ? ', ' + n + ' new' : '') + '">' + BELL + (n ? '<span class="bdg">' + n + '</span>' : '') + '</button>'; }
+var baseNotifs7 = SCREENS.notifs;
+SCREENS.notifs = function(o){ LS.set(seenKey(), String(S.notifs.length)); return baseNotifs7(o); };
+
+function meName(){ return S.view === "admin" ? (ME || ADMIN) : ME; }
+
+tabbar = function(){
+  var t = S.view === "admin"
+    ? [["dash","Dashboard",ICON.dash],["sched","Schedule",ICON7.cal],["reqs","Requests",ICON.inbox, pendingReqs().length],["msgs","Messaging",ICON7.chat],["more","More",ICON7.more]]
+    : [["home","Home",ICON7.home],["sched","Schedule",ICON7.cal],["msgs","Messaging",ICON7.chat],["more","More",ICON7.more, todosLeft()]];
+  var cur = S.tab[S.view];
+  return '<nav class="tabs">' + t.map(function(x){
+    return '<button data-a="tab" data-v="' + x[0] + '"' + (x[0] === cur && !S.stack.length ? ' aria-current="page"' : '') + '>' + x[2] + (x[3] && on("badges") ? '<span class="dot">' + x[3] + '</span>' : '') + x[1] + '</button>';
+  }).join("") + '</nav>';
+};
+var baseTab7 = A.tab;
+A.tab = function(d){
+  if (S.view === "vol" && d.v === "pool") { baseTab7({ v: "home" }); if (on("openspots")) push("vol:pool"); return; }
+  baseTab7(d);
+};
+
+/* ---------- Home ---------- */
+function tasksLeftFor(x){ var sv = svc(x.sid), n = on("onboarding") ? todosLeft() : 0;
+  ckFor(x.team, sv.svc).forEach(function(k){ k.items.forEach(function(_, i){ if (!S.ticks[sv.id + "|" + k.id + "|" + i]) n++; }); }); return n; }
+function shiftCard(x){ var sv = svc(x.sid), n = tasksLeftFor(x);
+  return '<div class="scard" data-a="detail" data-id="' + x.id + '" role="button" tabindex="0">' + bigRange(sv.svc)
+    + '<div class="sline">' + dot(x.role) + '<span>' + esc(x.role) + ' | ' + esc(x.team) + ' (' + ORG + ')</span></div>'
+    + '<div class="sfoot">' + CHECK + 'You have ' + n + ' incomplete task' + (n === 1 ? '' : 's') + '.</div></div>'; }
+function dateCol(iso){ var d = dt(iso); return '<div class="ud"><small>' + DOW[d.getUTCDay()] + '</small><b>' + d.getUTCDate() + '</b><small>' + MON[d.getUTCMonth()].toUpperCase() + '</small></div>'; }
+function upRow(x){ var sv = svc(x.sid);
+  return '<div class="urow" data-a="detail" data-id="' + x.id + '">' + dateCol(sv.date) + '<div class="um"><div class="ut">' + esc(rangeTxt(sv.svc)) + evTag(sv.date) + '</div><div class="us">' + ORG + '</div><div class="us">' + dot(x.role) + esc(x.role) + ' | ' + esc(x.team) + '</div></div>'
+    + '<span class="chev">›</span></div>'; }
+function openRow(x){ var sv = svc(x.sid);
+  return '<div class="urow" data-a="push" data-s="vol:pool">' + dateCol(sv.date) + '<div class="um"><div class="ut">' + esc(rangeTxt(sv.svc)) + '</div><div class="us">' + dot(x.role) + esc(x.role) + ' | ' + esc(x.team) + '</div></div>'
+    + (S.pendingMine[x.id] ? '<span class="chip c-acc">Hand raised</span>' : '') + '<span class="chev">›</span></div>'; }
+SCREENS["vol:home"] = function(){
+  wxLoad();
+  var m = mine(), today = m.filter(function(x){ return svc(x.sid).date === TODAY; }), later = m.filter(function(x){ return svc(x.sid).date !== TODAY; });
+  var body = '<div class="band"><div class="btop"><button class="me" data-a="tab" data-v="more" aria-label="Your profile">' + ava(ME, 60) + '</button>' + bellBtn() + '</div>'
+    + '<div class="bdate">' + upperDate(TODAY) + wx(TODAY) + '</div>'
+    + '<div class="bgreet">' + greet() + ',<br>' + esc(ME) + '.</div>';
+  if (on("home")) body += '<div class="bhead">' + (today.length ? 'You have<br>' + (NUM[today.length] || today.length) + ' serve' + (today.length > 1 ? 's' : '') + ' today.' : 'You have<br>no serves today.') + evBanner(TODAY) + '</div>';
+  body += today.map(shiftCard).join("") + '</div>';
+  if (on("swaps")) S.requests.filter(function(r){ return r.kind === "swap" && r.to === ME && r.state === "pending" && r.stage === 1; }).forEach(function(r){ var x = slot(r.slot); if (!x) return; var sv = svc(x.sid);
+    body += '<div class="card" style="margin-top:16px"><div class="t" style="font:500 17px/22px var(--font)">' + esc(r.from) + ' asks to swap</div><div class="small">You take ' + esc(x.role) + ', ' + dShort(sv.date) + ' ' + sv.svc + '</div>' + (r.note ? '<p style="margin:8px 0 0;font-size:15px">"' + esc(r.note) + '"</p>' : '') + '<div class="btns two"><button class="btn sm" style="width:100%" data-a="acceptSwap" data-id="' + r.id + '">Accept</button><button class="btn sm sec" style="width:100%" data-a="declineSwap" data-id="' + r.id + '">Decline</button></div><p class="small" style="margin:8px 0 0">Then your leader approves.</p></div>'; });
+  if (on("onboarding")) todosFor(ME).filter(function(t){ return !(S.todoDone[t.id] || {})[ME]; }).slice(0,1).forEach(function(t){
+    body += '<div class="card" style="margin-top:16px"><div class="small" style="text-transform:uppercase;letter-spacing:.06em;font-weight:600">To do</div><div class="t" style="font:500 17px/22px var(--font);margin-top:2px">' + esc(t.title) + '</div><p style="margin:4px 0 0;font-size:15px">' + esc(t.text) + '</p><div class="btns"><button class="btn sm" style="width:100%" data-a="doneTodo" data-id="' + t.id + '">I\'ve done this</button></div></div>'; });
+  var team = ((today[0] || m[0]) || {}).team || teamsOf(ME)[0];
+  if (team) {
+    var lead = LEADERS[team];
+    if (lead && lead !== ME) body += '<h3 class="h7">Message your leader on duty</h3><button class="btn w7" data-a="dmWith" data-id="' + esc(lead) + '">Start chat</button>';
+    else body += '<h3 class="h7">Message your team</h3><button class="btn w7" data-a="openCh" data-id="' + esc("ch:team:" + team) + '">Start chat</button>';
+  }
+  body += '<div class="lbl">Your upcoming serves<a data-a="tab" data-v="sched">View all</a></div>'
+    + (later.length ? '<div class="list7">' + later.slice(0,3).map(upRow).join("") + '</div>' : '<div class="empty">Nothing else coming up.</div>');
+  if (on("openspots")) { var open = openFor(ME);
+    body += '<div class="lbl">Open spots up for grabs<a data-a="push" data-s="vol:pool">View all</a></div>'
+      + (open.length ? '<div class="list7">' + open.slice(0,3).map(openRow).join("") + '</div>' : '<div class="empty">No open spots on your teams.</div>'); }
+  return { head: '', body: body };
+};
+var basePool7 = SCREENS["vol:pool"];
+SCREENS["vol:pool"] = function(o){
+  if (!on("openspots")) return { head: header("Open spots"), body: '<div class="empty">Open spots are turned off.</div>' };
+  return basePool7(o);
+};
+var baseSched7 = SCREENS["vol:sched"];
+SCREENS["vol:sched"] = function(){
+  if (S.volSchedMode !== "mine") return baseSched7();
+  var m = mine();
+  var body = '<div class="seg"><button data-a="volMode" data-v="mine" aria-current="true">My serves</button><button data-a="volMode" data-v="all">Full roster</button></div>'
+    + (m.length ? '<div class="list7">' + m.map(upRow).join("") + '</div>' : '<div class="empty">No serves coming up.</div>')
+    + '<div class="btns"><button class="btn soft" data-a="ics">Add all to my calendar</button></div>';
+  return { head: header("Schedule"), body: body };
+};
+
+/* ---------- serve details ---------- */
+SCREENS.detail = function(o){
+  var x = slot(o.id); if (!x) return { head: header("Serve details"), body: '<div class="empty">This serve is no longer on the roster.</div>' };
+  wxLoad();
+  var sv = svc(x.sid), me = x.person === ME && S.view === "vol", d = dt(sv.date), info = SVC[sv.svc] || {};
+  var with_ = S.slots.filter(function(y){ return y.sid === x.sid && y.team === x.team && y.id !== x.id; });
+  var body = '<div class="ddate">' + DOW[d.getUTCDay()] + ', ' + MON[d.getUTCMonth()] + ' ' + d.getUTCDate() + (sv.date === TODAY ? ' (Today)' : '') + wx(sv.date) + '</div>' + bigRange(sv.svc)
+    + '<div class="sline wrap">' + dot(x.role) + '<span>' + esc(x.role) + ' | ' + esc(x.team) + ' (' + ORG + ')</span></div>'
+    + '<p class="small" style="margin:8px 0 0">Arrive by ' + esc(svcStart(sv.svc)) + '. ' + esc(info.name || sv.svc) + ' starts ' + esc(info.time || "") + '.</p>'
+    + (x.status === "declined" ? '<div style="margin:10px 0 0">' + statusChip(x) + '</div>' : '') + evBanner(sv.date);
+  if (on("notes") && x.note) body += '<div class="card" style="margin-top:14px"><div class="small" style="text-transform:uppercase;letter-spacing:.06em;font-weight:600">Note from your leader</div><p style="margin:4px 0 0">' + esc(x.note) + '</p></div>';
+  body += '<div class="lbl">Serving with</div>' + (with_.length ? '<div class="list7">' + with_.map(function(y){
+    return '<div class="wrow">' + (y.person ? ava(y.person, 48) : '<span class="ava open" style="width:48px;height:48px">?</span>') + '<div class="um"><div class="wt">' + esc(y.person || "Open spot") + '</div><div class="us">' + esc(rangeTxt(sv.svc)) + '</div><div class="us">' + dot(y.role) + esc(y.role) + ' | ' + esc(y.team) + '</div></div>'
+      + (y.status === "declined" ? statusChip(y) : '') + '</div>'; }).join("") + '</div>' : '<div class="empty">No one else on ' + esc(x.team) + ' for this service.</div>');
+  body += planBlock(sv);
+  ckFor(x.team, sv.svc).forEach(function(k){
+    var done = k.items.filter(function(_, i){ return S.ticks[sv.id + "|" + k.id + "|" + i]; }).length;
+    body += '<div class="lbl">' + esc(k.title) + '<span class="small" style="font-size:15px">' + done + '/' + k.items.length + '</span></div><div class="grp">' + k.items.map(function(t, i){ var key = sv.id + "|" + k.id + "|" + i, tk = S.ticks[key];
+      return '<label class="row tap"><input type="checkbox" data-a="tick" data-k="' + key + '"' + (tk ? ' checked' : '') + ' style="width:20px;height:20px;accent-color:var(--accent)"><div class="m"><div class="t" style="font-weight:400">' + esc(t) + '</div>' + (tk ? '<div class="s">Done by ' + esc(tk.by) + ' · ' + esc(tk.at) + '</div>' : '') + '</div></label>'; }).join("") + '</div>';
+  });
+  if (me) body += '<div class="btns"><button class="btn soft" data-a="ics" data-id="' + x.id + '">Add to calendar</button></div>';
+  var foot = me && x.status !== "declined" ? '<div class="foot7"><button class="btn" data-a="sheet" data-s="cover" data-id="' + x.id + '">Request Coverage</button></div>' : '';
+  return { head: header("Serve details"), body: body, foot: foot, noTabs: !!foot };
+};
+
+/* ---------- Messaging: channels, direct messages, shout-outs ---------- */
+function chatOf(id){ return S.chats.filter(function(c){ return c.id === id; })[0]; }
+function ensureChat(id, name, extra){ var c = chatOf(id); if (!c) { c = { id: id, name: name, msgs: [] }; for (var k in extra) c[k] = extra[k]; S.chats.push(c); } return c; }
+function rolesOf(p){ var r = []; S.slots.forEach(function(x){ if (x.person === p && r.indexOf(x.role) < 0) r.push(x.role); }); return r.sort(); }
+function chans(){
+  var me = meName(), admin = S.view === "admin", out = [];
+  if (!admin) rolesOf(me).forEach(function(r){ out.push({ id: "ch:role:" + r, name: r, kind: "role" }); });
+  (admin ? Object.keys(POOL) : teamsOf(me)).forEach(function(t){ out.push({ id: "ch:team:" + t, name: t, kind: "team" }); });
+  if (on("shoutouts")) out.push({ id: "shouts", name: "Team shout-outs", kind: "shouts" });
+  out.push({ id: "ch:all", name: ORG, kind: "all" });
+  return out;
+}
+function chIcon(ch){
+  if (ch.kind === "role") return '<span class="cic" style="background:' + PAL[hashN(ch.name) % PAL.length] + ';color:#2B2B2F">' + esc(ch.name.charAt(0).toUpperCase()) + '</span>';
+  return '<span class="cic" style="background:' + CH_COLOR[ch.kind] + '">' + CH_ICON[ch.kind] + '</span>';
+}
+function lastAt(c){ var l = c && c.msgs[c.msgs.length - 1]; return (l && l.at) || 0; }
+function lastLine(c, empty){ var l = c && c.msgs[c.msgs.length - 1]; return l ? esc(l.who) + ': ' + esc(l.t) : empty; }
+function dmOther(c){ var me = meName(); return c.dm[0] === me ? c.dm[1] : c.dm[0]; }
+function msgs7(){
+  var body = '<div class="seg"><button data-a="msgTab" data-v="chats"' + (S.msgTab !== "ann" ? ' aria-current="true"' : '') + '>Messages</button><button data-a="msgTab" data-v="ann"' + (S.msgTab === "ann" ? ' aria-current="true"' : '') + '>Announcements</button></div>';
+  if (S.msgTab === "ann") {
+    var sh = visibleShouts(), an = visibleAnns();
+    if (S.view === "admin") body += '<div class="btns" style="margin:0 0 12px"><button class="btn soft" data-a="sheet" data-s="announce">New announcement</button></div>';
+    body += sh.map(shoutCard).join("") + an.map(function(a){ return '<div class="card ann" style="margin-bottom:10px"><div style="display:flex;gap:10px;align-items:center">' + ava(a.who, 36) + '<div><div class="t">' + esc(a.who) + '</div><div class="small">To ' + esc(a.to) + ' · ' + esc(a.when) + '</div></div></div><div class="t" style="margin-top:8px">' + esc(a.title) + '</div><p>' + esc(a.text) + '</p></div>'; }).join("");
+    if (!sh.length && !an.length) body += '<div class="empty">No announcements yet.</div>';
+    return body;
+  }
+  if (on("shoutouts")) body += '<button class="scard7" data-a="sheet" data-s="shoutPick"><div class="st">🎉 Serve shout-outs</div><div class="ss">Thank someone you served with</div></button>';
+  var me = meName(), rows = [], n = 0;
+  chans().forEach(function(ch){
+    var c = ch.kind === "shouts" ? null : chatOf(ch.id), top = ch.kind === "shouts" ? visibleShouts()[0] : null;
+    var sub = ch.kind === "shouts" ? (top ? esc(top.from) + ' thanked ' + esc(top.to) + '.' : 'No shout-outs yet.') : lastLine(c, 'No messages yet. Send something to the channel.');
+    rows.push({ at: lastAt(c), i: n++, html: '<div class="crow" ' + (ch.kind === "shouts" ? 'data-a="push" data-s="shouts7"' : 'data-a="openCh" data-id="' + esc(ch.id) + '"') + '>' + chIcon(ch) + '<div class="um"><div class="wt">' + esc(ch.name) + '</div>' + (ch.kind !== "all" ? '<div class="us">' + ORG + '</div>' : '') + '<div class="us cl">' + sub + '</div></div></div>' });
+  });
+  S.chats.forEach(function(c){
+    if (c.id.indexOf("ch:") === 0) return;
+    if (c.dm) { if (c.dm.indexOf(me) < 0) return;
+      rows.push({ at: lastAt(c), i: n++, html: '<div class="crow" data-a="push" data-s="chat" data-id="' + esc(c.id) + '">' + ava(dmOther(c), 48) + '<div class="um"><div class="wt">' + esc(dmOther(c)) + '</div><div class="us cl">' + lastLine(c, 'No messages yet.') + '</div></div></div>' });
+      return; }
+    rows.push({ at: lastAt(c), i: n++, html: '<div class="crow" data-a="push" data-s="chat" data-id="' + esc(c.id) + '"><span class="cic" style="background:#8A94A6">' + CH_ICON.team + '</span><div class="um"><div class="wt">' + esc(c.name) + '</div><div class="us cl">' + lastLine(c, 'No messages yet.') + '</div></div></div>' });
+  });
+  rows.sort(function(a, b){ return (b.at - a.at) || (a.i - b.i); });
+  return body + '<div class="lbl sm">Recent messages</div><div class="list7">' + rows.map(function(r){ return r.html; }).join("") + '</div>';
+}
+var COMPOSE = '<button class="ic" data-a="sheet" data-s="compose" aria-label="New conversation">' + PENCIL + '</button>';
+SCREENS["vol:msgs"] = function(){ return { head: header("Messaging", { right: COMPOSE }), body: msgs7() }; };
+SCREENS["admin:msgs"] = function(){ return { head: header("Messaging", { right: COMPOSE }), body: msgs7() }; };
+SCREENS.chat = function(o){
+  var c = chatOf(o.id); if (!c) return { head: header("Chat"), body: '<div class="empty">This chat is gone.</div>' };
+  var me = meName(), title = c.dm ? dmOther(c) : c.name;
+  var sub = c.dm ? 'Direct message' : c.id.indexOf("ch:") === 0 ? 'Channel · ' + ORG : c.auto ? 'Made from the schedule' : 'Group chat';
+  var body = '<p class="small" style="text-align:center;margin:6px 0 10px">' + esc(sub) + '</p>' + (c.msgs.length ? c.msgs.map(function(m){ return '<div class="bubble ' + (m.who === me ? 'me' : 'them') + '">' + (m.who === me ? '' : '<small>' + esc(m.who) + '</small>') + esc(m.t) + '</div>'; }).join("") : '<div class="empty">No messages yet. Say hello.</div>');
+  return { head: header(title), body: body, foot: '<form class="compose" data-a="send" data-id="' + esc(c.id) + '"><input name="t" placeholder="Message" aria-label="Message" autocomplete="off"><button aria-label="Send">↑</button></form>', noTabs: true };
+};
+SCREENS.shouts7 = function(){
+  var sh = visibleShouts();
+  return { head: header("Team shout-outs"), body: '<div class="btns" style="margin:4px 0 14px"><button class="btn soft" data-a="sheet" data-s="shoutPick">Send a shout-out</button></div>' + (sh.length ? sh.map(shoutCard).join("") : '<div class="empty">No shout-outs yet.</div>') };
+};
+A.openCh = function(d){
+  var ch = chans().filter(function(c){ return c.id === d.id; })[0];
+  var name = ch ? ch.name : d.id === "ch:all" ? ORG : String(d.id).replace(/^ch:[a-z]+:/, "");
+  ensureChat(d.id, name, { channel: true }); S.sheet = null; push("chat", { id: d.id });
+};
+A.dmWith = function(d){
+  var me = meName(), p = d.id; if (!me || !p || p === me) return;
+  var pair = [me, p].sort(), id = "dm:" + pair.join("|");
+  ensureChat(id, p, { dm: pair }); S.sheet = null; push("chat", { id: id });
+};
+SHEETS.compose = function(){
+  return '<div class="as"><div class="ash">Start a new conversation</div>' + (S.view === "admin" ? '<button data-a="sheet" data-s="announce">New announcement</button>' : '')
+    + '<button data-a="sheet" data-s="newDm">New direct message</button><button data-a="sheet" data-s="newCh">New channel message</button></div><button class="ascancel" data-a="closeSheet">Cancel</button>';
+};
+SHEETS.newDm = function(){ var me = meName();
+  return '<h4>New direct message</h4><p class="s">Only you and they can see it.</p><div class="grp">' + everyone().filter(function(p){ return p !== me; }).sort().map(function(p){ return '<div class="row tap" data-a="dmWith" data-id="' + esc(p) + '">' + ava(p, 36) + '<div class="m"><div class="t">' + esc(p) + '</div><div class="s">' + esc(teamsOf(p).join(" · ")) + '</div></div><span class="chev">›</span></div>'; }).join("") + '</div>';
+};
+SHEETS.newCh = function(){
+  return '<h4>New channel message</h4><p class="s">Everyone in the channel sees it.</p><div class="grp">' + chans().filter(function(c){ return c.kind !== "shouts"; }).map(function(ch){ return '<div class="row tap" data-a="openCh" data-id="' + esc(ch.id) + '">' + chIcon(ch) + '<div class="m"><div class="t">' + esc(ch.name) + '</div></div><span class="chev">›</span></div>'; }).join("") + '</div>';
+};
+SHEETS.shoutPick = function(){
+  var me = meName(), people = [];
+  if (S.view === "admin") people = everyone();
+  else {
+    var past = S.slots.filter(function(x){ return x.person === me && svc(x.sid) && svc(x.sid).date <= TODAY; }).sort(function(a, b){ return svc(a.sid).date < svc(b.sid).date ? 1 : -1; })[0];
+    if (past) S.slots.forEach(function(y){ if (y.sid === past.sid && y.team === past.team && y.person && people.indexOf(y.person) < 0) people.push(y.person); });
+    if (people.length < 2) teamsOf(me).forEach(function(t){ (POOL[t] || []).forEach(function(p){ if (people.indexOf(p) < 0) people.push(p); }); });
+  }
+  people = people.filter(function(p){ return p !== me; }).sort();
+  return '<h4>Who do you want to thank?</h4><p class="s">The shout-out shows in Team shout-outs.</p><div class="grp">' + (people.length ? people.map(function(p){ return '<div class="row tap" data-a="sheet" data-s="shout" data-id="' + esc(p) + '">' + ava(p, 36) + '<div class="m"><div class="t">' + esc(p) + '</div><div class="s">' + esc(teamsOf(p).join(" · ")) + '</div></div><span class="chev">›</span></div>'; }).join("") : '<div class="empty">No one to thank yet.</div>') + '</div>';
+};
+
+/* ---------- leader screens ---------- */
+var baseDash7 = SCREENS["admin:dash"];
+SCREENS["admin:dash"] = function(){
+  wxLoad();
+  var r = baseDash7(), m = r.body.match(/^<p class="small"[^>]*>[^<]*<\/p><h2 class="big">([\s\S]*?)<\/h2>/);
+  var band = '<div class="band"><div class="btop"><span class="org">HCC · All ministries</span>' + bellBtn() + '</div><div class="bdate">' + upperDate(TODAY) + wx(TODAY) + '</div><div class="bgreet">' + greet() + ',<br>' + esc(ME || "Leader") + '.</div>' + (m ? '<div class="bhead sm">' + m[1] + '</div>' : '') + '</div>';
+  r.body = band + (m ? r.body.slice(m[0].length) : r.body); r.head = ''; return r;
+};
+var baseMore7 = SCREENS["admin:more"];
+SCREENS["admin:more"] = function(){
+  var r = baseMore7(), g = '<div class="lbl">Services</div><div class="grp">' + row("Service times", "Arrive, start and end times on everyone's serves", "push", "svcTimes") + '</div>';
+  r.body = r.body.indexOf('<div class="lbl">This phone</div>') >= 0 ? r.body.replace('<div class="lbl">This phone</div>', g + '<div class="lbl">This phone</div>') : r.body + g; return r;
+};
+SCREENS.svcTimes = function(){
+  var body = '<p class="small" style="margin:8px 0 0">Shown on everyone\'s serves as arrive → end. Write times like 9:00 AM.</p>' + Object.keys(SVC).map(function(k){ var x = SVC[k], i = k.replace(/\W/g, "");
+    return '<div class="lbl">' + esc(x.name || k) + '</div><div class="three"><div><label class="fl" for="c' + i + '">Arrive</label><input class="field" id="c' + i + '" value="' + esc(x.call || "") + '"></div><div><label class="fl" for="t' + i + '">Starts</label><input class="field" id="t' + i + '" value="' + esc(x.time || "") + '"></div><div><label class="fl" for="e' + i + '">Ends</label><input class="field" id="e' + i + '" value="' + esc(svcEnd(k)) + '"></div></div>'; }).join("")
+    + '<div class="btns"><button class="btn" data-a="saveTimes">Save</button></div>';
+  return { head: header("Service times"), body: body };
+};
+A.saveTimes = function(){
+  var bad = 0;
+  Object.keys(SVC).forEach(function(k){ var i = k.replace(/\W/g, ""), x = SVC[k];
+    [["c","call"],["t","time"],["e","end"]].forEach(function(f){ var el = document.getElementById(f[0] + i); if (!el) return;
+      var v = el.value.trim().toUpperCase().replace(/\s+/g, " ").replace(/^(\d{1,2}:\d{2})(AM|PM)$/, "$1 $2");
+      if (!/^\d{1,2}:\d{2} (AM|PM)$/.test(v)) { bad++; return; } x[f[1]] = v; }); });
+  toast(bad ? "Some times weren't saved. Write them like 9:00 AM." : "Service times saved."); render.same = true; render();
+};
+
+/* no Confirm step (Nov 15): anyone on the roster counts as confirmed */
+function noPending(){ (S.slots || []).forEach(function(x){ if (x.person && x.status === "pending") x.status = "confirmed"; }); }
+var baseEnsure7 = ensureShape;
+ensureShape = function(){ baseEnsure7(); noPending(); };
+SHEETS.cover = function(o){ var x = slot(o.id), sv = svc(x.sid);
+  return '<h4>Request Coverage</h4><p class="s">' + esc(x.role) + ', ' + dShort(sv.date) + ' · ' + esc(rangeTxt(sv.svc)) + '</p><div class="grp">'
+    + (on("swaps") ? '<div class="row tap" data-a="sheet" data-s="swap" data-id="' + x.id + '"><div class="m"><div class="t">Swap with someone</div><div class="s">They take this, you take one of theirs</div></div><span class="chev">›</span></div>' : '')
+    + (on("openspots") ? '<div class="row tap" data-a="giveaway" data-id="' + x.id + '"><div class="m"><div class="t">Give it away</div><div class="s">Post it to Open spots for ' + esc(x.team) + '</div></div><span class="chev">›</span></div>' : '')
+    + '<div class="row tap" data-a="sheet" data-s="cant" data-id="' + x.id + '"><div class="m"><div class="t">Ask my leader to find someone</div><div class="s">Your leader is told right away</div></div><span class="chev">›</span></div></div>'
+    + '<p class="small mt">Your leader approves before anything changes.</p>'; };
+var baseLocal7 = localDefaults;
+localDefaults = function(){ var o = baseLocal7(); o.msgTab = "chats"; return o; };
+var baseRender7 = render;
+render = function(){ if (ME) ADMIN = ME; baseRender7(); };
 
 /* render: wait for the roster, then ask who you are or for the leader PIN */
 var baseRender = render;
