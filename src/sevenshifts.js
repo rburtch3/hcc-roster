@@ -177,8 +177,9 @@ export const PUBLISH_WEEKS = ["2026-11-22"];
  * up to MAX_CREATES a call. Returns { week, published, remaining, notified }.
  */
 export async function publishWeek(env, sunday, { fetchFn, dryRun = false } = {}) {
-  if (!PUBLISH_WEEKS.includes(sunday)) return { error: "That week isn't approved for publishing." };
+  if (!dryRun && !PUBLISH_WEEKS.includes(sunday)) return { error: "That week isn't approved for publishing." };
   const days = weekDates(sunday);
+  if (!days) return { error: "week must be a Sunday, like 2026-11-15" };
   const api = client(env, fetchFn);
   const loc = env.SEVENSHIFTS_LOCATION_ID;
   const shifts = await api.all(`/shifts?location_id=${loc}&start[gte]=${utc(days[0], 0, 0)}&start[lte]=${utc(days[6], 23, 59)}&include_draft=true`);
@@ -189,7 +190,8 @@ export async function publishWeek(env, sunday, { fetchFn, dryRun = false } = {})
   if (dryRun) {
     const count = (f) => live.filter(f).length;
     return { week: sunday, shifts: live.length, drafts: count(isDraft), ours: count(ours), toPublish: drafts.length,
-      sample: live.slice(0, 3).map((s) => ({ draft: s.draft, publish_status: s.publish_status, notes: s.notes })) };
+      published: count((s) => !isDraft(s)), notified: count((s) => s.notified),
+      sample: live.slice(0, 3).map((s) => ({ draft: s.draft, publish_status: s.publish_status, notified: s.notified, notes: s.notes, created: s.created, modified: s.modified })) };
   }
   let published = 0, notified = 0;
   for (const s of drafts.slice(0, MAX_CREATES)) {
