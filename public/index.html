@@ -2680,6 +2680,13 @@ SCREENS["vol:more"] = function(o){ var r = baseVolMore14(o);
   if (r && on("onboarding") && !todosFor(ME).length) r.body = r.body.replace(/(<div class="t">To-dos<\/div><div class="s">)All done(<\/div>)/, '$1None right now$2');
   return r; };
 
+/* Checklists can go to everyone on a service, not one team only (Nov 16, user comment "checklist not showing from admin") */
+ckFor = function(team, sv){ return on("checklists") ? S.checklists.filter(function(k){ return (k.team === team || k.team === "Everyone") && k.svc === sv; }) : []; };
+var baseAddCk14 = SHEETS.addCk;
+SHEETS.addCk = function(o){ return baseAddCk14(o)
+  .replace('<select class="field" id="ckTeam">', '<select class="field" id="ckTeam"><option>Everyone</option>')
+  .replace('Volunteers on that team tick it off on their serve details.', 'It shows on the serve details of everyone on that team for that service. Pick Everyone to show it to every team.'); };
+
 var baseLocal7 = localDefaults;
 localDefaults = function(){ var o = baseLocal7(); o.msgTab = "chats"; return o; };
 var baseRender7 = render;
