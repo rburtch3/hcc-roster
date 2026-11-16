@@ -128,7 +128,7 @@ test("publish week: only approved weeks, only this app's drafts", async () => {
   assert.equal(r.published, 1);
   assert.equal(r.remaining, 0);
   const no = fake({ shifts: [{ id: 1, draft: true, notes: "From HCC Roster" }] });
-  const r2 = await publishWeek(env, "2026-11-29", { fetchFn: no.fn });
+  const r2 = await publishWeek(env, "2026-12-06", { fetchFn: no.fn });
   assert.match(r2.error, /isn't approved/);
   assert.equal(no.calls.length, 0);
 });
