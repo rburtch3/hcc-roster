@@ -2713,6 +2713,13 @@ SHEETS.addCk = function(o){ return baseAddCk14(o)
   .replace('<select class="field" id="ckTeam">', '<select class="field" id="ckTeam"><option>Everyone</option>')
   .replace('Volunteers on that team tick it off on their serve details.', 'It shows on the serve details of everyone on that team for that service. Pick Everyone to show it to every team.'); };
 
+/* Team leader view looks like the leader view: no banner on each screen; leave from More › Volunteer view, as leaders do (Nov 16, user comment "replace w/ admin volunteer view") */
+scopeBanner = function(){ return ''; };
+var baseMore15 = SCREENS["admin:more"];
+SCREENS["admin:more"] = function(o){ var r = baseMore15(o); if (!r || !scoped()) return r;
+  r.body = r.body.replace(/<div class="row tap" data-a="leaveTeamLead"[^>]*><div class="m"><div class="t">Back to volunteer view<\/div><\/div>/, '<div class="row tap" data-a="leaveTeamLead" data-s="" data-t="" data-v=""><div class="m"><div class="t">Volunteer view</div><div class="s">See the roster as a volunteer</div></div>');
+  return r; };
+
 var baseLocal7 = localDefaults;
 localDefaults = function(){ var o = baseLocal7(); o.msgTab = "chats"; return o; };
 var baseRender7 = render;
