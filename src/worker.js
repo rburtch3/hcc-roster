@@ -222,6 +222,32 @@ export async function handleSevenShifts(request, env, loadRoster, fetchFn) {
   }
 }
 
+/** GET /api/cal?n=Name: that person's published serves as a calendar feed (times are India time, like the app). */
+export async function handleCal(request, store) {
+  if (request.method !== "GET") return json({ error: "GET only" }, 405);
+  const name = new URL(request.url).searchParams.get("n") || "";
+  const { data } = await store.get();
+  let st = {};
+  try { st = data ? JSON.parse(data) : {}; } catch { st = {}; }
+  const svcs = {}; (st.services || []).forEach((v) => { svcs[v.id] = v; });
+  const cfg = (st.cfg && st.cfg.services) || {};
+  const since = new Date(Date.now() - 14 * 864e5).toISOString().slice(0, 10);
+  const hm = (t) => { const m = String(t || "").match(/(\d{1,2}):(\d{2})\s*([AP]M)/i); return m ? [(+m[1] % 12) + (m[3].toUpperCase() === "PM" ? 12 : 0), +m[2]] : [10, 0]; };
+  const stamp = (iso, t, add = 0) => new Date(Date.UTC(+iso.slice(0, 4), +iso.slice(5, 7) - 1, +iso.slice(8, 10), t[0], t[1]) - 330 * 60000 + add).toISOString().replace(/[-:]/g, "").slice(0, 15) + "Z";
+  const clean = (t) => String(t || "").replace(/[\\;,]/g, " ").replace(/[\r\n]+/g, " ");
+  const now = stamp(new Date().toISOString().slice(0, 10), [0, 0]);
+  const lines = ["BEGIN:VCALENDAR", "VERSION:2.0", "PRODID:-//HCC//Roster//EN", "CALSCALE:GREGORIAN", "METHOD:PUBLISH", "X-WR-CALNAME:HCC Roster" + (name ? " " + clean(name) : ""), "REFRESH-INTERVAL;VALUE=DURATION:PT6H", "X-PUBLISHED-TTL:PT6H"];
+  if (name) (st.slots || []).forEach((x) => {
+    const sv = svcs[x.sid];
+    if (x.person !== name || x.status === "declined" || !sv || sv.published === false || !sv.date || sv.date < since) return;
+    const c = cfg[sv.svc] || {}, t = hm(c.call);
+    lines.push("BEGIN:VEVENT", "UID:" + String(x.id).replace(/[^A-Za-z0-9]/g, "") + "@hcc-roster", "DTSTAMP:" + now, "DTSTART:" + stamp(sv.date, t), "DTEND:" + stamp(sv.date, t, 2 * 3600000),
+      "SUMMARY:" + clean((x.role || "Serving") + " · " + (c.name || sv.svc)), "DESCRIPTION:" + clean((x.team || "") + ". Call time " + (c.call || "") + " service " + (c.time || "")), "END:VEVENT");
+  });
+  lines.push("END:VCALENDAR");
+  return new Response(lines.join("\r\n") + "\r\n", { headers: { "content-type": "text/calendar; charset=utf-8", "cache-control": "no-store", "access-control-allow-origin": "*" } });
+}
+
 export default {
   async fetch(request, env) {
     const url = new URL(request.url);
@@ -229,7 +255,7 @@ export default {
       const loadRoster = async () => (await env.ASSETS.fetch(new URL("/sheet-shifts.json", url))).json();
       return handleSevenShifts(request, env, loadRoster);
     }
-    const routes = { "/api/state": handleState, "/api/unlock": handleUnlock, "/api/contacts": handleContacts, "/api/vpin": handleVolPin, "/api/emergency": handleEmergency };
+    const routes = { "/api/state": handleState, "/api/unlock": handleUnlock, "/api/contacts": handleContacts, "/api/vpin": handleVolPin, "/api/emergency": handleEmergency, "/api/cal": handleCal };
     const h = routes[url.pathname];
     if (h) return h(request, env.ROSTER.get(env.ROSTER.idFromName("hcc")));
     return env.ASSETS.fetch(request);

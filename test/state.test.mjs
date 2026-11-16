@@ -162,3 +162,18 @@ test("emergency contact: only that volunteer changes it, leaders can read, never
   assert.deepEqual(await (await mod.handleEmergency(vreq("/api/emergency?name=Ana", "GET", null, { "x-roster-key": lead }), s)).json(), body);
   assert.equal(JSON.stringify(await (await handleState(req("GET"), s)).json()).includes("555"), false);
 });
+
+test("calendar feed lists only that person's published serves", async () => {
+  const s = mem();
+  const st = { services: [{ id: "a", date: "2099-01-04", svc: "Sun AM", published: true }, { id: "b", date: "2099-01-07", svc: "Wed PM", published: false }],
+    slots: [{ id: "x1", sid: "a", person: "Ann", role: "Singer", team: "Worship" }, { id: "x2", sid: "b", person: "Ann", role: "Singer", team: "Worship" }, { id: "x3", sid: "a", person: "Bo", role: "Drums", team: "Worship" }],
+    cfg: { services: { "Sun AM": { name: "Sunday Morning", call: "9:30 AM", time: "10:00 AM" } } } };
+  await s.put(0, JSON.stringify(st));
+  const r = await mod.handleCal(new Request("https://x/api/cal?n=Ann"), s);
+  assert.equal(r.status, 200);
+  assert.match(r.headers.get("content-type"), /text\/calendar/);
+  const t = await r.text();
+  assert.equal((t.match(/BEGIN:VEVENT/g) || []).length, 1);
+  assert.match(t, /SUMMARY:Singer · Sunday Morning/);
+  assert.match(t, /DTSTART:20990104T040000Z/);
+});

@@ -643,7 +643,7 @@ SCREENS["vol:more"] = function(){
     + row("Team contacts", "Call or WhatsApp your team", "push", "contacts") + '</div>'
     + '<div class="lbl">Settings</div><div class="grp">'
     + row("Notifications", "What we tell you about", "push", "notifSettings")
-    + row("Calendar sync", S.settings.cal ? "On, your phone calendar" : "Off", "push", "notifSettings") + '</div>'
+    + row("Calendar sync", S.settings.cal ? "On, your phone calendar" : "Off", "push", "calsync") + '</div>'
     + '<div class="lbl">HCC</div><div class="grp">' + row("HCC Hub home", "", "hub", "") + '</div>';
   return { head: header("More"), body: body };
 };
@@ -1046,7 +1046,7 @@ SCREENS["vol:more"] = function(){
     + row("Team contacts", "Call, WhatsApp or thank your team", "push", "contacts") + '</div>'
     + '<div class="lbl">Settings</div><div class="grp">'
     + (on("notify") ? row("Notifications", "What we tell you about", "push", "notifSettings") : '')
-    + row("Calendar sync", S.settings.cal ? "On, your phone calendar" : "Off", "push", "notifSettings") + '</div>'
+    + row("Calendar sync", S.settings.cal ? "On, your phone calendar" : "Off", "push", "calsync") + '</div>'
     + '<div class="lbl">HCC</div><div class="grp">' + row("HCC Hub home", "", "hub", "") + row("Not " + ME + "?", "Pick your name", "whoami", "") + row("Leader view", "For team leaders, needs the leader PIN", "toAdmin", "") + '</div>';
   return { head: header("More"), body: body };
 };
@@ -1609,6 +1609,10 @@ function shiftCard(x){ var sv = svc(x.sid), n = tasksLeftFor(x);
     + '<div class="sline">' + dot(x.role) + '<span>' + esc(x.role) + ' | ' + esc(x.team) + ' (' + ORG + ')</span></div>'
     + '<div class="sfoot">' + CHECK + 'You have ' + n + ' incomplete task' + (n === 1 ? '' : 's') + '.</div></div>'; }
 function dateCol(iso){ var d = dt(iso); return '<div class="ud"><small>' + DOW[d.getUTCDay()] + '</small><b>' + d.getUTCDate() + '</b><small>' + MON[d.getUTCMonth()].toUpperCase() + '</small></div>'; }
+function bySvc(list){ var o = {}, out = []; list.forEach(function(x){ if (!o[x.sid]) { o[x.sid] = []; out.push(o[x.sid]); } o[x.sid].push(x); }); return out; }
+function upRows(list, n){ var g = bySvc(list); if (n) g = g.slice(0, n); return g.map(function(xs){ var x = xs[0], sv = svc(x.sid);
+  return '<div class="urow" data-a="detail" data-id="' + x.id + '">' + dateCol(sv.date) + '<div class="um"><div class="ut">' + esc(SVC[sv.svc] ? SVC[sv.svc].name : sv.svc) + ' · ' + esc(rangeTxt(sv.svc)) + evTag(sv.date) + '</div><div class="us">' + ORG + '</div>'
+    + xs.map(function(y){ return '<div class="us">' + dot(y.role) + esc(y.role) + ' | ' + esc(y.team) + '</div>'; }).join("") + '</div><span class="chev">›</span></div>'; }).join(""); }
 function upRow(x){ var sv = svc(x.sid);
   return '<div class="urow" data-a="detail" data-id="' + x.id + '">' + dateCol(sv.date) + '<div class="um"><div class="ut">' + esc(rangeTxt(sv.svc)) + evTag(sv.date) + '</div><div class="us">' + ORG + '</div><div class="us">' + dot(x.role) + esc(x.role) + ' | ' + esc(x.team) + '</div></div>'
     + '<span class="chev">›</span></div>'; }
@@ -1621,7 +1625,7 @@ SCREENS["vol:home"] = function(){
   var body = '<div class="band"><div class="btop"><button class="me" data-a="tab" data-v="more" aria-label="Your profile">' + ava(ME, 60) + '</button>' + bellBtn() + '</div>'
     + '<div class="bdate">' + upperDate(TODAY) + wx(TODAY) + '</div>'
     + '<div class="bgreet">' + greet() + ',<br>' + esc(ME) + '.</div>';
-  if (on("home")) body += '<div class="bhead">' + (today.length ? 'You have<br>' + (NUM[today.length] || today.length) + ' serve' + (today.length > 1 ? 's' : '') + ' today.' : 'You have<br>no serves today.') + evBanner(TODAY) + '</div>';
+  if (on("home")) body += '<div class="bhead">' + (today.length ? 'You have<br>' + (NUM[bySvc(today).length] || bySvc(today).length) + ' serve' + (bySvc(today).length > 1 ? 's' : '') + ' today.' : 'You have<br>no serves today.') + evBanner(TODAY) + '</div>';
   body += today.map(shiftCard).join("") + '</div>';
   if (on("swaps")) S.requests.filter(function(r){ return r.kind === "swap" && r.to === ME && r.state === "pending" && r.stage === 1; }).forEach(function(r){ var x = slot(r.slot); if (!x) return; var sv = svc(x.sid);
     body += '<div class="card" style="margin-top:16px"><div class="t" style="font:500 17px/22px var(--font)">' + esc(r.from) + ' asks to swap</div><div class="small">You take ' + esc(x.role) + ', ' + dShort(sv.date) + ' ' + sv.svc + '</div>' + (r.note ? '<p style="margin:8px 0 0;font-size:15px">"' + esc(r.note) + '"</p>' : '') + '<div class="btns two"><button class="btn sm" style="width:100%" data-a="acceptSwap" data-id="' + r.id + '">Accept</button><button class="btn sm sec" style="width:100%" data-a="declineSwap" data-id="' + r.id + '">Decline</button></div><p class="small" style="margin:8px 0 0">Then your leader approves.</p></div>'; });
@@ -1634,7 +1638,7 @@ SCREENS["vol:home"] = function(){
     else body += '<h3 class="h7">Message your team</h3><button class="btn w7" data-a="openCh" data-id="' + esc("ch:team:" + team) + '">Start chat</button>';
   }
   body += '<div class="lbl">Your upcoming serves<a data-a="tab" data-v="sched">View all</a></div>'
-    + (later.length ? '<div class="list7">' + later.slice(0,3).map(upRow).join("") + '</div>' : '<div class="empty">Nothing else coming up.</div>');
+    + (later.length ? '<div class="list7">' + upRows(later, 3) + '</div>' : '<div class="empty">Nothing else coming up.</div>');
   if (on("openspots")) { var open = openFor(ME);
     body += '<div class="lbl">Open spots up for grabs<a data-a="push" data-s="vol:pool">View all</a></div>'
       + (open.length ? '<div class="list7">' + open.slice(0,3).map(openRow).join("") + '</div>' : '<div class="empty">No open spots on your teams.</div>'); }
@@ -1650,7 +1654,7 @@ SCREENS["vol:sched"] = function(){
   if (S.volSchedMode !== "mine") return baseSched7();
   var m = mine();
   var body = '<div class="seg"><button data-a="volMode" data-v="mine" aria-current="true">My serves</button><button data-a="volMode" data-v="all">Full roster</button></div>'
-    + (m.length ? '<div class="list7">' + m.map(upRow).join("") + '</div>' : '<div class="empty">No serves coming up.</div>')
+    + (m.length ? '<div class="list7">' + upRows(m) + '</div>' : '<div class="empty">No serves coming up.</div>')
     + '<div class="btns"><button class="btn soft" data-a="ics">Add all to my calendar</button></div>';
   return { head: header("Schedule"), body: body };
 };
@@ -2468,7 +2472,7 @@ A.sendShout = function(d, el){ baseShout11(d, el); var h = S.shouts[0]; if (!on(
 /* blockout dates: To follows From and can't be earlier */
 document.addEventListener("change", function(e){ if (!e.target || e.target.id !== "bf") return; var t = document.getElementById("bt"); if (!t) return; t.min = e.target.value; if (!t.value || t.value < e.target.value) t.value = e.target.value; });
 /* ---------- schedule header like 7shifts: month picker, today, week strip (Nov 16) ---------- */
-FEATS.push(["weekhead","Week strip on Schedule","Schedule opens with the month, a today button, My Shifts or Schedule, and a Sun to Sat week strip. A dot marks days you serve."]);
+FEATS.push(["weekhead","Week strip on Schedule","Schedule opens with the month, a today button, My serves or Full roster, and a Sun to Sat week strip. A dot marks days you serve."]);
 LOCAL.wkDay = 1;
 (function(){ var st = document.createElement("style"); st.textContent =
   '.wkm{border:0;background:none;color:var(--ink);font:600 20px/26px var(--font);display:inline-flex;align-items:center;gap:6px;cursor:pointer;padding:4px 8px}'
@@ -2497,11 +2501,14 @@ function wkSlotRow(x){ return '<div class="row">' + (x.person ? ava(x.person, 36
 var baseVolSched12 = SCREENS["vol:sched"];
 SCREENS["vol:sched"] = function(){ if (!on("weekhead")) return baseVolSched12();
   var sel = wkSel(), mode = S.volSchedMode === "mine" ? "mine" : "all";
-  var body = '<div class="seg"><button data-a="volMode" data-v="mine"' + (mode === "mine" ? ' aria-current="true"' : '') + '>My Shifts</button><button data-a="volMode" data-v="all"' + (mode === "all" ? ' aria-current="true"' : '') + '>Schedule</button></div>' + wkStrip();
+  var body = '<div class="seg"><button data-a="volMode" data-v="mine"' + (mode === "mine" ? ' aria-current="true"' : '') + '>My serves</button><button data-a="volMode" data-v="all"' + (mode === "all" ? ' aria-current="true"' : '') + '>Full roster</button></div>' + wkStrip();
   if (mode === "mine") {
     var m = S.slots.filter(function(x){ var sv = svc(x.sid); return x.person === ME && x.status !== "declined" && sv && sv.published !== false && sv.date >= sel; })
       .sort(function(a, b){ var p = svc(a.sid).date, q = svc(b.sid).date; return p < q ? -1 : p > q ? 1 : 0; });
-    body += '<div class="lbl">' + (sel === TODAY ? 'From today' : 'From ' + esc(dShort(sel))) + '</div>' + (m.length ? '<div class="list7">' + m.map(upRow).join("") + '</div>' : '<div class="empty">No serves from this day on.</div>')
+    var day = S.services.filter(function(sv){ return sv.date === sel && sv.published !== false; }), after = m.filter(function(x){ return svc(x.sid).date > sel; });
+    body += '<div class="lbl">' + esc(dLong(sel)) + '</div>' + (day.length ? '<div class="list7">' + day.map(function(sv){ var xs = m.filter(function(x){ return x.sid === sv.id; }); return xs.length ? upRows(xs)
+        : '<div class="urow" data-a="volMode" data-v="all">' + dateCol(sv.date) + '<div class="um"><div class="ut">' + esc(SVC[sv.svc] ? SVC[sv.svc].name : sv.svc) + ' · ' + esc(rangeTxt(sv.svc)) + evTag(sv.date) + '</div><div class="us">' + ORG + '</div><div class="us">You\'re not serving. Tap to see who is.</div></div><span class="chev">›</span></div>'; }).join("") + '</div>' : '<div class="empty">No services on this day.</div>')
+      + '<div class="lbl">Coming up after</div>' + (after.length ? '<div class="list7">' + upRows(after) + '</div>' : '<div class="empty">No more serves after this day.</div>')
       + '<div class="btns"><button class="btn soft" data-a="ics">Add all to my calendar</button></div>';
   } else {
     var all = !!S.rosterAll, mt = teamsOf(ME), svs = S.services.filter(function(sv){ return sv.date === sel && sv.published; });
@@ -2521,6 +2528,35 @@ SHEETS.wkMonth = function(){ var sel = dt(wkSel()), t = dt(TODAY), out = [];
     return '<div class="row tap" data-a="wkMonth" data-v="' + iso + '"><div class="m"><div class="t">' + MONTHS[d.getUTCMonth()] + ' ' + d.getUTCFullYear() + '</div></div>' + (cur ? '<span class="chip c-acc">Showing</span>' : '<span class="chev">›</span>') + '</div>'; }).join("") + '</div>'; };
 A.wkMonth = function(d){ var first = d.v, t = TODAY; S.wkDay = first.slice(0, 7) === t.slice(0, 7) ? t : first; S.sheet = null; render(); };
 
+
+/* Calendar sync that works: a live feed to subscribe to, and one-tap Google links per serve (Nov 16) */
+function calLive(){ return /workers\.dev$/.test(location.hostname) || location.hostname === "localhost"; }
+function calFeed(){ return APP_URL + "api/cal?n=" + encodeURIComponent(ME || ""); }
+function calStamp(iso, hm, add){ var d = new Date(Date.UTC(+iso.slice(0,4), +iso.slice(5,7) - 1, +iso.slice(8,10), hm[0], hm[1]) - 330 * 60000 + (add || 0)); return d.toISOString().replace(/[-:]/g, "").slice(0,15) + "Z"; }
+function gcalFor(x){ var sv = svc(x.sid), c = SVC[sv.svc] || {}, hm = to24(c.call);
+  return "https://calendar.google.com/calendar/render?action=TEMPLATE&text=" + encodeURIComponent(x.role + " · " + (c.name || sv.svc)) + "&dates=" + calStamp(sv.date, hm) + "/" + calStamp(sv.date, hm, 2 * 3600000) + "&details=" + encodeURIComponent(x.team + ". Call time " + (c.call || "") + ", service " + (c.time || "")) + "&location=" + encodeURIComponent("HCC"); }
+SCREENS.calsync = function(){
+  var st = S.settings || {}, body = '<div class="grp"><label class="row tap"><div class="m"><div class="t">Calendar sync</div><div class="s">Your serves in your phone calendar</div></div><input type="checkbox" class="tog" data-a="setting" data-k="cal"' + (st.cal ? ' checked' : '') + '></label></div>';
+  if (!st.cal) return { head: header("Calendar sync"), body: body + '<p class="small" style="margin:8px 4px 0">Turn it on to put your serves in Google Calendar or your iPhone calendar.</p>' };
+  if (!ME) return { head: header("Calendar sync"), body: body + '<div class="empty">Pick who you are first.</div>' };
+  var feed = calFeed(), list = mine();
+  body += '<div class="lbl">Keep it updated</div><div class="card"><p class="small" style="margin:0 0 8px;color:var(--ink)">Subscribe once. New serves and changes show up on their own.</p>'
+    + '<input class="field" id="calFeed" readonly value="' + esc(feed) + '" aria-label="Your calendar link" style="margin-bottom:8px">'
+    + '<div class="two"><button class="btn sec" data-a="calCopy">Copy link</button><a class="btn soft" style="text-align:center;text-decoration:none" target="_blank" rel="noopener" href="https://calendar.google.com/calendar/r?cid=' + encodeURIComponent(feed.replace(/^https:/, "webcal:")) + '">Google Calendar</a></div>'
+    + '<p class="small" style="margin:8px 0 0">iPhone: Settings, Calendar, Accounts, Add Account, Other, Add Subscribed Calendar, then paste the link.</p></div>'
+    + '<div class="lbl">Add one serve</div>' + (list.length ? '<div class="grp">' + list.map(function(x){ var sv = svc(x.sid); return '<div class="row"><div class="m"><div class="t">' + dShort(sv.date) + ' · ' + esc((SVC[sv.svc] || {}).name || sv.svc) + '</div><div class="s">' + esc(x.role) + '</div></div><a class="chip c-ok" style="text-decoration:none" target="_blank" rel="noopener" href="' + esc(gcalFor(x)) + '">Add</a></div>'; }).join("") + '</div>' : '<div class="empty">Nothing coming up.</div>')
+    + (calLive() && list.length ? '<div class="btns"><button class="btn soft" data-a="icsFile">Download all (.ics file)</button></div>' : '');
+  return { head: header("Calendar sync"), body: body };
+};
+A.calCopy = function(){ var el = document.getElementById("calFeed"), url = calFeed();
+  function sel(){ if (el) { el.focus(); el.select(); } toast("Link selected. Copy it from the box."); }
+  try { navigator.clipboard.writeText(url).then(function(){ toast("Link copied."); }, sel); } catch (e) { sel(); } };
+var baseSetting12 = A.setting;
+A.setting = function(d, el){ baseSetting12(d, el); if (d.k === "cal") render(); };
+var baseIcs12 = A.ics;
+A.icsFile = function(d){ baseIcs12(d || {}); };
+A.ics = function(d){ if (calLive()) return baseIcs12(d);
+  if (!S.settings.cal) { S.settings.cal = true; saveSoon(); } push("calsync", {}); };
 var baseLocal7 = localDefaults;
 localDefaults = function(){ var o = baseLocal7(); o.msgTab = "chats"; return o; };
 var baseRender7 = render;
