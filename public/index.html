@@ -257,6 +257,7 @@ body{background:#fff}
 .nch .h{font:600 12px/16px var(--font);color:var(--mut);text-align:center;text-transform:uppercase;letter-spacing:.04em}
 
 #fillList .row[hidden]{display:none}
+#fillOthers .row[hidden],#fillOthers[hidden],#fillOthersLbl[hidden]{display:none}
 .trow .m{flex:1;min-width:0}
 .trow .t{font:400 18px/23px var(--font);color:#2B2B2F}
 .trow .s{font:400 14px/18px var(--font);color:#6E6E76;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
@@ -1214,7 +1215,7 @@ SHEETS.fill = function(o){ var x = slot(o.id), sv = svc(x.sid), pick = on("picke
   var out = '<h4>' + esc(x.role) + '</h4><p class="s">' + dShort(sv.date) + ' · ' + SVC[sv.svc].name + (x.person ? ' · now ' + esc(x.person) : ' · open') + '</p>';
   if (h.length) out += '<div class="lbl" style="margin-top:4px">Raised their hand</div><div class="grp">' + h.map(function(r){ return '<div class="row"><span class="av">' + initials(r.from) + '</span><div class="m"><div class="t">' + esc(r.from) + '</div><div class="s">Asked to serve this spot</div></div><button class="btn sm" data-a="assignHand" data-id="' + r.id + '">Pick</button></div>'; }).join("") + '</div>';
   out += '<div class="lbl"' + (h.length ? '' : ' style="margin-top:4px"') + '>' + (pick ? 'Find who\'s available' : 'Pick someone') + '</div><div class="grp">' + people.map(function(e){ return '<div class="row tap" data-a="assign" data-id="' + x.id + '" data-p="' + esc(e.p) + '"><span class="av' + (!pick || e.st === "free" ? '' : ' g') + '">' + initials(e.p) + '</span><div class="m"><div class="t">' + esc(e.p) + (e.p === x.person ? ' ✓' : '') + '</div>' + (pick ? '<div class="s">' + (wk(e.p) ? 'Serving ' + wk(e.p) + (wk(e.p) === 1 ? ' time' : ' times') + ' this week' : e.st === "blocked" ? 'Blocked out that day' : lastServedText(e.p, sv)) + '</div>' : '') + '</div>' + (pick ? '<span class="chip ' + lab[e.st][1] + '">' + lab[e.st][0] + '</span>' : '') + '</div>'; }).join("") + '</div>';
-  if (on("notes")) out += '<label class="fl" for="spotNote">Note for whoever serves</label><input class="field" id="spotNote" placeholder="Like: Kids room A, bring keys" value="' + esc(x.note || "") + '"><div class="btns"><button class="btn sm soft" style="width:100%" data-a="saveSpotNote" data-id="' + x.id + '">Save note</button></div>';
+  if (on("notes")) out += '<label class="fl" for="spotNote">Add note for volunteer</label><input class="field" id="spotNote" placeholder="Like: Kids room A, bring keys" value="' + esc(x.note || "") + '"><div class="btns"><button class="btn sm soft" style="width:100%" data-a="saveSpotNote" data-id="' + x.id + '">Save note</button></div>';
   out += (x.person ? '<div class="btns two"><button class="btn sec" data-a="clearSlot" data-id="' + x.id + '">Leave open</button><button class="btn soft" data-a="toast" data-t="No phone number saved for ' + esc(x.person) + ' yet.">Message ' + esc(x.person) + '</button></div>' : '<div class="btns"><button class="btn soft" data-a="postOpen" data-id="' + x.id + '">Post to Open spots</button></div>');
   return out; };
 SHEETS.publish = function(){ var sv = svc(S.adminSid), changed = S.slots.filter(function(x){ return x.dirty && x.sid === sv.id && x.person; }), all = S.slots.filter(function(x){ return x.sid === sv.id && x.person; });
@@ -1482,7 +1483,7 @@ SHEETS.addCk = function(){
   var teams = Object.keys(ROLES).filter(function(t){ return Object.keys(ROLES[t]).some(function(k){ return ROLES[t][k].length; }); });
   return '<h4>Add a checklist</h4><p class="s">Volunteers on that team tick it off on their serve details.</p><label class="fl" for="ckTitle">Name</label><input class="field" id="ckTitle" placeholder="Like: Media setup">'
     + '<div class="two"><div><label class="fl" for="ckTeam">Team</label><select class="field" id="ckTeam">' + teams.map(function(t){ return '<option>' + esc(t) + '</option>'; }).join("") + '</select></div><div><label class="fl" for="ckSvc">Service</label><select class="field" id="ckSvc">' + Object.keys(SVC).map(function(k){ return '<option>' + esc(k) + '</option>'; }).join("") + '</select></div></div>'
-    + '<label class="fl" for="ckDue">Done by (optional)</label><input class="field" id="ckDue" placeholder="Like: 9:30 AM"><label class="fl" for="ckItems">Items, one per line</label><textarea class="field" id="ckItems" placeholder="Load slides&#10;Test mics"></textarea>'
+    + '<label class="fl" for="ckDue">Done by (optional)</label><select class="field" id="ckDue">' + qtrTimes() + '</select><label class="fl" for="ckItems">Items, one per line</label><textarea class="field" id="ckItems" placeholder="Load slides&#10;Test mics"></textarea>'
     + '<div class="btns"><button class="btn" data-a="saveCk">Save checklist</button></div>';
 };
 A.saveCk = function(){ var t = (document.getElementById("ckTitle").value || "").trim(), items = (document.getElementById("ckItems").value || "").split(/\n/).map(function(x){ return x.trim(); }).filter(Boolean);
@@ -1826,13 +1827,21 @@ var baseFill7 = SHEETS.fill;
 SHEETS.fill = function(o){ if (on("usual")) return baseFill7(o); var keep = S.regularBy; S.regularBy = tempOverlay({}, o); try { return baseFill7(o); } finally { S.regularBy = keep; } };
 /* search by name in the pick-someone list (Nov 16) */
 SHEETS.fill = (function(base){ return function(o){ var out = base(o);
-  return out.replace(/(<div class="lbl"[^>]*>(?:Find who's available|Pick someone)<\/div>)(<div class="grp")/, '$1<div class="tsearch" style="margin:6px 0 8px">' + SRCH + '<input id="fillSearch" type="search" placeholder="Search by name" aria-label="Search by name" autocomplete="off"></div>$2 id="fillList"')
-    .replace(/(<\/div>)(<label class="fl" for="spotNote"|<div class="btns)/, '$1<p class="small" id="fillNone" hidden>No one by that name on this team.</p>$2'); }; })(SHEETS.fill);
+  return out.replace(/(<div class="lbl"[^>]*>)(?:Find who's available|Pick someone)(<\/div>)(<div class="grp")/, '$1Assign volunteer$2<div class="tsearch" style="margin:6px 0 8px">' + SRCH + '<input id="fillSearch" type="search" placeholder="Search by name" aria-label="Search by name" autocomplete="off"></div>$3 id="fillList"')
+    .replace(/(<\/div>)(<label class="fl" for="spotNote"|<div class="btns)/, function(m, a, b){ return a + fillOthers(o) + '<p class="small" id="fillNone" hidden>No one by that name.</p>' + b; }); }; })(SHEETS.fill);
+/* search finds anyone at church, not just this team (Nov 16): others show only while you type */
+function fillOthers(o){ var x = slot(o.id), sv = x && svc(x.sid); if (!x || !sv) return '';
+  var team = POOL[x.team] || [], rest = everyone().filter(function(p){ return team.indexOf(p) < 0; }); if (!rest.length) return '';
+  return '<div class="lbl" id="fillOthersLbl" hidden>Not on ' + esc(x.team) + '</div><div class="grp" id="fillOthers" hidden>' + rest.map(function(p){
+    var st = blockedOn(p, sv) ? ["Away","c-late"] : (servingAt(sv.id, p) && x.person !== p) ? ["Already serving","c-warn"] : ["Available","c-ok"], ts = teamsOf(p);
+    return '<div class="row tap" data-a="assign" data-id="' + x.id + '" data-p="' + esc(p) + '" hidden><span class="av g">' + initials(p) + '</span><div class="m"><div class="t">' + esc(p) + (p === x.person ? ' ✓' : '') + '</div><div class="s">' + esc(ts.length ? ts.join(" · ") : "Not on a team yet") + '</div></div><span class="chip ' + st[1] + '">' + st[0] + '</span></div>'; }).join("") + '</div>'; }
 app.addEventListener("input", function(e){
   if (!e.target || e.target.id !== "fillSearch") return;
   var q = e.target.value.trim().toLowerCase(), n = 0;
   app.querySelectorAll('#fillList .row[data-a="assign"]').forEach(function(r){ var hit = !q || (r.dataset.p || "").toLowerCase().indexOf(q) >= 0; r.hidden = !hit; if (hit) n++; });
-  var none = document.getElementById("fillNone"); if (none) none.hidden = n > 0;
+  var m = 0; app.querySelectorAll('#fillOthers .row[data-a="assign"]').forEach(function(r){ var hit = !!q && (r.dataset.p || "").toLowerCase().indexOf(q) >= 0; r.hidden = !hit; if (hit) m++; });
+  var og = document.getElementById("fillOthers"), ol = document.getElementById("fillOthersLbl"); if (og) og.hidden = !m; if (ol) ol.hidden = !m;
+  var none = document.getElementById("fillNone"); if (none) none.hidden = n + m > 0;
 });
 
 /* dashboard counts open their list (Nov 15) */
@@ -2270,7 +2279,7 @@ SHEETS.fill = function(o){ var keep = S.regularBy; if (false && on("usual")) S.r
   var box = '<div class="lbl sm">Flag</div>' + (f ? '<div class="cline"><span class="flag">⚑ ' + esc(f) + '</span></div><div class="btns"><button class="btn sm sec" style="width:100%" data-a="unflag" data-id="' + o.id + '">Remove flag</button></div>'
     : '<div class="two" style="display:grid;grid-template-columns:1fr auto;gap:8px"><input class="field" id="flagWhy" placeholder="Like: New, needs help" maxlength="60"><button class="btn sm soft" data-a="flagSpot" data-id="' + o.id + '">Flag</button></div>');
   return h.replace(/(<p class="s">[\s\S]*?<\/p>)/, '$1' + box); };
-A.flagSpot = function(d){ var v = ((document.getElementById("flagWhy") || {}).value || "").trim(); if (!v) { toast("Write a short reason for the flag."); render.same = true; render(); return; } objOf("flags")[d.id] = v.slice(0, 60); toast("Spot flagged."); render.same = true; render(); };
+A.flagSpot = function(d){ var v = ((document.getElementById("flagWhy") || {}).value || "").trim(); if (!v) { toast("Write a short reason for the flag."); render.same = true; render(); return; } objOf("flags")[d.id] = v.slice(0, 60); S.sheet = null; toast("Spot flagged."); render.same = true; render(); };
 A.unflag = function(d){ delete objOf("flags")[d.id]; toast("Flag removed."); render.same = true; render(); };
 var baseSched10 = SCREENS["admin:sched"];
 SCREENS["admin:sched"] = function(){ var r = baseSched10(); if (!on("flags") || !r) return r; var f = objOf("flags");
@@ -2569,6 +2578,45 @@ SCREENS["admin:sched"] = function(){ if (!on("weekhead")) return baseSched13();
 var baseOpenSvc13 = A.openSvc;
 A.openSvc = function(d){ S.adminDay = null; return baseOpenSvc13(d); };
 
+/* Requests opened from a link (Dashboard, More) gets a back button to where you came from (Nov 16) */
+LOCAL.reqsBack = 1;
+var baseTab13 = A.tab;
+A.tab = function(d, el){
+  if (S.view === "admin" && d.v === "reqs" && S.tab.admin !== "reqs" && !(el && el.closest && el.closest("nav.tabs"))) { var from = S.tab.admin; baseTab13(d, el); S.reqsBack = from; render(); return; }
+  S.reqsBack = null; baseTab13(d, el); };
+var baseReqs13 = SCREENS["admin:reqs"];
+SCREENS["admin:reqs"] = function(o){ var r = baseReqs13(o);
+  if (r && r.head && S.reqsBack && !S.stack.length && r.head.indexOf('data-a="reqsBack"') < 0)
+    r.head = r.head.replace(/^<div class="hd">(<span style="width:40px"><\/span>)?/, '<div class="hd"><button class="ic" data-a="reqsBack" aria-label="Back">‹</button>');
+  return r; };
+A.reqsBack = function(){ var t = S.reqsBack || "dash"; S.reqsBack = null; A.tab({ v: t }); };
+
+/* templates can be edited: rename, change who fills each spot, delete (Nov 16) */
+var baseTpl13 = SHEETS.templates;
+SHEETS.templates = function(o){ var h = baseTpl13(o);
+  return h.replace(/<div class="row tap" data-a="useTemplate" data-id="(\d+)">([\s\S]*?)<span class="chev">›<\/span><\/div>/g, function(m, i, mid){
+    return '<div class="row tap" data-a="useTemplate" data-id="' + i + '">' + mid + '<button class="btn sm soft" data-a="sheet" data-s="tplEdit" data-id="' + i + '">Edit</button></div>'; })
+    .replace('It only fills empty spots.</p>', 'It only fills empty spots. Tap Edit to change one.</p>'); };
+function tplKeys(t){ var ks = [];
+  Object.keys(ROLES).forEach(function(team){ var seen = {}; ((ROLES[team] || {})[t.sv] || []).forEach(function(r){ if (seen[r]) return; seen[r] = 1; ks.push(team + "|" + r); }); });
+  Object.keys(t.lines).forEach(function(k){ if (ks.indexOf(k) < 0) ks.push(k); }); return ks; }
+SHEETS.tplEdit = function(o){ var t = S.templates[+o.id]; if (!t) return baseTpl13(o);
+  var ks = tplKeys(t), teams = [], out = '<h4>Edit template</h4><p class="s">' + esc(t.sv) + ' · saved by ' + esc(t.by) + '</p><label class="fl" for="tplEName">Name</label><input class="field" id="tplEName" value="' + esc(t.name) + '">';
+  ks.forEach(function(k){ var tm = k.split("|")[0]; if (teams.indexOf(tm) < 0) teams.push(tm); });
+  teams.forEach(function(tm){ out += '<div class="lbl">' + esc(tm) + '</div><div class="grp">' + ks.filter(function(k){ return k.split("|")[0] === tm; }).map(function(k){
+      var cur = t.lines[k] || "", ppl = (POOL[tm] || []).slice(); if (cur && ppl.indexOf(cur) < 0) ppl.unshift(cur);
+      return '<div class="row"><div class="m"><div class="t">' + esc(k.split("|").slice(1).join("|")) + '</div></div><select class="field tplsel" data-k="' + esc(k) + '" style="width:auto;max-width:58%;margin:0" aria-label="' + esc(k.split("|").slice(1).join("|")) + '"><option value="">Leave empty</option>' + ppl.map(function(p){ return '<option' + (p === cur ? ' selected' : '') + '>' + esc(p) + '</option>'; }).join("") + '</select></div>'; }).join("") + '</div>'; });
+  return out + '<div class="btns"><button class="btn" data-a="tplSave" data-id="' + o.id + '">Save changes</button><button class="btn sec" data-a="sheet" data-s="templates">Back to templates</button></div>'
+    + '<div class="btns"><button class="btn sm danger" style="width:100%" data-a="tplDel" data-id="' + o.id + '">Delete template</button></div>'; };
+A.tplSave = function(d){ var t = S.templates[+d.id]; if (!t) return; var nm = ((document.getElementById("tplEName") || {}).value || "").trim(), lines = {};
+  app.querySelectorAll(".tplsel").forEach(function(s){ if (s.value) lines[s.dataset.k] = s.value; });
+  if (nm) t.name = nm; t.lines = lines; S.sheet = { s: "templates" }; toast("Saved \"" + t.name + "\" with " + Object.keys(lines).length + " spots."); render.same = true; render(); };
+/* 15-minute time picker for checklist "Done by" (Nov 16) */
+function qtrTimes(sel){ var o = '<option value="">No time</option>';
+  for (var m = 6 * 60; m < 24 * 60; m += 15) { var h = Math.floor(m / 60), mm = m % 60, t = ((h + 11) % 12 + 1) + ':' + (mm < 10 ? '0' : '') + mm + ' ' + (h < 12 ? 'AM' : 'PM');
+    o += '<option' + (t === sel ? ' selected' : '') + '>' + t + '</option>'; } return o; }
+A.tplDel = function(d){ var t = S.templates[+d.id]; if (!t) return; S.templates.splice(+d.id, 1); S.sheet = { s: "templates" }; toast("Deleted \"" + t.name + "\"."); render.same = true; render(); };
+
 
 /* Calendar sync that works: a live feed to subscribe to, and one-tap Google links per serve (Nov 16) */
 function calLive(){ return /workers\.dev$/.test(location.hostname) || location.hostname === "localhost"; }
@@ -2622,6 +2670,15 @@ SCREENS["vol:sched"] = function(){
   });
   r.body = body; return r;
 };
+
+/* To-dos: an empty list said "All done" and opened a blank page (Nov 16, user comment "nothing shows up") */
+var baseTodosVol14 = SCREENS.todosVol;
+SCREENS.todosVol = function(o){ var r = baseTodosVol14(o); if (todosFor(ME).length) return r;
+  r.body = '<div class="empty">No to-dos for you right now.</div><p class="small" style="margin:8px 4px">When a team leader adds one, like reading the team guidelines, it shows here with a Done button.</p>'; return r; };
+var baseVolMore14 = SCREENS["vol:more"];
+SCREENS["vol:more"] = function(o){ var r = baseVolMore14(o);
+  if (r && on("onboarding") && !todosFor(ME).length) r.body = r.body.replace(/(<div class="t">To-dos<\/div><div class="s">)All done(<\/div>)/, '$1None right now$2');
+  return r; };
 
 var baseLocal7 = localDefaults;
 localDefaults = function(){ var o = baseLocal7(); o.msgTab = "chats"; return o; };
