@@ -167,3 +167,27 @@ export async function publishTest(env, roster, { fetchFn } = {}) {
   const d = r.data || {};
   return { published: ready[0].label, publish_status: d.publish_status ?? null, notified: d.notified ?? null, draft: d.draft ?? null };
 }
+
+// Weeks the leader has said yes to publishing. Publishing makes the shifts final and
+// visible in the 7shifts app, so a week is only added here after that yes.
+export const PUBLISH_WEEKS = ["2026-11-22"];
+
+/**
+ * Publishes the draft shifts this app added (notes "From HCC Roster") in an approved week,
+ * up to MAX_CREATES a call. Returns { week, published, remaining, notified }.
+ */
+export async function publishWeek(env, sunday, { fetchFn } = {}) {
+  if (!PUBLISH_WEEKS.includes(sunday)) return { error: "That week isn't approved for publishing." };
+  const days = weekDates(sunday);
+  const api = client(env, fetchFn);
+  const loc = env.SEVENSHIFTS_LOCATION_ID;
+  const shifts = await api.all(`/shifts?location_id=${loc}&start[gte]=${utc(days[0], 0, 0)}&start[lte]=${utc(days[6], 23, 59)}&include_draft=true`);
+  const drafts = shifts.filter((s) => !s.deleted && s.draft === true && String(s.notes || "").includes("From HCC Roster"));
+  let published = 0, notified = 0;
+  for (const s of drafts.slice(0, MAX_CREATES)) {
+    const r = await api.call("PUT", `/shifts/${s.id}`, { draft: false });
+    published++;
+    if (r.data && r.data.notified) notified++;
+  }
+  return { week: sunday, published, remaining: drafts.length - published, notified };
+}

@@ -33,6 +33,7 @@
     <button id="sync" class="primary">Add to 7shifts</button>
     <button id="test">Add test shift</button>
     <button id="pubtest">Publish test shift</button>
+    <button id="pubweek">Publish week</button>
   </div>
   <div id="out" class="muted">Pick a week, then Preview.</div>
 </main>
@@ -41,7 +42,7 @@
   var esc = function (s) { return String(s).replace(/[&<>"]/g, function (c) { return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]; }); };
   var list = function (items) { return "<ul>" + items.map(function (x) { return "<li>" + esc(x) + "</li>"; }).join("") + "</ul>"; };
   (function () { var d = new Date(); d.setDate(d.getDate() + ((7 - d.getDay()) % 7)); $("week").value = d.toISOString().slice(0, 10); })();
-  function busy(on) { ["preview", "sync", "test", "pubtest"].forEach(function (id) { $(id).disabled = on; }); }
+  function busy(on) { ["preview", "sync", "test", "pubtest", "pubweek"].forEach(function (id) { $(id).disabled = on; }); }
   function show(r, totals) {
     if (r.error) { $("out").innerHTML = '<p class="bad">' + esc(r.error) + "</p>"; return; }
     var h = "";
@@ -81,6 +82,20 @@
     try {
       var r = await go("POST", "/api/7shifts/publish-test");
       $("out").innerHTML = r.error ? '<p class="bad">' + esc(r.error) + "</p>" : '<p class="ok">Published: ' + esc(r.published) + "</p><p class=\"muted\">7shifts says: " + esc(r.publish_status) + ", notified " + esc(r.notified) + ".</p>";
+    } catch (e) { show({ error: "Couldn't reach 7shifts." }); }
+    busy(false);
+  };
+  $("pubweek").onclick = async function () {
+    busy(true); var total = 0, notified = 0, r;
+    try {
+      for (var i = 0; i < 20; i++) {
+        $("out").textContent = "Publishing... " + total + " so far";
+        r = await go("POST", "/api/7shifts/publish?week=" + $("week").value);
+        if (r.error) break;
+        total += r.published; notified += r.notified;
+        if (!r.remaining || !r.published) break;
+      }
+      $("out").innerHTML = r.error ? '<p class="bad">' + esc(r.error) + "</p>" : '<p class="ok">Published ' + total + " shifts.</p><p class=\"muted\">7shifts notified " + notified + ".</p>";
     } catch (e) { show({ error: "Couldn't reach 7shifts." }); }
     busy(false);
   };

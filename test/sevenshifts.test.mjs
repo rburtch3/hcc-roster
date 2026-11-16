@@ -112,3 +112,23 @@ test("publish-test does nothing when the test shift isn't there", async () => {
   assert.match(r.error, /isn't in 7shifts yet/);
   assert.equal(f.calls.filter((c) => c.method === "PUT").length, 0);
 });
+
+test("publish week: only approved weeks, only this app's drafts", async () => {
+  const { publishWeek } = await import("../src/sevenshifts.js");
+  const f = fake({ shifts: [
+    { id: 1, draft: true, notes: "From HCC Roster" },
+    { id: 2, draft: false, notes: "From HCC Roster" },
+    { id: 3, draft: true, notes: "made by hand" },
+    { id: 4, draft: true, notes: "From HCC Roster", deleted: true },
+  ] });
+  const r = await publishWeek(env, "2026-11-22", { fetchFn: f.fn });
+  const puts = f.calls.filter((c) => c.method === "PUT");
+  assert.deepEqual(puts.map((p) => p.path), ["/shifts/1"]);
+  assert.deepEqual(puts[0].body, { draft: false });
+  assert.equal(r.published, 1);
+  assert.equal(r.remaining, 0);
+  const no = fake({ shifts: [{ id: 1, draft: true, notes: "From HCC Roster" }] });
+  const r2 = await publishWeek(env, "2026-11-29", { fetchFn: no.fn });
+  assert.match(r2.error, /isn't approved/);
+  assert.equal(no.calls.length, 0);
+});
