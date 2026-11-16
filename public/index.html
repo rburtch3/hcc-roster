@@ -2708,6 +2708,11 @@ SCREENS["vol:sched"] = function(){
   });
   r.body = body; return r;
 };
+/* event banner also on My serves for the picked day (Nov 16) */
+var baseVolSched15 = SCREENS["vol:sched"];
+SCREENS["vol:sched"] = function(){ var r = baseVolSched15(); if (!r || !on("weekhead") || S.volSchedMode !== "mine") return r;
+  var sel = wkSel(), lb = '<div class="lbl">' + esc(dLong(sel)) + '</div>', ev = evBanner(sel);
+  if (ev && r.body.indexOf(lb) >= 0) r.body = r.body.replace(lb, lb + ev); return r; };
 
 /* To-dos: an empty list said "All done" and opened a blank page (Nov 16, user comment "nothing shows up") */
 var baseTodosVol14 = SCREENS.todosVol;
