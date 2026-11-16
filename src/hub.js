@@ -163,7 +163,7 @@ export async function rosterNameFor(sess, store) {
  * cookie and goes to the app. GET /auth/hub goes to the Hub to sign in.
  */
 export async function handleAuthHub(request, env, store, fetchFn = fetch) {
-  if (request.method === "GET") return Response.redirect(HUB_URL + "/#roster", 302);
+  if (request.method === "GET") return Response.redirect(HUB_URL + "/#rota", 302);
   if (request.method !== "POST") return new Response("Method not allowed", { status: 405 });
   let token = "";
   try {

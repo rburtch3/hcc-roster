@@ -2775,7 +2775,7 @@ leadTeams = function(p){ var t = baseLeadTeams15(p);
   if (HUBME && HUBME.role === "leader" && p && p === hubName()) { var names = Object.keys(POOL).concat(Object.keys(ROLES));
     (HUBME.teams || []).forEach(function(h){ var m = names.filter(function(n){ return n.toLowerCase() === String(h).trim().toLowerCase(); })[0]; if (m && t.indexOf(m) < 0) t.push(m); }); }
   return t; };
-A.hubSignIn = function(){ location.href = HUB_URL + "/#roster"; };
+A.hubSignIn = function(){ location.href = "/auth/hub"; }; /* the Worker sends them to the Hub's Roster tile */
 A.hubSignOut = function(){
   fetch("/auth/signout", { method: "POST", credentials: "same-origin" }).then(function(){}, function(){}).then(function(){
     HUBME = null; ME = ""; LS.set("roster.me", null); LS.set("roster.scope", null); LS.set("roster.vkey", null); bindMe(); S.view = "vol"; S.stack = []; S.sheet = null; render(); }); };
