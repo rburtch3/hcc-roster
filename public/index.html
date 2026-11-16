@@ -2703,6 +2703,21 @@ SHEETS.addCk = function(o){ return baseAddCk14(o)
   .replace('<select class="field" id="ckTeam">', '<select class="field" id="ckTeam"><option>Everyone</option>')
   .replace('Volunteers on that team tick it off on their serve details.', 'It shows on the serve details of everyone on that team for that service. Pick Everyone to show it to every team.'); };
 
+/* My requests: a + button to start a new request from one of your serves (Nov 16, user comment "add a plus button here") */
+var baseMyReqs14 = SCREENS.myReqs;
+SCREENS.myReqs = function(o){ var r = baseMyReqs14(o); if (!r) return r;
+  var plus = '<button class="ic" data-a="sheet" data-s="newReq" aria-label="New request" style="font-size:30px">+</button>';
+  r.head = r.head.replace(/<span style="width:40px"><\/span><\/div>\s*$/, plus + '</div>');
+  if (r.head.indexOf('data-s="newReq"') < 0) r.head = r.head.replace(/<\/div>\s*$/, plus + '</div>');
+  r.body = r.body.replace('No requests yet.', 'No requests yet. Tap + to swap or give away one of your serves.');
+  return r; };
+SHEETS.newReq = function(){
+  var mine = S.slots.filter(function(x){ var sv = svc(x.sid); return x.person === ME && x.status !== "declined" && sv && sv.published !== false && sv.date >= TODAY; })
+    .sort(function(a, b){ var p = svc(a.sid).date, q = svc(b.sid).date; return p < q ? -1 : p > q ? 1 : 0; });
+  return '<h4>New request</h4><p class="s">Pick the serve you need covered.</p>' + (mine.length ? '<div class="grp">' + mine.map(function(x){ var sv = svc(x.sid), nm = SVC[sv.svc] ? SVC[sv.svc].name : sv.svc;
+    return '<div class="row tap" data-a="sheet" data-s="cover" data-id="' + x.id + '"><div class="m"><div class="t">' + esc(dShort(sv.date)) + ' · ' + esc(nm) + '</div><div class="s">' + esc(x.role) + ' | ' + esc(x.team) + '</div></div><span class="chev">›</span></div>'; }).join("") + '</div>'
+    : '<div class="empty">You have no upcoming serves.</div>'); };
+
 var baseLocal7 = localDefaults;
 localDefaults = function(){ var o = baseLocal7(); o.msgTab = "chats"; return o; };
 var baseRender7 = render;
