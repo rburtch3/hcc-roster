@@ -642,7 +642,7 @@ SCREENS["vol:msgs"] = function(){ return { head: header("Messages", { right: '<b
 SCREENS["vol:more"] = function(){
   var body = '<div class="card" style="display:flex;gap:12px;align-items:center"><span class="av" style="width:52px;height:52px;font-size:17px">' + initials(ME || "?") + '</span><div><div class="t" style="font:700 18px/22px var(--font)">' + esc(ME) + '</div><div class="small">' + esc(teamsOf(ME).join(" · ") || "Volunteer") + '</div></div></div>'
     + '<div class="lbl">Serving</div><div class="grp">'
-    + row("Availability", "Which services you can do", "push", "avail")
+    + row("Availability", "Dates you can't serve", "push", "avail")
     + row("Team contacts", "Call or WhatsApp your team", "push", "contacts") + '</div>'
     + '<div class="lbl">Settings</div><div class="grp">'
     + row("Notifications", "What we tell you about", "push", "notifSettings")
@@ -1043,7 +1043,7 @@ SCREENS["vol:more"] = function(){
   var left = todosLeft();
   var body = '<div class="card" style="display:flex;gap:12px;align-items:center"><span class="av" style="width:52px;height:52px;font-size:17px">' + initials(ME || "?") + '</span><div><div class="t" style="font:700 18px/22px var(--font)">' + esc(ME) + '</div><div class="small">' + esc(teamsOf(ME).join(" · ") || "Volunteer") + '</div></div></div>'
     + '<div class="lbl">Serving</div><div class="grp">'
-    + row("Availability", "Which services you can do", "push", "avail")
+    + row("Availability", "Dates you can't serve", "push", "avail")
     + (on("swaps") ? row("My requests", "Swaps and give-aways, and where each stands", "push", "myReqs") : '')
     + (on("onboarding") ? row("To-dos", left ? left + " to do" : "All done", "push", "todosVol") : '')
     + row("Team contacts", "Call, WhatsApp or thank your team", "push", "contacts") + '</div>'
@@ -1819,12 +1819,12 @@ SHEETS.cover = function(o){ var x = slot(o.id), sv = svc(x.sid);
     + '<p class="small mt">Your leader approves before anything changes.</p>'; };
 
 /* switch: "Services I usually serve" on Availability (Nov 15) */
-FEATS.push(["usual","Usual services","On Availability, volunteers pick which services they usually serve. Off hides it, and leaders see everyone as available."]);
+/* Usual services was removed from Availability (Nov 16, user comment "remove this section"); leaders see everyone as available. */
 var baseAvail7 = SCREENS.avail;
-SCREENS.avail = function(o){ var r = baseAvail7(o); if (on("usual")) return r;
+SCREENS.avail = function(o){ var r = baseAvail7(o);
   var i = r.body.indexOf('<div class="lbl">Blockout dates'); if (i > 0) r.body = r.body.slice(i); return r; };
 var baseFill7 = SHEETS.fill;
-SHEETS.fill = function(o){ if (on("usual")) return baseFill7(o); var keep = S.regularBy; S.regularBy = tempOverlay({}, o); try { return baseFill7(o); } finally { S.regularBy = keep; } };
+SHEETS.fill = function(o){ var keep = S.regularBy; S.regularBy = tempOverlay({}, o); try { return baseFill7(o); } finally { S.regularBy = keep; } };
 /* search by name in the pick-someone list (Nov 16) */
 SHEETS.fill = (function(base){ return function(o){ var out = base(o);
   return out.replace(/(<div class="lbl"[^>]*>)(?:Find who's available|Pick someone)(<\/div>)(<div class="grp")/, '$1Assign volunteer$2<div class="tsearch" style="margin:6px 0 8px">' + SRCH + '<input id="fillSearch" type="search" placeholder="Search by name" aria-label="Search by name" autocomplete="off"></div>$3 id="fillList"')
