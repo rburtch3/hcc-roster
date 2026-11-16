@@ -49,7 +49,7 @@ export async function handleState(request, store) {
  * /api/7shifts/sync?week=SUNDAY      POST: creates missing draft shifts, up to 40 a call
  * /api/7shifts/test                  POST: creates the one approved test shift as a draft
  * /api/7shifts/publish-test          POST: publishes that one test shift, nothing else
- * /api/7shifts/publish?week=SUNDAY   POST: publishes this app's drafts in an approved week, up to 40 a call
+ * /api/7shifts/publish?week=SUNDAY   POST: publishes this app's drafts in an approved week, up to 40 a call (GET: counts only)
  * Roster weeks are only ever added as drafts; a leader publishes them in 7shifts.
  */
 export async function handleSevenShifts(request, env, loadRoster, fetchFn) {
@@ -68,9 +68,9 @@ export async function handleSevenShifts(request, env, loadRoster, fetchFn) {
     }
   }
   if (action === "publish") {
-    if (request.method !== "POST") return new Response("Method not allowed", { status: 405 });
+    if (!["GET", "POST"].includes(request.method)) return new Response("Method not allowed", { status: 405 });
     try {
-      const r = await publishWeek(env, url.searchParams.get("week"), { fetchFn });
+      const r = await publishWeek(env, url.searchParams.get("week"), { fetchFn, dryRun: request.method === "GET" });
       return json(r, r.error ? 403 : 200);
     } catch (e) {
       return json({ error: String(e.message || e) }, 502);

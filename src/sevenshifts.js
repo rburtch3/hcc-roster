@@ -176,13 +176,21 @@ export const PUBLISH_WEEKS = ["2026-11-22"];
  * Publishes the draft shifts this app added (notes "From HCC Roster") in an approved week,
  * up to MAX_CREATES a call. Returns { week, published, remaining, notified }.
  */
-export async function publishWeek(env, sunday, { fetchFn } = {}) {
+export async function publishWeek(env, sunday, { fetchFn, dryRun = false } = {}) {
   if (!PUBLISH_WEEKS.includes(sunday)) return { error: "That week isn't approved for publishing." };
   const days = weekDates(sunday);
   const api = client(env, fetchFn);
   const loc = env.SEVENSHIFTS_LOCATION_ID;
   const shifts = await api.all(`/shifts?location_id=${loc}&start[gte]=${utc(days[0], 0, 0)}&start[lte]=${utc(days[6], 23, 59)}&include_draft=true`);
-  const drafts = shifts.filter((s) => !s.deleted && s.draft === true && String(s.notes || "").includes("From HCC Roster"));
+  const live = shifts.filter((s) => !s.deleted);
+  const isDraft = (s) => s.draft === true || s.draft === 1 || s.publish_status === "draft";
+  const ours = (s) => /from hcc roster/i.test(String(s.notes || ""));
+  const drafts = live.filter((s) => isDraft(s) && ours(s));
+  if (dryRun) {
+    const count = (f) => live.filter(f).length;
+    return { week: sunday, shifts: live.length, drafts: count(isDraft), ours: count(ours), toPublish: drafts.length,
+      sample: live.slice(0, 3).map((s) => ({ draft: s.draft, publish_status: s.publish_status, notes: s.notes })) };
+  }
   let published = 0, notified = 0;
   for (const s of drafts.slice(0, MAX_CREATES)) {
     const r = await api.call("PUT", `/shifts/${s.id}`, { draft: false });
