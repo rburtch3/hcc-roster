@@ -143,7 +143,7 @@ textarea.field{min-height:96px;resize:none}
 .unpub{width:8px;height:8px;border-radius:50%;background:var(--warn);display:inline-block;margin-left:6px;vertical-align:2px}
 .evb{display:grid;gap:2px;background:var(--accent-soft);color:var(--accent);border-radius:14px;padding:10px 14px;margin:0 0 12px;font:500 14px/19px var(--font)}
 .evb b{font-weight:700;font-size:15px}.evb span{color:var(--ink)}
-.evb{gap:4px;padding:12px 16px;margin:6px 0 18px}.evb+.pick{margin-top:0}
+.evb{margin:14px 0 14px;padding:12px 16px;gap:4px}
 .hnote{margin-top:10px;background:rgba(255,255,255,.18);border-radius:12px;padding:8px 12px;font:500 14px/19px var(--font)}
 .week{display:grid;grid-template-columns:repeat(7,1fr);gap:4px;margin-top:12px}
 .week div{display:grid;justify-items:center;gap:2px;padding:6px 0;border-radius:12px}
@@ -2413,11 +2413,22 @@ visibleReq = function(r){ if (!baseVisReq11(r)) return false; var sc = scoped();
     return r; }; });
 var baseMore11 = SCREENS["admin:more"];
 SCREENS["admin:more"] = function(){ var sc = scoped(); if (!sc) return baseMore11();
-  return { head: header("More"), body: scopeBanner(sc) + '<div class="card"><div class="t">You lead ' + esc(sc.join(", ")) + '</div><div class="small">You can fill spots, answer requests and message your team. Features, the leader PIN and services stay with the main leaders.</div></div>'
-    + '<div class="lbl">People</div><div class="grp">' + row("Team", "Your team's people", "push", "contacts") + '</div>'
+  return { head: header("More"), body: scopeBanner(sc) + '<div class="card"><div class="t">You lead ' + esc(sc.join(", ")) + '</div><div class="small">You can fill spots, answer requests, run your team\'s checklists and to-dos, and message your team. Features, templates, services and the leader PIN stay with the main leaders.</div></div>'
+    + '<div class="lbl">People</div><div class="grp">' + row("Team", "Your team's people", "push", "contacts") + row("Availability and blockouts", blockSummary(), "tab", "reqs")
+    + (on("onboarding") ? row("Onboarding to-dos", "Who on your team has read and confirmed", "push", "todosAdmin") : '') + '</div>'
+    + '<div class="lbl">Planning</div><div class="grp">' + row("Service notes", on("attendance") ? "Attendance and what happened" : "What happened", "push", "notes")
+    + (on("checklists") ? row("Checklists", "Your team's setup lists", "push", "checklistsAdmin") : '') + '</div>'
+    + '<div class="lbl">Settings</div><div class="grp">' + (on("notify") ? row("Notifications", "", "push", "notifSettings") : '') + row("HCC Hub home", "", "hub", "") + '</div>'
     + '<div class="lbl">This phone</div><div class="grp">' + row("Volunteer view", "See the roster as a volunteer", "leaveTeamLead", "") + '</div>' };
 };
 
+/* team leaders only see their own teams' checklists and to-dos (Nov 16) */
+(function(){
+  function withOnly(key, keep, fn){ var all = S[key]; S[key] = all.filter(keep); try { return fn(); } finally { S[key] = all; } }
+  var bCk = SCREENS.checklistsAdmin, bTd = SCREENS.todosAdmin, bAdd = SHEETS.addCk;
+  SCREENS.checklistsAdmin = function(o){ var sc = scoped(); if (!sc) return bCk(o); return withOnly("checklists", function(k){ return sc.indexOf(k.team) >= 0; }, function(){ return bCk(o); }); };
+  SCREENS.todosAdmin = function(o){ var sc = scoped(); if (!sc) return bTd(o); return withOnly("todos", function(t){ return t.teams.some(function(x){ return sc.indexOf(x) >= 0; }); }, function(){ return bTd(o); }); };
+})();
 /* volunteer More: emergency contact and the team leader view */
 var baseVolMore11 = SCREENS["vol:more"];
 SCREENS["vol:more"] = function(){ var r = baseVolMore11(); if (!r) return r;
@@ -2713,29 +2724,8 @@ var baseAddCk14 = SHEETS.addCk;
 SHEETS.addCk = function(o){ return baseAddCk14(o)
   .replace('<select class="field" id="ckTeam">', '<select class="field" id="ckTeam"><option>Everyone</option>')
   .replace('Volunteers on that team tick it off on their serve details.', 'It shows on the serve details of everyone on that team for that service. Pick Everyone to show it to every team.'); };
-
-/* Team leaders get more of the leader tools in More, limited to their own teams (Nov 16, user comment "add other options here for team leaders, just not all the admin options") */
-var baseMore16 = SCREENS["admin:more"];
-SCREENS["admin:more"] = function(o){ var sc = scoped(); if (!sc) return baseMore16(o);
-  return { head: header("More"), body: '<div class="card"><div class="t">You lead ' + esc(sc.join(", ")) + '</div><div class="small">You can fill spots, answer requests, message your team and set up its checklists and to-dos. Features, the leader PIN, events, templates and services stay with the main leaders.</div></div>'
-    + '<div class="lbl">People</div><div class="grp">' + row("Team", "Your team's people", "push", "contacts") + row("Availability and blockouts", "Who can't serve when", "tab", "reqs") + (on("onboarding") ? row("Onboarding to-dos", "For new people on your team", "push", "todosAdmin") : '') + '</div>'
-    + '<div class="lbl">Planning</div><div class="grp">' + row("Service notes", "Attendance and notes", "push", "notes") + (on("checklists") ? row("Checklists", "Your team's checklists", "push", "checklistsAdmin") : '') + '</div>'
-    + '<div class="lbl">Settings</div><div class="grp">' + row("Notifications", "What this phone tells you", "push", "notifSettings") + '</div>'
-    + '<div class="lbl">This phone</div><div class="grp">' + row("Volunteer view", "See the roster as a volunteer", "leaveTeamLead", "") + '</div>' };
-};
-/* in team leader view, checklists and to-dos show and save for their teams only */
-var baseCkAdmin16 = SCREENS.checklistsAdmin;
-SCREENS.checklistsAdmin = function(o){ var sc = scoped(); if (!sc) return baseCkAdmin16(o);
-  var keep = S.checklists; S.checklists = keep.filter(function(k){ return sc.indexOf(k.team) >= 0; });
-  try { return baseCkAdmin16(o); } finally { S.checklists = keep; } };
-var baseAddCk16 = SHEETS.addCk;
-SHEETS.addCk = function(o){ var r = baseAddCk16(o); return scoped() ? r.replace('<option>Everyone</option>', '').replace(' Pick Everyone to show it to every team.', '') : r; };
-var baseTodosAdmin16 = SCREENS.todosAdmin;
-SCREENS.todosAdmin = function(o){ var sc = scoped(); if (!sc) return baseTodosAdmin16(o);
-  var keep = S.todos; S.todos = keep.filter(function(t){ return t.teams.some(function(tm){ return sc.indexOf(tm) >= 0; }); });
-  try { return baseTodosAdmin16(o); } finally { S.todos = keep; } };
-var baseSaveTodo16 = A.saveTodo;
-A.saveTodo = function(){ var sc = scoped(); if (sc && !document.querySelector("#tdTeams [aria-pressed=true]")) document.querySelectorAll("#tdTeams button").forEach(function(b){ b.setAttribute("aria-pressed", "true"); }); return baseSaveTodo16(); };
+var baseAddCk15 = SHEETS.addCk; /* team leaders: own teams only, no Everyone (Nov 16) */
+SHEETS.addCk = function(o){ var h = baseAddCk15(o); return scoped() ? h.replace('<select class="field" id="ckTeam"><option>Everyone</option>', '<select class="field" id="ckTeam">').replace(' Pick Everyone to show it to every team.', '') : h; };
 
 var baseLocal7 = localDefaults;
 localDefaults = function(){ var o = baseLocal7(); o.msgTab = "chats"; return o; };
