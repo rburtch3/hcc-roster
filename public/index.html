@@ -640,7 +640,6 @@ SCREENS["vol:more"] = function(){
   var body = '<div class="card" style="display:flex;gap:12px;align-items:center"><span class="av" style="width:52px;height:52px;font-size:17px">' + initials(ME || "?") + '</span><div><div class="t" style="font:700 18px/22px var(--font)">' + esc(ME) + '</div><div class="small">' + esc(teamsOf(ME).join(" · ") || "Volunteer") + '</div></div></div>'
     + '<div class="lbl">Serving</div><div class="grp">'
     + row("Availability", "Which services you can do", "push", "avail")
-    + row("Blockout dates", myBlocks().length + " coming up", "push", "avail")
     + row("Team contacts", "Call or WhatsApp your team", "push", "contacts") + '</div>'
     + '<div class="lbl">Settings</div><div class="grp">'
     + row("Notifications", "What we tell you about", "push", "notifSettings")
@@ -807,7 +806,7 @@ SHEETS.newChat = function(){ var gs = upc().slice(0,3).map(function(sv){ var n =
   (S.view === "admin" ? Object.keys(ROLES) : teamsOf(ME)).forEach(function(t){ gs.push([(S.view === "admin" ? "" : "My team, ") + t, (POOL[t] || []).length + " people"]); });
   return '<h4>New chat</h4><p class="s">Message a group based on the schedule.</p><div class="grp">' + gs.map(function(g){ return '<div class="row tap" data-a="makeChat" data-t="' + esc(g[0]) + '"><span class="av">★</span><div class="m"><div class="t">' + g[0] + '</div><div class="s">' + g[1] + '</div></div><span class="chev">›</span></div>'; }).join("") + '</div>'; };
 SHEETS.msgLeader = function(){ var t = teamsOf(ME)[0], l = leaderOf(t); return '<h4>Message your leader</h4><p class="s">Goes to ' + esc(l) + (t ? ', ' + esc(t) + ' leader' : '') + '.</p><textarea class="field" id="ml" placeholder="Write a message"></textarea><div class="btns"><button class="btn" data-a="leaderMsg">Send</button><button class="btn wa" data-a="leaderWa">WhatsApp instead</button></div>'; };
-SHEETS.blockout = function(){ return '<h4>Block out dates</h4><p class="s">You won\'t be scheduled on these days.</p><label class="fl" for="bf">From</label><input class="field" id="bf" placeholder="Like: 20 Dec"><label class="fl" for="bt">To</label><input class="field" id="bt" placeholder="Like: 27 Dec"><label class="fl" for="br">Reason (optional)</label><input class="field" id="br" placeholder="Like: Travel"><div class="btns"><button class="btn" data-a="addBlock">Save</button></div>'; };
+SHEETS.blockout = function(){ return '<h4>Block out dates</h4><p class="s">You won\'t be scheduled on these days.</p><label class="fl" for="bf">From</label><input class="field" id="bf" type="date" min="' + TODAY + '" value="' + TODAY + '"><label class="fl" for="bt">To</label><input class="field" id="bt" type="date" min="' + TODAY + '" value="' + TODAY + '"><label class="fl" for="br">Reason (optional)</label><input class="field" id="br" placeholder="Like: Travel"><div class="btns"><button class="btn" data-a="addBlock">Save</button></div>'; };
 SHEETS.note = function(){ var ns = noteSvc(); return '<h4>' + (ns ? dShort(ns.date) + ' ' + esc(ns.svc) : 'Service') + ' · notes</h4><div class="two"><div><label class="fl" for="na">Adults</label><input class="field" id="na" inputmode="numeric"></div><div><label class="fl" for="nk">Kids</label><input class="field" id="nk" inputmode="numeric"></div></div><label class="fl" for="nv">Visitors</label><input class="field" id="nv" inputmode="numeric"><label class="fl" for="nt">What happened</label><textarea class="field" id="nt" placeholder="Anything worth remembering"></textarea><div class="btns"><button class="btn" data-a="saveNote">Save</button></div>'; };
 
 /* ---------------- actions ---------------- */
@@ -846,7 +845,7 @@ var A = {
   publish: function(){ var sv = svc(S.adminSid); sv.published = true; var n = S.slots.filter(function(x){ return x.dirty; }).length; S.slots.forEach(function(x){ x.dirty = false; }); S.sheet = null; toast("Published. " + (n ? n + " volunteer" + (n > 1 ? "s" : "") + " notified." : "Volunteers can see it now.")); render.same = true; render(); },
   postAnn: function(){ var to = document.querySelector("#anTo [aria-pressed=true]"); S.announcements.unshift({ id: "a" + Date.now(), who: ADMIN, to: to ? to.textContent : "Everyone", when: "Just now", title: document.getElementById("anTitle").value || "Announcement", text: document.getElementById("anText").value }); S.notifs.unshift({ t: "New announcement", s: document.getElementById("anTitle").value, when: "Now" }); S.sheet = null; S.msgTab = "ann"; toast("Posted. Switch to Volunteer to see it."); render(); },
   makeChat: function(d){ var c = { id: "c" + Date.now(), name: d.t, auto: true, msgs: [{ who: "HCC Roster", t: "Chat started for " + d.t + "." }] }; S.chats.unshift(c); S.sheet = null; S.msgTab = "chats"; push("chat", { id: c.id }); },
-  addBlock: function(){ var f = document.getElementById("bf").value.trim(), t = document.getElementById("bt").value.trim() || f, fi = parseDay(f), ti = parseDay(t); if (!fi || !ti) { toast("Type dates like 20 Dec."); render.same = true; render(); return; } myBlocks().push({ from: dm(fi), to: dm(ti), fromIso: fi, toIso: ti < fi ? fi : ti, reason: document.getElementById("br").value.trim() }); S.sheet = null; toast("Blocked out. " + leaderOf(teamsOf(ME)[0]) + " can see it."); render.same = true; render(); },
+  addBlock: function(){ var f = document.getElementById("bf").value.trim(), t = document.getElementById("bt").value.trim() || f, fi = parseDay(f), ti = parseDay(t); if (!fi || !ti) { toast("Pick a From date."); render.same = true; render(); return; } myBlocks().push({ from: dm(fi), to: dm(ti), fromIso: fi, toIso: ti < fi ? fi : ti, reason: document.getElementById("br").value.trim() }); S.sheet = null; toast("Blocked out. " + leaderOf(teamsOf(ME)[0]) + " can see it."); render.same = true; render(); },
   saveNote: function(){ var ns = noteSvc(); S.notes.unshift({ date: ns ? dShort(ns.date) : dShort(TODAY), svc: ns ? ns.svc : "", adults: +document.getElementById("na").value || 0, kids: +document.getElementById("nk").value || 0, visitors: +document.getElementById("nv").value || 0, text: document.getElementById("nt").value }); S.sheet = null; render(); },
   setting: function(d, el){ S.settings[d.k] = el.checked; },
   regular: function(d, el){ S.regular[d.k] = el.checked; }
@@ -1042,7 +1041,6 @@ SCREENS["vol:more"] = function(){
   var body = '<div class="card" style="display:flex;gap:12px;align-items:center"><span class="av" style="width:52px;height:52px;font-size:17px">' + initials(ME || "?") + '</span><div><div class="t" style="font:700 18px/22px var(--font)">' + esc(ME) + '</div><div class="small">' + esc(teamsOf(ME).join(" · ") || "Volunteer") + '</div></div></div>'
     + '<div class="lbl">Serving</div><div class="grp">'
     + row("Availability", "Which services you can do", "push", "avail")
-    + row("Blockout dates", myBlocks().length + " coming up", "push", "avail")
     + (on("swaps") ? row("My requests", "Swaps and give-aways, and where each stands", "push", "myReqs") : '')
     + (on("onboarding") ? row("To-dos", left ? left + " to do" : "All done", "push", "todosVol") : '')
     + row("Team contacts", "Call, WhatsApp or thank your team", "push", "contacts") + '</div>'
@@ -2184,7 +2182,7 @@ FEATS.push(["annphoto","Photos on announcements","Add one picture to an announce
 FEATS.push(["levels","Levels","Mark each person as Volunteer, Assistant leader or Leader. It shows on Team and their profile."]);
 FEATS.push(["flags","Flag a spot","Leaders flag a spot with a short reason, like New, needs help. It shows on the schedule."]);
 FEATS.push(["sortsched","Sort the full roster","On Full roster, volunteers sort by time, role, person or team, and can show every team."]);
-FEATS.push(["tempavail","Temporary availability","Volunteers set different services for a date range, like only Sunday mornings in December. The picker shows it."]);
+/* Temporary availability was removed from the Availability page (Nov 16, user comment "remove this section"). */
 FEATS.push(["notifchan","Phone and email","In Notifications, each kind of message has its own Phone and Email switch."]);
 
 LOCAL.rosterSort = 1; LOCAL.rosterAll = 1;
@@ -2259,7 +2257,7 @@ A.addPerson = function(d, el){ var nm = ((document.getElementById("apName") || {
 
 /* flag a spot */
 var baseFill10 = SHEETS.fill;
-SHEETS.fill = function(o){ var keep = S.regularBy; if (on("tempavail") && on("usual")) S.regularBy = tempOverlay(keep, o);
+SHEETS.fill = function(o){ var keep = S.regularBy; if (false && on("usual")) S.regularBy = tempOverlay(keep, o);
   var h; try { h = baseFill10(o); } finally { S.regularBy = keep; }
   if (!on("flags") || S.view !== "admin") return h; var f = objOf("flags")[o.id];
   var box = '<div class="lbl sm">Flag</div>' + (f ? '<div class="cline"><span class="flag">⚑ ' + esc(f) + '</span></div><div class="btns"><button class="btn sm sec" style="width:100%" data-a="unflag" data-id="' + o.id + '">Remove flag</button></div>'
@@ -2292,12 +2290,12 @@ A.rosterAll = function(){ S.rosterAll = !S.rosterAll; render.same = true; render
 
 /* temporary availability */
 function tempFor(p, iso){ var l = (objOf("tempBy")[p] || []); for (var i = l.length - 1; i >= 0; i--) if (l[i].from <= iso && iso <= l[i].to) return l[i]; return null; }
-function tempOverlay(base, o){ if (!on("tempavail")) return base; var x = o && slot(o.id), sv = x && svc(x.sid); if (!sv) return base; var out = {};
+function tempOverlay(base, o){ if (!false) return base; var x = o && slot(o.id), sv = x && svc(x.sid); if (!sv) return base; var out = {};
   Object.keys(base || {}).forEach(function(p){ out[p] = base[p]; });
   Object.keys(objOf("tempBy")).forEach(function(p){ var t = tempFor(p, sv.date); if (!t) return; var r = {}; Object.keys((base || {})[p] || {}).forEach(function(k){ r[k] = base[p][k]; }); r[sv.svc] = t.svcs.indexOf(sv.svc) >= 0; out[p] = r; });
   return out; }
 var baseAvail10 = SCREENS.avail;
-SCREENS.avail = function(o){ var r = baseAvail10(o); if (!on("tempavail") || !r || !ME) return r; var l = (objOf("tempBy")[ME] || []).filter(function(t){ return t.to >= TODAY; });
+SCREENS.avail = function(o){ var r = baseAvail10(o); if (!false || !r || !ME) return r; var l = (objOf("tempBy")[ME] || []).filter(function(t){ return t.to >= TODAY; });
   var sec = '<div class="lbl">Temporary availability<a data-a="sheet" data-s="tempAvail">Add</a></div>'
     + (l.length ? '<div class="grp">' + l.map(function(t){ return '<div class="row"><div class="m"><div class="t">' + dShort(t.from) + (t.to !== t.from ? ' to ' + dShort(t.to) : '') + '</div><div class="s">' + (t.svcs.length ? 'Only ' + esc(t.svcs.map(function(k){ return SVC[k] ? SVC[k].name : k; }).join(", ")) : 'No services') + '</div></div><button class="btn sm sec" data-a="rmTemp" data-id="' + esc(t.id) + '">Remove</button></div>'; }).join("") + '</div>'
       : '<p class="small" style="margin:4px 4px 0">For a stretch when your usual services change, like only Sunday mornings in December.</p>');
@@ -2466,6 +2464,62 @@ var baseShout11 = A.sendShout;
 A.sendShout = function(d, el){ baseShout11(d, el); var h = S.shouts[0]; if (!on("teamthanks") || !h || !h.team) return;
   ensureChat("ch:thanks:" + h.team, "Thanks, " + h.team, { channel: true }).msgs.push({ who: h.from, t: "Shout-out for " + h.to + ": " + h.badge + (h.text ? ". " + h.text : ""), at: Date.now() });
   render.same = true; render(); };
+
+/* blockout dates: To follows From and can't be earlier */
+document.addEventListener("change", function(e){ if (!e.target || e.target.id !== "bf") return; var t = document.getElementById("bt"); if (!t) return; t.min = e.target.value; if (!t.value || t.value < e.target.value) t.value = e.target.value; });
+/* ---------- schedule header like 7shifts: month picker, today, week strip (Nov 16) ---------- */
+FEATS.push(["weekhead","Week strip on Schedule","Schedule opens with the month, a today button, My Shifts or Schedule, and a Sun to Sat week strip. A dot marks days you serve."]);
+LOCAL.wkDay = 1;
+(function(){ var st = document.createElement("style"); st.textContent =
+  '.wkm{border:0;background:none;color:var(--ink);font:600 20px/26px var(--font);display:inline-flex;align-items:center;gap:6px;cursor:pointer;padding:4px 8px}'
+  + '.wkm svg{width:14px;height:14px;stroke:currentColor;fill:none;stroke-width:2}'
+  + '.wkcal{position:relative;display:inline-flex;align-items:center;justify-content:center}.wkcal svg{width:26px;height:26px;stroke:var(--ink);fill:none;stroke-width:1.6}'
+  + '.wkcal b{position:absolute;top:10px;left:0;right:0;text-align:center;font:700 9px/10px var(--font);color:var(--ink)}'
+  + '.wkstrip{display:flex;align-items:stretch;gap:2px;margin:2px -4px 12px}'
+  + '.wkstrip .nav{flex:0 0 22px;border:0;background:none;color:var(--muted);font:400 22px/1 var(--font);cursor:pointer;padding:0}'
+  + '.wkd{flex:1 1 0;min-width:0;border:0;background:none;border-radius:10px;padding:6px 0 4px;cursor:pointer;color:var(--muted);display:flex;flex-direction:column;align-items:center;gap:2px}'
+  + '.wkd small{font:500 13px/16px var(--font)}.wkd span{font:400 22px/26px var(--font);color:var(--ink)}'
+  + '.wkd i{width:5px;height:5px;border-radius:50%;background:transparent;margin-top:2px}.wkd i.on{background:var(--muted)}'
+  + '.wkd[aria-current]{background:var(--accent)}.wkd[aria-current] small,.wkd[aria-current] span{color:#fff;font-weight:600}.wkd[aria-current] i.on{background:#fff}'
+  + '.wkd.today:not([aria-current]) span{color:var(--accent);font-weight:600}';
+  document.head.appendChild(st); })();
+function isoAddDays(iso, n){ var d = dt(iso); d.setUTCDate(d.getUTCDate() + n); return d.toISOString().slice(0, 10); }
+function wkSel(){ return S.wkDay || TODAY; }
+function myDates(){ var o = {}; S.slots.forEach(function(x){ if (x.person === ME && x.status !== "declined") { var sv = svc(x.sid); if (sv && sv.published !== false) o[sv.date] = 1; } }); return o; }
+function wkHead(){ var sel = dt(wkSel()), td = dt(TODAY).getUTCDate();
+  return '<div class="hd"><button class="ic wkcal" data-a="wkToday" aria-label="Go to today"><svg viewBox="0 0 24 24"><rect x="3.5" y="5" width="17" height="15.5" rx="2.5"/><path d="M3.5 9.5h17M8 3v4M16 3v4"/></svg><b>' + td + '</b></button>'
+    + '<h3><button class="wkm" data-a="sheet" data-s="wkMonth" aria-label="Pick a month">' + MONTHS[sel.getUTCMonth()] + (sel.getUTCFullYear() !== dt(TODAY).getUTCFullYear() ? ' ' + sel.getUTCFullYear() : '') + '<svg viewBox="0 0 24 24"><path d="M6 9l6 6 6-6"/></svg></button></h3><span style="width:40px"></span></div>'; }
+function wkStrip(){ var sel = wkSel(), start = isoAddDays(sel, -dt(sel).getUTCDay()), dots = myDates(), out = '';
+  for (var i = 0; i < 7; i++) { var iso = isoAddDays(start, i);
+    out += '<button class="wkd' + (iso === TODAY ? ' today' : '') + '" data-a="wkDay" data-v="' + iso + '"' + (iso === sel ? ' aria-current="date"' : '') + ' aria-label="' + esc(dLong(iso)) + (dots[iso] ? ', you serve' : '') + '"><small>' + DOW[dt(iso).getUTCDay()] + '</small><span>' + dt(iso).getUTCDate() + '</span><i' + (dots[iso] ? ' class="on"' : '') + '></i></button>'; }
+  return '<div class="wkstrip"><button class="nav" data-a="wkDay" data-v="' + isoAddDays(start, -7) + '" aria-label="Last week">‹</button>' + out + '<button class="nav" data-a="wkDay" data-v="' + isoAddDays(start, 7) + '" aria-label="Next week">›</button></div>'; }
+function wkSlotRow(x){ return '<div class="row">' + (x.person ? ava(x.person, 36) : '<span class="ava open" style="width:36px;height:36px">?</span>') + '<div class="m"><div class="t">' + esc(x.person || "Open") + (x.person === ME ? ' (you)' : '') + '</div><div class="s">' + esc(x.role) + ' | ' + esc(x.team) + '</div></div></div>'; }
+var baseVolSched12 = SCREENS["vol:sched"];
+SCREENS["vol:sched"] = function(){ if (!on("weekhead")) return baseVolSched12();
+  var sel = wkSel(), mode = S.volSchedMode === "mine" ? "mine" : "all";
+  var body = '<div class="seg"><button data-a="volMode" data-v="mine"' + (mode === "mine" ? ' aria-current="true"' : '') + '>My Shifts</button><button data-a="volMode" data-v="all"' + (mode === "all" ? ' aria-current="true"' : '') + '>Schedule</button></div>' + wkStrip();
+  if (mode === "mine") {
+    var m = S.slots.filter(function(x){ var sv = svc(x.sid); return x.person === ME && x.status !== "declined" && sv && sv.published !== false && sv.date >= sel; })
+      .sort(function(a, b){ var p = svc(a.sid).date, q = svc(b.sid).date; return p < q ? -1 : p > q ? 1 : 0; });
+    body += '<div class="lbl">' + (sel === TODAY ? 'From today' : 'From ' + esc(dShort(sel))) + '</div>' + (m.length ? '<div class="list7">' + m.map(upRow).join("") + '</div>' : '<div class="empty">No serves from this day on.</div>')
+      + '<div class="btns"><button class="btn soft" data-a="ics">Add all to my calendar</button></div>';
+  } else {
+    var all = !!S.rosterAll, mt = teamsOf(ME), svs = S.services.filter(function(sv){ return sv.date === sel && sv.published; });
+    body += '<div class="lbl">' + esc(dLong(sel)) + (mt.length ? '<a data-a="rosterAll">' + (all ? 'My teams' : 'All teams') + '</a>' : '') + '</div>';
+    if (!svs.length) body += '<div class="empty">No services on this day.</div>';
+    svs.forEach(function(sv){ var list = S.slots.filter(function(x){ return x.sid === sv.id && (all || !mt.length || mt.indexOf(x.team) >= 0); });
+      body += '<div class="lbl sm">' + esc(SVC[sv.svc] ? SVC[sv.svc].name : sv.svc) + ' · ' + esc(rangeTxt(sv.svc)) + '</div>' + evBanner(sv.date)
+        + (list.length ? '<div class="grp">' + list.map(wkSlotRow).join("") + '</div>' : '<div class="empty">No spots for your teams.</div>'); });
+  }
+  return { head: wkHead(), body: body };
+};
+A.wkDay = function(d){ S.wkDay = d.v; render.same = true; render(); };
+A.wkToday = function(){ S.wkDay = TODAY; render(); };
+SHEETS.wkMonth = function(){ var sel = dt(wkSel()), t = dt(TODAY), out = [];
+  for (var i = -2; i <= 9; i++) { var d = new Date(Date.UTC(t.getUTCFullYear(), t.getUTCMonth() + i, 1)); out.push(d); }
+  return '<h4>Pick a month</h4><div class="grp">' + out.map(function(d){ var cur = d.getUTCMonth() === sel.getUTCMonth() && d.getUTCFullYear() === sel.getUTCFullYear(), iso = d.toISOString().slice(0, 10);
+    return '<div class="row tap" data-a="wkMonth" data-v="' + iso + '"><div class="m"><div class="t">' + MONTHS[d.getUTCMonth()] + ' ' + d.getUTCFullYear() + '</div></div>' + (cur ? '<span class="chip c-acc">Showing</span>' : '<span class="chev">›</span>') + '</div>'; }).join("") + '</div>'; };
+A.wkMonth = function(d){ var first = d.v, t = TODAY; S.wkDay = first.slice(0, 7) === t.slice(0, 7) ? t : first; S.sheet = null; render(); };
 
 var baseLocal7 = localDefaults;
 localDefaults = function(){ var o = baseLocal7(); o.msgTab = "chats"; return o; };
