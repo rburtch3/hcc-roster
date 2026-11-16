@@ -1529,7 +1529,8 @@ var PAL = ["#E8B4D2","#8FCFC2","#B5CB8C","#F3B1A2","#A6BDF2","#EFCB82","#C6B1EA"
 var DOTS = ["#E9A6CF","#16B2D6","#2DD4B4","#F59E0B","#7C83F7","#F06A6A","#5BBE6A","#C084FC"];
 var NUM = ["no","one","two","three","four","five"];
 function hashN(t){ var h = 0; t = String(t || ""); for (var i = 0; i < t.length; i++) h = (h * 31 + t.charCodeAt(i)) >>> 0; return h; }
-function dot(role){ return '<i class="rdot" style="background:var(--accent)"></i>'; }
+var BLUES = ["#4A72FF","#1E3A8A","#38BDF8","#0E8FB0","#6366F1","#5B7FA6","#7C9CF5","#0369A1"];
+function dot(role){ return '<i class="rdot" style="background:' + BLUES[hashN(role) % BLUES.length] + '"></i>'; }
 var PERSON = '<svg viewBox="0 0 40 40" aria-hidden="true"><circle cx="20" cy="15.5" r="7.5" fill="rgba(255,255,255,.88)"/><path d="M5 38c1.5-8.5 8-12.5 15-12.5S33.5 29.5 35 38z" fill="rgba(255,255,255,.88)"/></svg>';
 function ava(p, size){ size = size || 44; return '<span class="ava" style="width:' + size + 'px;height:' + size + 'px;background:' + PAL[hashN(p) % PAL.length] + '" aria-hidden="true">' + PERSON + '</span>'; }
 function SV(d, inner, w){ return '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="' + (w || 1.6) + '" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">' + inner + '</svg>'; }
