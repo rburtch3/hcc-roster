@@ -4,7 +4,8 @@ import { readFileSync } from "node:fs";
 
 // handleState is tested with a plain in-memory store; the Durable Object import is stubbed out.
 const src = readFileSync(new URL("../src/worker.js", import.meta.url), "utf8")
-  .replace('import { DurableObject } from "cloudflare:workers";', "class DurableObject {}");
+  .replace('import { DurableObject } from "cloudflare:workers";', "class DurableObject {}")
+  .replace('"./sevenshifts.js"', JSON.stringify(new URL("../src/sevenshifts.js", import.meta.url).href));
 const { handleState } = await import("data:text/javascript," + encodeURIComponent(src));
 
 // Same contract as RosterStore.
@@ -90,4 +91,17 @@ test("contacts are for leaders only", async () => {
   assert.equal((await r("PUT", h, JSON.stringify({ contacts: { Ana: { phone: "1" } } }))).status, 200);
   assert.deepEqual(await (await r("GET", h)).json(), { contacts: { Ana: { phone: "1" } } });
   assert.equal(JSON.stringify(await (await handleState(req("GET"), s)).json()).includes("Ana"), false);
+});
+
+test("7shifts routes: need the token, a Sunday, and the right method", async () => {
+  const { handleSevenShifts } = await import("data:text/javascript," + encodeURIComponent(src));
+  const roster = JSON.parse(readFileSync(new URL("../public/roster-data.json", import.meta.url), "utf8"));
+  const load = async () => roster;
+  const env = { SEVENSHIFTS_COMPANY_ID: "1", SEVENSHIFTS_LOCATION_ID: "2" };
+  const r = (m, p) => new Request("https://x" + p, { method: m });
+  assert.equal((await handleSevenShifts(r("POST", "/api/7shifts/test"), env, load)).status, 503);
+  const withToken = { ...env, SEVENSHIFTS_TOKEN: "t" };
+  assert.equal((await handleSevenShifts(r("GET", "/api/7shifts/sync?week=2030-01-06"), withToken, load)).status, 405);
+  assert.equal((await handleSevenShifts(r("GET", "/api/7shifts/preview?week=2030-01-07"), withToken, load)).status, 400);
+  assert.equal((await handleSevenShifts(r("GET", "/api/7shifts/nope"), withToken, load)).status, 404);
 });

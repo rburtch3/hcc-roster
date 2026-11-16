@@ -1,6 +1,7 @@
 // HCC Roster: serves the app page and keeps one shared copy of the roster
 // in a Durable Object (SQLite storage, no setup needed on Cloudflare).
 import { DurableObject } from "cloudflare:workers";
+import { rowsForWeek, syncRows, publishTest, TEST_ROWS } from "./sevenshifts.js";
 
 const MAX = 1_000_000;
 const MAX_CONTACTS = 200_000;
@@ -98,9 +99,48 @@ export async function handleContacts(request, store) {
   return new Response("Method not allowed", { status: 405 });
 }
 
+/**
+ * /api/7shifts/preview?week=SUNDAY   GET: what a sync would create (reads 7shifts only)
+ * /api/7shifts/sync?week=SUNDAY      POST: creates missing draft shifts, up to 40 a call
+ * /api/7shifts/test                  POST: creates the one approved test shift as a draft
+ * /api/7shifts/publish-test          POST: publishes that one test shift, nothing else
+ * Roster weeks are only ever added as drafts; a leader publishes them in 7shifts.
+ */
+export async function handleSevenShifts(request, env, loadRoster, fetchFn) {
+  const url = new URL(request.url);
+  const action = url.pathname.split("/")[3];
+  if (!env.SEVENSHIFTS_TOKEN) return json({ error: "The 7shifts token isn't set up yet." }, 503);
+  const isTest = action === "test";
+  if (!["preview", "sync", "test", "publish-test"].includes(action)) return new Response("Not found", { status: 404 });
+  if (action === "publish-test") {
+    if (request.method !== "POST") return new Response("Method not allowed", { status: 405 });
+    try {
+      const r = await publishTest(env, await loadRoster(), { fetchFn });
+      return json(r, r.error ? 409 : 200);
+    } catch (e) {
+      return json({ error: String(e.message || e) }, 502);
+    }
+  }
+  if (action === "preview" ? request.method !== "GET" : request.method !== "POST") return new Response("Method not allowed", { status: 405 });
+  const roster = await loadRoster();
+  const week = isTest ? TEST_ROWS[0][0] : url.searchParams.get("week");
+  const rows = isTest ? TEST_ROWS : rowsForWeek(roster, week);
+  if (!rows) return json({ error: "week must be a Sunday, like 2026-11-15" }, 400);
+  if (week < new Date(Date.now() - 7 * 86400e3).toISOString().slice(0, 10)) return json({ error: "That week is in the past." }, 400);
+  try {
+    return json(await syncRows(env, roster, rows, week, { create: action !== "preview", fetchFn }));
+  } catch (e) {
+    return json({ error: String(e.message || e) }, 502);
+  }
+}
+
 export default {
   async fetch(request, env) {
     const url = new URL(request.url);
+    if (url.pathname.startsWith("/api/7shifts/")) {
+      const loadRoster = async () => (await env.ASSETS.fetch(new URL("/sheet-shifts.json", url))).json();
+      return handleSevenShifts(request, env, loadRoster);
+    }
     const routes = { "/api/state": handleState, "/api/unlock": handleUnlock, "/api/contacts": handleContacts };
     const h = routes[url.pathname];
     if (h) return h(request, env.ROSTER.get(env.ROSTER.idFromName("hcc")));
