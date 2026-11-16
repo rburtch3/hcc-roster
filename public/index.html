@@ -1383,11 +1383,11 @@ function saveNow(){
   if (inflight) { again = true; return; }
   var body = snapshot(); if (body === lastSaved) return;
   inflight = true;
-  fetch("/api/state", { method: "PUT", headers: { "content-type": "application/json" }, body: '{"rev":' + rev + ',"data":' + body + '}' })
+  fetch("/api/state", { method: "PUT", headers: authHeaders(), body: '{"rev":' + rev + ',"data":' + body + '}' })
     .then(function(r){ return r.json().then(function(j){ return { s: r.status, j: j }; }, function(){ return { s: r.status }; }); })
     .then(function(x){
       inflight = false;
-      if (x.s === 200) { rev = x.j.rev; lastSaved = body; failed = false; }
+      if (x.s === 200) { rev = x.j.rev; lastSaved = body; failed = false; if (x.j.kept && x.j.kept.length) keptBack(x.j.kept); }
       else if (x.s === 409 && x.j && x.j.data) {
         var base = lastSaved ? JSON.parse(lastSaved) : null;
         if (!base) { adopt(x.j); toast("The roster was just set up on another phone, so this phone now shows that copy."); render.same = true; render(); }
@@ -2329,6 +2329,144 @@ SCREENS.notifSettings = function(){ if (!on("notifchan") || S.view === "admin") 
   return { head: header("Notifications"), body: body }; };
 var baseSetting10 = A.setting;
 A.setting = function(d, el){ baseSetting10(d, el); if (/_ph$/.test(d.k)) S.settings[d.k.slice(0, -3)] = el.checked; };
+/* ---------- volunteer sign-in, team leader view, team thank-you chats (Nov 16) ---------- */
+FEATS.push(["volpin","Volunteer sign-in","Each volunteer signs in with their own PIN. Only they can change their availability and their emergency contact."]);
+FEATS.push(["teamlead","Team leader view","Assistant leaders open a leader view for their own team only. The leader PIN still sees everything."]);
+FEATS.push(["teamthanks","Team thank-you chats","Each team gets a Thanks chat in Messaging. Shout-outs post there too."]);
+var VPINS = null, vpinBusy = false, EMERG_ME, emBusy = false, EMERG_ALL = null, emAllBusy = false;
+function loadVpins(force){ if ((VPINS && !force) || vpinBusy) return; vpinBusy = true;
+  fetch("/api/vpin", { cache: "no-store" }).then(function(r){ return r.ok ? r.json() : { names: [] }; })
+    .then(function(j){ VPINS = (j && j.names) || []; vpinBusy = false; render.same = true; render(); }, function(){ VPINS = []; vpinBusy = false; }); }
+function vk(){ var v = null; try { v = JSON.parse(LS.get("roster.vkey") || "null"); } catch (e) {} return v && v.name === ME && v.key ? v.key : ""; }
+function volHeaders(h){ h = h || {}; var k = vk(); if (k) { h["x-vol-name"] = encodeURIComponent(ME); h["x-vol-key"] = k; } return h; }
+function authHeaders(){ var h = { "content-type": "application/json" }, a = LS.get("roster.admin"); if (a && a !== "set") h["x-roster-key"] = a; return volHeaders(h); }
+function keptBack(names){
+  fetch("/api/state", { cache: "no-store" }).then(function(r){ return r.ok ? r.json() : null; }).then(function(j){ if (j && j.data) adopt(j);
+    toast("Only " + names.join(", ") + " can change " + (names.length > 1 ? "their own" : "their") + " availability, so that change was put back."); render.same = true; render(); }, function(){});
+}
+function pickKeys(o, ks){ var r = {}; ks.forEach(function(k){ if (o[k]) r[k] = o[k]; }); return r; }
+function leadTeams(p){ var t = leadsOf(p).slice(), l = objOf("levels")[p]; if (on("levels") && (l === "assistant" || l === "leader")) teamsOf(p).forEach(function(x){ if (t.indexOf(x) < 0) t.push(x); }); return t; }
+var baseAdminOk11 = adminOk;
+function scopeTeams(){ if (!on("teamlead") || baseAdminOk11() || !ME || LS.get("roster.scope") !== ME || (on("volpin") && !vk())) return null; var t = leadTeams(ME); return t.length ? t : null; }
+function scoped(){ return S.view === "admin" ? scopeTeams() : null; }
+adminOk = function(){ return baseAdminOk11() || !!scopeTeams(); };
+function scopeBanner(sc){ return '<div class="card small" style="margin-bottom:12px;color:var(--ink)">Team leader view: <b>' + esc(sc.join(", ")) + '</b> only. <a data-a="leaveTeamLead" style="color:var(--acc);font-weight:600">Leave</a></div>'; }
+
+/* the sign-in screen after picking a name */
+SCREENS.vpin = function(){ loadVpins(); var has = VPINS && VPINS.indexOf(ME) >= 0;
+  return { head: plainHead(has ? "Hi, " + ME : "Pick your own PIN"), noTabs: true, body: '<div class="card"><p class="small" style="margin:0 0 10px">'
+    + (VPINS === null ? "Checking…" : has ? "Type your own PIN to open your roster on this phone." : "Pick a 4 to 8 digit PIN just for you. Then only you can change your availability and your emergency contact.") + '</p>'
+    + '<label class="fl" for="vp1">' + (has ? "Your PIN" : "New PIN") + '</label><input class="field" id="vp1" type="password" inputmode="numeric" autocomplete="off" maxlength="8">'
+    + (has ? '' : '<label class="fl" for="vp2">Type it again</label><input class="field" id="vp2" type="password" inputmode="numeric" autocomplete="off" maxlength="8">')
+    + '<div class="btns"><button class="btn" data-a="vpinGo">' + (has ? "Sign in" : "Save my PIN") + '</button><button class="btn sec" data-a="whoami">Not ' + esc(ME) + '?</button></div>'
+    + (has ? '<p class="small mt" style="margin-bottom:0">Forgot it? Ask a leader to reset your PIN.</p>' : '') + '</div>' };
+};
+A.vpinGo = function(){
+  var p1 = (document.getElementById("vp1").value || "").trim(), e2 = document.getElementById("vp2");
+  if (!/^\d{4,8}$/.test(p1)) { toast("Use 4 to 8 digits."); render(); return; }
+  if (e2 && e2.value.trim() !== p1) { toast("The two PINs don't match."); render(); return; }
+  var who = ME;
+  fetch("/api/vpin", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ name: who, pin: p1 }) })
+    .then(function(r){ return r.json().then(function(j){ return { st: r.status, j: j }; }, function(){ return { st: r.status, j: {} }; }); })
+    .then(function(x){
+      if (x.j && x.j.ok && who === ME) { LS.set("roster.vkey", JSON.stringify({ name: who, key: x.j.key })); if (VPINS && VPINS.indexOf(who) < 0) VPINS.push(who); EMERG_ME = undefined; S.stack = []; toast(x.j.first ? "PIN saved. Only you can change your availability now." : "Signed in."); render(); }
+      else { toast(x.st === 429 ? "Too many wrong tries. Wait 15 minutes and try again." : "That PIN isn't right."); render(); } })
+    .catch(function(){ toast("Couldn't check the PIN. Check your connection and try again."); render(); });
+};
+var baseSetMe11 = A.setMe; A.setMe = function(d, el){ EMERG_ME = undefined; baseSetMe11(d, el); };
+var baseWho11 = A.whoami; A.whoami = function(d, el){ LS.set("roster.vkey", null); LS.set("roster.scope", null); EMERG_ME = undefined; baseWho11(d, el); };
+A.toTeamLead = function(){ LS.set("roster.scope", ME); S.view = "admin"; S.tab.admin = "sched"; S.stack = []; S.sheet = null; toast("Team leader view for " + leadTeams(ME).join(", ") + "."); render(); };
+A.leaveTeamLead = function(){ LS.set("roster.scope", null); S.view = "vol"; S.stack = []; S.sheet = null; render(); };
+
+/* the gate, and the team leader's narrower view */
+var baseRender11 = render;
+render = function(){
+  if (on("volpin") && S.view === "vol" && ME && !vk()) { if (!S.stack[0] || S.stack[0].s !== "vpin") S.stack = [{ s: "vpin" }]; S.sheet = null; }
+  else if (S.stack[0] && S.stack[0].s === "vpin") S.stack = [];
+  var sc = scoped(), keepR = ROLES, keepP = POOL;
+  if (sc) { ROLES = pickKeys(ROLES, sc); POOL = pickKeys(POOL, sc); }
+  try { baseRender11(); } finally { ROLES = keepR; POOL = keepP; }
+};
+var baseVisReq11 = visibleReq;
+visibleReq = function(r){ if (!baseVisReq11(r)) return false; var sc = scoped(); if (!sc) return true; var x = r.slot && slot(r.slot);
+  return x ? sc.indexOf(x.team) >= 0 : teamsOf(r.from).some(function(t){ return sc.indexOf(t) >= 0; }); };
+["admin:dash", "admin:sched", "admin:reqs", "admin:msgs"].forEach(function(k){ var base = SCREENS[k];
+  SCREENS[k] = function(o){ var r = base(o), sc = scoped(); if (!sc || !r) return r;
+    r.head = r.head.replace(/<button class="ic" data-a="sheet" data-s="newOneOff"[^>]*>\+<\/button>/, '<span style="width:40px"></span>');
+    r.body = scopeBanner(sc) + r.body.replace(/<div class="btns mt"><button class="btn sm danger"[^>]*data-s="discardSvc">[^<]*<\/button><\/div>/, '');
+    return r; }; });
+var baseMore11 = SCREENS["admin:more"];
+SCREENS["admin:more"] = function(){ var sc = scoped(); if (!sc) return baseMore11();
+  return { head: header("More"), body: scopeBanner(sc) + '<div class="card"><div class="t">You lead ' + esc(sc.join(", ")) + '</div><div class="small">You can fill spots, answer requests and message your team. Features, the leader PIN and services stay with the main leaders.</div></div>'
+    + '<div class="lbl">People</div><div class="grp">' + row("Team", "Your team's people", "push", "contacts") + '</div>'
+    + '<div class="grp mt">' + row("Back to volunteer view", "", "leaveTeamLead", "") + '</div>' };
+};
+
+/* volunteer More: emergency contact and the team leader view */
+var baseVolMore11 = SCREENS["vol:more"];
+SCREENS["vol:more"] = function(){ var r = baseVolMore11(); if (!r) return r;
+  if (on("volpin") && vk()) { loadEmergMe();
+    r.body = r.body.replace('<div class="lbl">Settings</div>', '<div class="lbl">Safety</div><div class="grp">' + row("Emergency contact", EMERG_ME === undefined ? "Loading…" : EMERG_ME ? EMERG_ME.name + (EMERG_ME.relation ? ", " + EMERG_ME.relation : "") : "Not added yet. Only you can change it.", "push", "emerg") + '</div><div class="lbl">Settings</div>'); }
+  if (on("teamlead") && leadTeams(ME).length && (!on("volpin") || vk()))
+    r.body = r.body.replace('<div class="lbl">HCC</div><div class="grp">', '<div class="lbl">Leading</div><div class="grp">' + row("Team leader view", "Manage " + leadTeams(ME).join(", ") + " only", "toTeamLead", "") + '</div><div class="lbl">HCC</div><div class="grp">');
+  return r; };
+function loadEmergMe(){ if (EMERG_ME !== undefined || emBusy || !vk()) return; emBusy = true;
+  fetch("/api/emergency", { headers: volHeaders() }).then(function(r){ return r.ok ? r.json() : { contact: null }; })
+    .then(function(j){ EMERG_ME = (j && j.contact) || null; emBusy = false; render.same = true; render(); }, function(){ EMERG_ME = null; emBusy = false; }); }
+SCREENS.emerg = function(){ loadEmergMe(); var c = EMERG_ME || {};
+  return { head: header("Emergency contact"), body: '<div class="card"><p class="small" style="margin:0 0 6px">Who should we call if something happens while you serve? Only you can change this. Main leaders can see it.</p>'
+    + '<label class="fl" for="emN">Name</label><input class="field" id="emN" autocomplete="off" value="' + esc(c.name || "") + '">'
+    + '<label class="fl" for="emR">How they know you</label><input class="field" id="emR" placeholder="Like Mother or Husband" autocomplete="off" value="' + esc(c.relation || "") + '">'
+    + '<label class="fl" for="emP">Phone</label><input class="field" id="emP" type="tel" autocomplete="off" value="' + esc(c.phone || "") + '">'
+    + '<div class="btns"><button class="btn" data-a="saveEmerg">Save</button>' + (EMERG_ME ? '<button class="btn sec" data-a="rmEmerg">Remove</button>' : '') + '</div></div>' };
+};
+function putEmerg(c, msg){
+  fetch("/api/emergency", { method: "PUT", headers: volHeaders({ "content-type": "application/json" }), body: JSON.stringify({ contact: c }) })
+    .then(function(r){ if (!r.ok) throw new Error(r.status); EMERG_ME = c; EMERG_ALL = null; if (S.stack.length) S.stack.pop(); toast(msg); render(); })
+    .catch(function(){ toast("Couldn't save it. Sign in again and try once more."); render(); });
+}
+A.saveEmerg = function(){ var g = function(id){ return (document.getElementById(id).value || "").trim(); }, c = { name: g("emN"), relation: g("emR"), phone: g("emP") };
+  if (!c.name || !c.phone) { toast("Add a name and a phone number."); render(); return; } putEmerg(c, "Emergency contact saved."); };
+A.rmEmerg = function(){ putEmerg(null, "Emergency contact removed."); };
+
+/* main leader: see a volunteer's emergency contact and reset their PIN */
+function loadEmergAll(){ if (EMERG_ALL || emAllBusy || !baseAdminOk11()) return; emAllBusy = true;
+  fetch("/api/emergency", { headers: { "x-roster-key": LS.get("roster.admin") || "" } }).then(function(r){ return r.ok ? r.json() : { contacts: {} }; })
+    .then(function(j){ EMERG_ALL = (j && j.contacts) || {}; emAllBusy = false; render.same = true; render(); }, function(){ EMERG_ALL = {}; emAllBusy = false; }); }
+var basePerson11 = SCREENS.person;
+SCREENS.person = function(o){ var r = basePerson11(o), p = o.id; if (!r || S.view !== "admin" || !on("volpin") || !baseAdminOk11()) return r;
+  loadVpins(); loadEmergAll(); var e = EMERG_ALL && EMERG_ALL[p], has = VPINS && VPINS.indexOf(p) >= 0;
+  r.body += '<div class="card mt"><div class="lbl sm">Emergency contact</div>'
+    + (EMERG_ALL === null ? '<div class="small">Loading…</div>' : e ? '<div class="cline"><span>Name</span>' + esc(e.name + (e.relation ? ", " + e.relation : "")) + '</div><div class="cline"><span>Phone</span>' + esc(e.phone) + '</div>' : '<div class="small">Not added yet.</div>')
+    + '<p class="small" style="margin:6px 0 0">Only ' + esc(p) + ' can change this, after signing in.</p>'
+    + '<div class="lbl sm">Sign-in</div><div class="small">' + (VPINS === null ? 'Loading…' : has ? 'Signs in with their own PIN.' : 'Hasn\'t picked a PIN yet.') + '</div>'
+    + (has ? '<div class="btns"><button class="btn sec" data-a="sheet" data-s="resetVpin" data-id="' + esc(p) + '">Reset their PIN</button></div>' : '') + '</div>';
+  return r; };
+SHEETS.resetVpin = function(o){ return '<h4>Reset ' + esc(o.id) + '\'s PIN?</h4><p class="s">They pick a new PIN the next time they open the app. Until then, anyone who picks their name can set it.</p><div class="btns"><button class="btn danger" data-a="resetVpin" data-id="' + esc(o.id) + '">Reset PIN</button><button class="btn sec" data-a="closeSheet">Keep it</button></div>'; };
+A.resetVpin = function(d){
+  fetch("/api/vpin", { method: "POST", headers: { "content-type": "application/json", "x-roster-key": LS.get("roster.admin") || "" }, body: JSON.stringify({ name: d.id, reset: true }) })
+    .then(function(r){ if (!r.ok) throw new Error(r.status); if (VPINS) VPINS = VPINS.filter(function(n){ return n !== d.id; }); S.sheet = null; toast(d.id + "'s PIN is reset."); render(); })
+    .catch(function(){ S.sheet = null; toast("Couldn't reset it. Lock and reopen Admin, then try again."); render(); });
+};
+
+/* a Thanks chat per team, built on the team channels */
+CH_COLOR.thanks = "#E8A317"; CH_ICON.thanks = CH_ICON.shouts;
+var baseChans11 = chans;
+chans = function(){ var out = baseChans11(); if (!on("teamthanks")) return out;
+  var ts = S.view === "admin" ? Object.keys(POOL) : teamsOf(meName()), at = 0;
+  out.forEach(function(c, i){ if (c.kind === "team") at = i + 1; });
+  out.splice.apply(out, [at, 0].concat(ts.map(function(t){ return { id: "ch:thanks:" + t, name: "Thanks, " + t, kind: "thanks" }; })));
+  return out; };
+var baseChat11 = SCREENS.chat;
+SCREENS.chat = function(o){ var r = baseChat11(o); if (!r || String(o.id).indexOf("ch:thanks:") !== 0) return r; var team = String(o.id).slice(10);
+  r.body = r.body.replace(/<p class="small" style="text-align:center;margin:6px 0 10px">[^<]*<\/p>/, '<p class="small" style="text-align:center;margin:6px 0 10px">Say thanks to anyone on ' + esc(team) + '. Everyone on the team sees it.</p>'
+    + (on("shoutouts") ? '<div class="btns" style="margin:0 0 12px"><button class="btn soft" data-a="sheet" data-s="shoutPick">Send a shout-out</button></div>' : ''));
+  return r; };
+var baseShout11 = A.sendShout;
+A.sendShout = function(d, el){ baseShout11(d, el); var h = S.shouts[0]; if (!on("teamthanks") || !h || !h.team) return;
+  ensureChat("ch:thanks:" + h.team, "Thanks, " + h.team, { channel: true }).msgs.push({ who: h.from, t: "Shout-out for " + h.to + ": " + h.badge + (h.text ? ". " + h.text : ""), at: Date.now() });
+  render.same = true; render(); };
+
 var baseLocal7 = localDefaults;
 localDefaults = function(){ var o = baseLocal7(); o.msgTab = "chats"; return o; };
 var baseRender7 = render;

@@ -105,3 +105,60 @@ test("7shifts routes: need the token, a Sunday, and the right method", async () 
   assert.equal((await handleSevenShifts(r("GET", "/api/7shifts/preview?week=2030-01-07"), withToken, load)).status, 400);
   assert.equal((await handleSevenShifts(r("GET", "/api/7shifts/nope"), withToken, load)).status, 404);
 });
+
+// --- volunteer PINs, availability guard, emergency contacts ---
+const vreq = (path, method, body, headers) => new Request("https://x" + path, { method, body: body == null ? undefined : JSON.stringify(body), headers });
+const vput = (s, rev, data, headers) => handleState(new Request("https://x/api/state", { method: "PUT", body: JSON.stringify({ rev, data }), headers }), s);
+
+test("volunteer PIN: set once, then checked, locks after 10 wrong tries, leader can reset", async () => {
+  const s = mem2(), lead = await mod.hashPin("1111");
+  await put(s, 0, { slots: [], pinHash: lead });
+  const first = await (await mod.handleVolPin(vreq("/api/vpin", "POST", { name: "Ana", pin: "4321" }), s, 1000)).json();
+  assert.equal(first.ok, true); assert.equal(first.first, true);
+  assert.deepEqual(await (await mod.handleVolPin(vreq("/api/vpin", "GET"), s)).json(), { names: ["Ana"] });
+  const again = await (await mod.handleVolPin(vreq("/api/vpin", "POST", { name: "Ana", pin: "4321" }), s, 1000)).json();
+  assert.equal(again.key, first.key); assert.equal(again.first, undefined);
+  for (let i = 0; i < 10; i++) assert.equal((await mod.handleVolPin(vreq("/api/vpin", "POST", { name: "Ana", pin: "0000" }), s, 2000)).status, 403);
+  assert.equal((await mod.handleVolPin(vreq("/api/vpin", "POST", { name: "Ana", pin: "4321" }), s, 3000)).status, 429);
+  assert.equal((await mod.handleVolPin(vreq("/api/vpin", "POST", { name: "Ana", reset: true }), s)).status, 403);
+  assert.equal((await mod.handleVolPin(vreq("/api/vpin", "POST", { name: "Ana", reset: true }, { "x-roster-key": lead }), s)).status, 200);
+  assert.deepEqual(await (await mod.handleVolPin(vreq("/api/vpin", "GET"), s)).json(), { names: [] });
+  assert.equal(JSON.stringify(await (await handleState(req("GET"), s)).json()).includes(first.key), false);
+});
+
+test("only the volunteer (or a leader) can change their own availability", async () => {
+  const s = mem2(), lead = await mod.hashPin("1111");
+  await put(s, 0, { slots: [], pinHash: lead, blockouts: { Ana: ["2030-01-06"] }, regularBy: {} });
+  const key = (await (await mod.handleVolPin(vreq("/api/vpin", "POST", { name: "Ana", pin: "4321" }), s)).json()).key;
+  // someone else's device: Ana's change is put back, Ben's goes through
+  let r = await (await vput(s, 1, { slots: [], blockouts: { Ana: [], Ben: ["2030-01-13"] }, regularBy: { Ana: { "Sun AM": true } } })).json();
+  assert.deepEqual(r.kept, ["Ana"]);
+  let got = (await (await handleState(req("GET"), s)).json()).data;
+  assert.deepEqual(got.blockouts, { Ana: ["2030-01-06"], Ben: ["2030-01-13"] });
+  assert.equal("Ana" in got.regularBy, false);
+  // Ana signed in
+  r = await (await vput(s, 2, { slots: [], blockouts: { Ana: [], Ben: ["2030-01-13"] } }, { "x-vol-name": "Ana", "x-vol-key": key })).json();
+  assert.equal(r.kept, undefined);
+  // a leader
+  r = await (await vput(s, 3, { slots: [], blockouts: { Ana: ["2030-02-01"] } }, { "x-roster-key": lead })).json();
+  assert.equal(r.kept, undefined);
+  // switch off: anyone can change it
+  await vput(s, 4, { slots: [], feat: { volpin: false }, blockouts: { Ana: ["2030-02-01"] } }, { "x-roster-key": lead });
+  r = await (await vput(s, 5, { slots: [], feat: { volpin: false }, blockouts: {} })).json();
+  assert.equal(r.kept, undefined);
+});
+
+test("emergency contact: only that volunteer changes it, leaders can read, never in public state", async () => {
+  const s = mem2(), lead = await mod.hashPin("1111");
+  await put(s, 0, { slots: [], pinHash: lead });
+  const key = (await (await mod.handleVolPin(vreq("/api/vpin", "POST", { name: "Ana", pin: "4321" }), s)).json()).key;
+  const me = { "x-vol-name": "Ana", "x-vol-key": key };
+  const body = { contact: { name: "Sam", phone: "555 0100", relation: "Brother" } };
+  assert.equal((await mod.handleEmergency(vreq("/api/emergency", "PUT", body), s)).status, 403);
+  assert.equal((await mod.handleEmergency(vreq("/api/emergency", "PUT", body, { "x-roster-key": lead }), s)).status, 403);
+  assert.equal((await mod.handleEmergency(vreq("/api/emergency", "PUT", body, me), s)).status, 200);
+  assert.deepEqual(await (await mod.handleEmergency(vreq("/api/emergency", "GET", null, me), s)).json(), body);
+  assert.equal((await mod.handleEmergency(vreq("/api/emergency?name=Ana", "GET"), s)).status, 403);
+  assert.deepEqual(await (await mod.handleEmergency(vreq("/api/emergency?name=Ana", "GET", null, { "x-roster-key": lead }), s)).json(), body);
+  assert.equal(JSON.stringify(await (await handleState(req("GET"), s)).json()).includes("555"), false);
+});
