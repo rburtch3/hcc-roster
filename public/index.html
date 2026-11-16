@@ -2365,7 +2365,7 @@ var baseAdminOk11 = adminOk;
 function scopeTeams(){ if (!on("teamlead") || baseAdminOk11() || !ME || LS.get("roster.scope") !== ME || (on("volpin") && !vk())) return null; var t = leadTeams(ME); return t.length ? t : null; }
 function scoped(){ return S.view === "admin" ? scopeTeams() : null; }
 adminOk = function(){ return baseAdminOk11() || !!scopeTeams(); };
-function scopeBanner(sc){ return '<div class="card small" style="margin-bottom:12px;color:var(--ink)">Team leader view: <b>' + esc(sc.join(", ")) + '</b> only. <a data-a="leaveTeamLead" style="color:var(--acc);font-weight:600">Leave</a></div>'; }
+function scopeBanner(sc){ return ''; } /* banner replaced by the admin-style Volunteer view switch in More (Nov 16) */
 
 /* the sign-in screen after picking a name */
 SCREENS.vpin = function(){ loadVpins(); var has = VPINS && VPINS.indexOf(ME) >= 0;
@@ -2414,7 +2414,7 @@ var baseMore11 = SCREENS["admin:more"];
 SCREENS["admin:more"] = function(){ var sc = scoped(); if (!sc) return baseMore11();
   return { head: header("More"), body: scopeBanner(sc) + '<div class="card"><div class="t">You lead ' + esc(sc.join(", ")) + '</div><div class="small">You can fill spots, answer requests and message your team. Features, the leader PIN and services stay with the main leaders.</div></div>'
     + '<div class="lbl">People</div><div class="grp">' + row("Team", "Your team's people", "push", "contacts") + '</div>'
-    + '<div class="grp mt">' + row("Back to volunteer view", "", "leaveTeamLead", "") + '</div>' };
+    + '<div class="lbl">This phone</div><div class="grp">' + row("Volunteer view", "See the roster as a volunteer", "leaveTeamLead", "") + '</div>' };
 };
 
 /* volunteer More: emergency contact and the team leader view */
@@ -2712,13 +2712,6 @@ var baseAddCk14 = SHEETS.addCk;
 SHEETS.addCk = function(o){ return baseAddCk14(o)
   .replace('<select class="field" id="ckTeam">', '<select class="field" id="ckTeam"><option>Everyone</option>')
   .replace('Volunteers on that team tick it off on their serve details.', 'It shows on the serve details of everyone on that team for that service. Pick Everyone to show it to every team.'); };
-
-/* Team leader view looks like the leader view: no banner on each screen; leave from More › Volunteer view, as leaders do (Nov 16, user comment "replace w/ admin volunteer view") */
-scopeBanner = function(){ return ''; };
-var baseMore15 = SCREENS["admin:more"];
-SCREENS["admin:more"] = function(o){ var r = baseMore15(o); if (!r || !scoped()) return r;
-  r.body = r.body.replace(/<div class="row tap" data-a="leaveTeamLead"[^>]*><div class="m"><div class="t">Back to volunteer view<\/div><\/div>/, '<div class="row tap" data-a="leaveTeamLead" data-s="" data-t="" data-v=""><div class="m"><div class="t">Volunteer view</div><div class="s">See the roster as a volunteer</div></div>');
-  return r; };
 
 var baseLocal7 = localDefaults;
 localDefaults = function(){ var o = baseLocal7(); o.msgTab = "chats"; return o; };
