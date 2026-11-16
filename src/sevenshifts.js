@@ -170,7 +170,7 @@ export async function publishTest(env, roster, { fetchFn } = {}) {
 
 // Weeks the leader has said yes to publishing. Publishing makes the shifts final and
 // visible in the 7shifts app, so a week is only added here after that yes.
-export const PUBLISH_WEEKS = ["2026-11-22"];
+export const PUBLISH_WEEKS = ["2026-11-22", "2026-11-29"];
 
 /**
  * Publishes the draft shifts this app added (notes "From HCC Roster") in an approved week,
