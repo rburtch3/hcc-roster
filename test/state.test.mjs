@@ -5,7 +5,8 @@ import { readFileSync } from "node:fs";
 // handleState is tested with a plain in-memory store; the Durable Object import is stubbed out.
 const src = readFileSync(new URL("../src/worker.js", import.meta.url), "utf8")
   .replace('import { DurableObject } from "cloudflare:workers";', "class DurableObject {}")
-  .replace('"./sevenshifts.js"', JSON.stringify(new URL("../src/sevenshifts.js", import.meta.url).href));
+  .replace('"./sevenshifts.js"', JSON.stringify(new URL("../src/sevenshifts.js", import.meta.url).href))
+  .replace('"./hub.js"', JSON.stringify(new URL("../src/hub.js", import.meta.url).href));
 const { handleState } = await import("data:text/javascript," + encodeURIComponent(src));
 
 // Same contract as RosterStore.

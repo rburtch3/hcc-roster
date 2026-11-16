@@ -2749,7 +2749,65 @@ render = function(){
 };
 S = localDefaults();
 render();
-load().then(function(){ loaded = true; render(); }, function(){ loadErr = "Couldn't load the roster. Check your connection and refresh."; render(); });
+
+/* ---------- HCC Hub sign-in (Nov 16): Google or phone through HCC Hub; roles from the Hub ---------- */
+var HUBME = null, HUB_OFF = false, HUB_URL = "https://hub.hyderabadchristiancenter.com";
+function loadMe(){
+  return fetch("/api/me", { cache: "no-store", credentials: "same-origin" }).then(function(r){ return r.ok ? r.json() : null; })
+    .then(function(j){ HUBME = j && j.signedIn ? j : null; }, function(){ HUBME = null; HUB_OFF = true; });
+}
+function hubName(){ return HUBME && HUBME.name ? HUBME.name : ""; }
+/** After load: the Hub sign-in decides who this phone is. */
+function hubApply(){
+  if (!HUBME) return;
+  if (hubName() && ME !== hubName()) { ME = hubName(); LS.set("roster.me", ME); bindMe(); }
+  if (!hubName() && ME) { ME = ""; LS.set("roster.me", null); bindMe(); }
+  if (HUBME.role === "admin" && !hubName()) S.view = "admin";
+}
+/* the Hub session stands in for the leader PIN (admins) and the volunteer PIN (everyone) */
+var baseAdminOk15 = adminOk;
+adminOk = function(){ return (!!HUBME && HUBME.role === "admin") || baseAdminOk15(); };
+var baseVk15 = vk;
+vk = function(){ return hubName() && hubName() === ME ? "hub" : baseVk15(); };
+/* a Hub leader leads their Hub teams too (matched to Roster's team names, any case) */
+var baseLeadTeams15 = leadTeams;
+leadTeams = function(p){ var t = baseLeadTeams15(p);
+  if (HUBME && HUBME.role === "leader" && p && p === hubName()) { var names = Object.keys(POOL).concat(Object.keys(ROLES));
+    (HUBME.teams || []).forEach(function(h){ var m = names.filter(function(n){ return n.toLowerCase() === String(h).trim().toLowerCase(); })[0]; if (m && t.indexOf(m) < 0) t.push(m); }); }
+  return t; };
+A.hubSignIn = function(){ location.href = HUB_URL + "/#roster"; };
+A.hubSignOut = function(){
+  fetch("/auth/signout", { method: "POST", credentials: "same-origin" }).then(function(){}, function(){}).then(function(){
+    HUBME = null; ME = ""; LS.set("roster.me", null); LS.set("roster.scope", null); LS.set("roster.vkey", null); bindMe(); S.view = "vol"; S.stack = []; S.sheet = null; render(); }); };
+var baseWho15 = A.whoami;
+A.whoami = function(d, el){ if (HUBME) return A.hubSignOut(); baseWho15(d, el); };
+A.hubLink = function(d){
+  fetch("/api/me", { method: "POST", credentials: "same-origin", headers: { "content-type": "application/json" }, body: JSON.stringify({ name: d.id }) })
+    .then(function(r){ return r.json().then(function(j){ return { s: r.status, j: j }; }); })
+    .then(function(x){
+      if (x.s === 200) { HUBME.name = x.j.name; hubApply(); S.stack = []; S.tab.vol = "home"; toast("You're " + x.j.name + " on Roster now."); render(); return; }
+      toast(x.j && x.j.error === "taken" ? d.id + " is already linked to another HCC Hub sign-in. Ask a leader." : "Couldn't save that. Try again."); render.same = true; render(); },
+      function(){ toast("Couldn't reach Roster. Try again."); render.same = true; render(); }); };
+var baseWhoScreen15 = SCREENS.who;
+SCREENS.who = function(o){
+  if (HUBME && !hubName()) {
+    var ps = everyone();
+    return { head: plainHead("Which one is you?"), noTabs: true, body: '<div class="card small" style="margin-bottom:12px;color:var(--ink)">Signed in to HCC Hub as <b>' + esc(HUBME.hubName) + '</b>. Pick your name once and this sign-in stays linked to it.</div><div class="grp">'
+      + ps.map(function(p){ return '<div class="row tap" data-a="hubLink" data-id="' + esc(p) + '"><span class="av">' + initials(p) + '</span><div class="m"><div class="t">' + esc(p) + '</div><div class="s">' + esc(teamsOf(p).join(" · ") || "Volunteer") + '</div></div><span class="chev">›</span></div>'; }).join("")
+      + '</div><p class="small mt" style="margin-left:4px">Not on the list? Ask your team leader to add you.</p><div class="grp mt">' + (HUBME.role === "admin" ? row("Open Admin", "You don't serve on the roster yourself", "toAdmin", "") : '') + row("Sign out", "Use a different HCC Hub account", "hubSignOut", "") + '</div>' };
+  }
+  var r = baseWhoScreen15(o); if (HUB_OFF || !r) return r;
+  r.head = plainHead("Sign in");
+  r.body = '<div class="card" style="margin-bottom:14px"><div class="t" style="font:600 17px/22px var(--font)">HCC Roster</div><p class="small" style="margin:4px 0 12px">Sign in with Google or your phone number through HCC Hub.</p><button class="btn" data-a="hubSignIn">Sign in with HCC Hub</button></div>'
+    + '<div class="lbl">Or pick your name</div>' + r.body.replace(/^<p class="small"[^>]*>[^<]*<\/p>/, '');
+  return r; };
+/* More: who's signed in, and sign out */
+["vol:more", "admin:more"].forEach(function(k){ var base = SCREENS[k]; SCREENS[k] = function(o){ var r = base(o); if (!r || !HUBME) return r;
+  r.body = r.body.replace(/<div class="row tap" data-a="whoami"[\s\S]*?<span class="chev">›<\/span><\/div>/, '');
+  if (HUBME.role === "admin") r.body = r.body.replace('<div class="s">For team leaders, needs the leader PIN</div>', '<div class="s">Your HCC Hub sign-in opens it</div>');
+  r.body += '<div class="lbl">HCC Hub</div><div class="grp">' + row("Signed in as " + HUBME.hubName, (HUBME.role === "admin" ? "Admin" : HUBME.role === "leader" ? "Team leader" : "Volunteer") + (hubName() ? " · Roster name " + hubName() : ""), "hubSignOut", "") + '</div><p class="small" style="margin:6px 4px 0">Tap to sign out.</p>';
+  return r; }; });
+Promise.all([load(), loadMe()]).then(function(){ hubApply(); loaded = true; render(); }, function(){ loadErr = "Couldn't load the roster. Check your connection and refresh."; render(); });
 })();
 </script>
 
