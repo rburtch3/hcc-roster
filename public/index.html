@@ -244,6 +244,7 @@ body{background:#fff}
 .tsearch input{width:100%;box-sizing:border-box;min-height:50px;padding:12px 14px 12px 46px;border:1px solid #D9D9DF;border-radius:10px;background:#fff;color:var(--ink);font:400 17px/22px var(--font)}
 .trow{display:flex;align-items:center;gap:16px;padding:12px 0;cursor:pointer}
 .trow[hidden]{display:none}
+#fillList .row[hidden]{display:none}
 .trow .m{flex:1;min-width:0}
 .trow .t{font:400 18px/23px var(--font);color:#2B2B2F}
 .trow .s{font:400 14px/18px var(--font);color:#6E6E76;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
@@ -1807,6 +1808,16 @@ SCREENS.avail = function(o){ var r = baseAvail7(o); if (on("usual")) return r;
   var i = r.body.indexOf('<div class="lbl">Blockout dates'); if (i > 0) r.body = r.body.slice(i); return r; };
 var baseFill7 = SHEETS.fill;
 SHEETS.fill = function(o){ if (on("usual")) return baseFill7(o); var keep = S.regularBy; S.regularBy = {}; try { return baseFill7(o); } finally { S.regularBy = keep; } };
+/* search by name in the pick-someone list (Nov 16) */
+SHEETS.fill = (function(base){ return function(o){ var out = base(o);
+  return out.replace(/(<div class="lbl"[^>]*>(?:Find who's available|Pick someone)<\/div>)(<div class="grp")/, '$1<div class="tsearch" style="margin:6px 0 8px">' + SRCH + '<input id="fillSearch" type="search" placeholder="Search by name" aria-label="Search by name" autocomplete="off"></div>$2 id="fillList"')
+    .replace(/(<\/div>)(<label class="fl" for="spotNote"|<div class="btns)/, '$1<p class="small" id="fillNone" hidden>No one by that name on this team.</p>$2'); }; })(SHEETS.fill);
+app.addEventListener("input", function(e){
+  if (!e.target || e.target.id !== "fillSearch") return;
+  var q = e.target.value.trim().toLowerCase(), n = 0;
+  app.querySelectorAll('#fillList .row[data-a="assign"]').forEach(function(r){ var hit = !q || (r.dataset.p || "").toLowerCase().indexOf(q) >= 0; r.hidden = !hit; if (hit) n++; });
+  var none = document.getElementById("fillNone"); if (none) none.hidden = n > 0;
+});
 
 /* dashboard counts open their list (Nov 15) */
 SHEETS.statList = function(o){
