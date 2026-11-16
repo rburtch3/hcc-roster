@@ -229,6 +229,7 @@ body{background:#fff}
 .ud small{font:400 14px/17px var(--font)}
 .ud b{font:500 19px/23px var(--font);color:#2B2B2F}
 .um{flex:1;min-width:0;display:grid;gap:4px}
+.usn{font:700 18px/23px var(--font);color:var(--ink);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .ut{font:400 17px/22px var(--font);color:#2B2B2F}
 .us{font:400 15px/20px var(--font);color:#45454B;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .us.cl{white-space:normal;color:#6E6E76}
@@ -1611,7 +1612,7 @@ function shiftCard(x){ var sv = svc(x.sid), n = tasksLeftFor(x);
 function dateCol(iso){ var d = dt(iso); return '<div class="ud"><small>' + DOW[d.getUTCDay()] + '</small><b>' + d.getUTCDate() + '</b><small>' + MON[d.getUTCMonth()].toUpperCase() + '</small></div>'; }
 function bySvc(list){ var o = {}, out = []; list.forEach(function(x){ if (!o[x.sid]) { o[x.sid] = []; out.push(o[x.sid]); } o[x.sid].push(x); }); return out; }
 function upRows(list, n){ var g = bySvc(list); if (n) g = g.slice(0, n); return g.map(function(xs){ var x = xs[0], sv = svc(x.sid);
-  return '<div class="urow" data-a="detail" data-id="' + x.id + '">' + dateCol(sv.date) + '<div class="um"><div class="ut">' + esc(SVC[sv.svc] ? SVC[sv.svc].name : sv.svc) + ' · ' + esc(rangeTxt(sv.svc)) + evTag(sv.date) + '</div><div class="us">' + ORG + '</div>'
+  return '<div class="urow" data-a="detail" data-id="' + x.id + '">' + dateCol(sv.date) + '<div class="um"><div class="usn">' + esc(SVC[sv.svc] ? SVC[sv.svc].name : sv.svc) + '</div><div class="ut">' + esc(rangeTxt(sv.svc)) + evTag(sv.date) + '</div><div class="us">' + ORG + '</div>'
     + xs.map(function(y){ return '<div class="us">' + dot(y.role) + esc(y.role) + ' | ' + esc(y.team) + '</div>'; }).join("") + '</div><span class="chev">›</span></div>'; }).join(""); }
 function upRow(x){ var sv = svc(x.sid);
   return '<div class="urow" data-a="detail" data-id="' + x.id + '">' + dateCol(sv.date) + '<div class="um"><div class="ut">' + esc(rangeTxt(sv.svc)) + evTag(sv.date) + '</div><div class="us">' + ORG + '</div><div class="us">' + dot(x.role) + esc(x.role) + ' | ' + esc(x.team) + '</div></div>'
@@ -2507,7 +2508,7 @@ SCREENS["vol:sched"] = function(){ if (!on("weekhead")) return baseVolSched12();
       .sort(function(a, b){ var p = svc(a.sid).date, q = svc(b.sid).date; return p < q ? -1 : p > q ? 1 : 0; });
     var day = S.services.filter(function(sv){ return sv.date === sel && sv.published !== false; }), after = m.filter(function(x){ return svc(x.sid).date > sel; });
     body += '<div class="lbl">' + esc(dLong(sel)) + '</div>' + (day.length ? '<div class="list7">' + day.map(function(sv){ var xs = m.filter(function(x){ return x.sid === sv.id; }); return xs.length ? upRows(xs)
-        : '<div class="urow" data-a="volMode" data-v="all">' + dateCol(sv.date) + '<div class="um"><div class="ut">' + esc(SVC[sv.svc] ? SVC[sv.svc].name : sv.svc) + ' · ' + esc(rangeTxt(sv.svc)) + evTag(sv.date) + '</div><div class="us">' + ORG + '</div><div class="us">You\'re not serving. Tap to see who is.</div></div><span class="chev">›</span></div>'; }).join("") + '</div>' : '<div class="empty">No services on this day.</div>')
+        : '<div class="urow" data-a="volMode" data-v="all">' + dateCol(sv.date) + '<div class="um"><div class="usn">' + esc(SVC[sv.svc] ? SVC[sv.svc].name : sv.svc) + '</div><div class="ut">' + esc(rangeTxt(sv.svc)) + evTag(sv.date) + '</div><div class="us">' + ORG + '</div><div class="us">You\'re not serving. Tap to see who is.</div></div><span class="chev">›</span></div>'; }).join("") + '</div>' : '<div class="empty">No services on this day.</div>')
       + '<div class="lbl">Coming up after</div>' + (after.length ? '<div class="list7">' + upRows(after) + '</div>' : '<div class="empty">No more serves after this day.</div>')
       + '<div class="btns"><button class="btn soft" data-a="ics">Add all to my calendar</button></div>';
   } else {
