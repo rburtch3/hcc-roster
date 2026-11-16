@@ -2610,12 +2610,28 @@ SHEETS.tplEdit = function(o){ var t = S.templates[+o.id]; if (!t) return baseTpl
     + '<div class="btns"><button class="btn sm danger" style="width:100%" data-a="tplDel" data-id="' + o.id + '">Delete template</button></div>'; };
 A.tplSave = function(d){ var t = S.templates[+d.id]; if (!t) return; var nm = ((document.getElementById("tplEName") || {}).value || "").trim(), lines = {};
   app.querySelectorAll(".tplsel").forEach(function(s){ if (s.value) lines[s.dataset.k] = s.value; });
-  if (nm) t.name = nm; t.lines = lines; S.sheet = { s: "templates" }; toast("Saved \"" + t.name + "\" with " + Object.keys(lines).length + " spots."); render.same = true; render(); };
+  if (nm) t.name = nm; t.lines = lines; S.sheet = { s: "templates" }; var nn = Object.keys(lines).length; toast("Saved \"" + t.name + "\" with " + nn + " spot" + (nn === 1 ? "" : "s") + "."); render.same = true; render(); };
 /* 15-minute time picker for checklist "Done by" (Nov 16) */
 function qtrTimes(sel){ var o = '<option value="">No time</option>';
   for (var m = 6 * 60; m < 24 * 60; m += 15) { var h = Math.floor(m / 60), mm = m % 60, t = ((h + 11) % 12 + 1) + ':' + (mm < 10 ? '0' : '') + mm + ' ' + (h < 12 ? 'AM' : 'PM');
     o += '<option' + (t === sel ? ' selected' : '') + '>' + t + '</option>'; } return o; }
 A.tplDel = function(d){ var t = S.templates[+d.id]; if (!t) return; S.templates.splice(+d.id, 1); S.sheet = { s: "templates" }; toast("Deleted \"" + t.name + "\"."); render.same = true; render(); };
+/* Templates from the More menu: list only (no drop-onto-service), Add template button, no "save this service" (Nov 16) */
+function tplFromMore(){ return S.view === "admin" && S.tab.admin === "more"; }
+var baseTpl14 = SHEETS.templates;
+SHEETS.templates = function(o){ var h = baseTpl14(o); if (!tplFromMore()) return h;
+  h = h.replace(/<div class="row tap" data-a="useTemplate" data-id="(\d+)">/g, '<div class="row">')
+    .replace(/<p class="s">Drop a saved line-up onto[\s\S]*?<\/p>/, '<p class="s">Your saved line-ups. Use one from Schedule › Templates.</p>');
+  var i = h.indexOf('<label class="fl" for="tplName">'); if (i >= 0) h = h.slice(0, i);
+  return h + '<div class="btns"><button class="btn" data-a="sheet" data-s="tplNew">Add template</button></div>'; };
+SHEETS.tplNew = function(){ var codes = Object.keys(SVC).filter(function(k){ return !SVC[k].oneoff; });
+  return '<h4>Add template</h4><p class="s">Pick the service, then choose who fills each position.</p><label class="fl" for="tplNName">Name</label><input class="field" id="tplNName" placeholder="Like: Sunday AM, Band C">'
+    + '<label class="fl" for="tplNSvc">Service</label><select class="field" id="tplNSvc">' + codes.map(function(k){ return '<option value="' + esc(k) + '">' + esc(SVC[k].name || k) + '</option>'; }).join("") + '</select>'
+    + '<div class="btns"><button class="btn" data-a="tplCreate">Next</button><button class="btn sec" data-a="sheet" data-s="templates">Back to templates</button></div>'; };
+A.tplCreate = function(){ var sv = (document.getElementById("tplNSvc") || {}).value, nm = ((document.getElementById("tplNName") || {}).value || "").trim();
+  if (!sv) { toast("Add a service first."); return; }
+  S.templates.push({ name: nm || ((SVC[sv] && SVC[sv].name) || sv) + " line-up", sv: sv, by: ADMIN, lines: {} });
+  S.sheet = { s: "tplEdit", id: String(S.templates.length - 1) }; render.same = true; render(); };
 
 
 /* Calendar sync that works: a live feed to subscribe to, and one-tap Google links per serve (Nov 16) */
