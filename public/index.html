@@ -143,6 +143,7 @@ textarea.field{min-height:96px;resize:none}
 .unpub{width:8px;height:8px;border-radius:50%;background:var(--warn);display:inline-block;margin-left:6px;vertical-align:2px}
 .evb{display:grid;gap:2px;background:var(--accent-soft);color:var(--accent);border-radius:14px;padding:10px 14px;margin:0 0 12px;font:500 14px/19px var(--font)}
 .evb b{font-weight:700;font-size:15px}.evb span{color:var(--ink)}
+.evb{margin:14px 0 14px;padding:12px 16px;gap:4px}
 .hnote{margin-top:10px;background:rgba(255,255,255,.18);border-radius:12px;padding:8px 12px;font:500 14px/19px var(--font)}
 .week{display:grid;grid-template-columns:repeat(7,1fr);gap:4px;margin-top:12px}
 .week div{display:grid;justify-items:center;gap:2px;padding:6px 0;border-radius:12px}
@@ -159,6 +160,157 @@ body{background:var(--ground);padding:0}
 .phone{width:auto;max-width:none;height:auto;padding:0;border-radius:0;background:none;box-shadow:none}
 .screen{position:fixed;inset:0;height:auto;border-radius:0;padding:env(safe-area-inset-top,0px) env(safe-area-inset-right,0px) env(safe-area-inset-bottom,0px) env(safe-area-inset-left,0px)}
 @media (min-width:640px){body{background:var(--page)}.screen{left:50%;right:auto;width:480px;transform:translateX(-50%);box-shadow:0 0 0 1px color-mix(in srgb,var(--ink) 10%,transparent)}}
+
+/* ---------- 7shifts look (Nov 15) ---------- */
+:root{--ground:#FFFFFF;--surface:#FFFFFF;--ink:#2B2B2F;--muted:#6E6E76;--line:#E7E7EC;--track:#F2F2F5;--field:#D9D9DF;--chevron:#9B9BA3;--accent:#4A72FF;--accent-soft:#EAF0FF;--pop:#4A72FF;--band:#D7E0FD;--badge:#FF5B1F}
+body{background:#fff}
+.screen{background:#fff}
+.hd{min-height:56px;border-bottom:1px solid var(--line);padding:0 10px}
+.hd h3{font:500 20px/26px var(--font)}
+.hd .ic{color:var(--ink)}
+.hd .ic svg{width:28px;height:28px}
+.body{padding:4px 20px 28px}
+.big{font:500 30px/36px var(--font)}
+.lbl{margin:28px 0 12px;font:500 22px/28px var(--font);letter-spacing:-.2px;text-transform:none;color:var(--ink)}
+.lbl a{font:400 17px/22px var(--font);color:var(--ink)}
+.lbl.sm{font:500 14px/18px var(--font);letter-spacing:.04em;text-transform:uppercase;color:var(--muted);margin:24px 0 4px}
+.card{border:1px solid var(--line);border-radius:12px;box-shadow:0 1px 2px rgba(20,20,40,.04)}
+.grp{background:#fff;border:1px solid var(--line);border-radius:12px}
+.row .t{font-weight:500}
+.av{background:#C9D6F7;color:#2F4A9A}
+.btn{border-radius:10px;box-shadow:none;font:500 17px/22px var(--font);min-height:52px}
+a.btn{box-sizing:border-box;min-width:0}.two>*{min-width:0}
+.btn.sec{box-shadow:inset 0 0 0 1px #CFCFD6}
+.btn.sm{border-radius:8px;min-height:40px}
+.seg{background:#F1F1F3;border-radius:10px;padding:3px}
+.seg button{min-height:38px;font:500 16px/20px var(--font);color:var(--ink)}
+.seg button[aria-current]{background:#2F2F33;color:#fff;box-shadow:none}
+.tabs{background:#F7F7F8;border-top:1px solid var(--line);padding:8px 6px 26px;backdrop-filter:none}
+.tabs button{font:400 13px/16px var(--font);color:#6B6B72;gap:4px}
+.tabs button svg{width:28px;height:28px}
+.tabs button[aria-current]{color:#1D1D1F;font-weight:600}
+.tabs button[aria-current] svg .f{fill:currentColor}
+.tabs .dot{background:var(--badge);left:calc(50% + 10px)}
+.sheet{background:#fff}
+.field{background:#F4F4F7}
+.bubble.them{background:#F1F1F4}
+.compose input{background:#F1F1F4}
+.band{margin:-4px -20px 0;padding:18px 20px 28px;background:var(--band);color:#2B2B2F}
+.band + .card{margin:18px 0 6px}
+.btop{display:flex;justify-content:space-between;align-items:center;margin-bottom:22px;min-height:56px}
+.btop .me{border:0;background:none;padding:0;cursor:pointer;border-radius:50%}
+.btop .org{font:500 15px/20px var(--font);color:#45454B}
+.bell{position:relative;border:0;background:none;color:#4B4B52;width:52px;height:52px;display:grid;place-items:center;cursor:pointer}
+.bell svg{width:34px;height:34px}
+.bdg{position:absolute;top:0;right:0;min-width:24px;height:24px;padding:0 6px;border-radius:99px;background:var(--badge);color:#fff;font:600 14px/24px var(--font);box-shadow:0 0 0 2px #fff;box-sizing:border-box;text-align:center}
+.bdate{display:flex;align-items:center;gap:14px;font:500 15px/20px var(--font);letter-spacing:.04em}
+.wx{display:inline-flex;align-items:center;gap:8px;letter-spacing:0;font-weight:400}
+.wx svg{width:28px;height:28px}
+.bgreet{font:400 22px/28px var(--font);margin-top:16px}
+.bhead{font:500 34px/40px var(--font);letter-spacing:-.5px;margin:24px 0 4px;text-wrap:balance}
+.bhead.sm{font-size:26px;line-height:32px}
+.bhead .evb{margin-top:10px}
+.scard{display:block;background:#fff;border:1px solid #DADDE6;border-radius:12px;margin-top:16px;cursor:pointer;overflow:hidden}
+.scard>.trange{padding:18px 18px 0}
+.trange{display:flex;align-items:baseline;gap:4px 10px;flex-wrap:wrap;color:#2B2B2F}
+.trange b{font-weight:400;font-size:clamp(30px,9.5vw,46px);line-height:1;letter-spacing:-1px}
+.trange small{font-weight:400;font-size:clamp(18px,5vw,26px);line-height:1;margin-left:4px;color:#45454B}
+.trange .arr{font-size:20px;color:#45454B}
+.sline{display:flex;align-items:center;gap:10px;padding:10px 18px 0;font:400 16px/21px var(--font);color:#3A3A40;white-space:nowrap;overflow:hidden}
+.sline>span{overflow:hidden;text-overflow:ellipsis}
+.sline.wrap{white-space:normal;padding:14px 0 0;align-items:flex-start}
+.sline.wrap .rdot{margin-top:4px}
+.rdot{flex:none;display:inline-block;width:13px;height:13px;border-radius:50%;margin-right:8px;vertical-align:-1px}
+.sline .rdot{margin-right:0}
+.sfoot{display:flex;align-items:center;gap:8px;margin-top:16px;padding:14px 18px;border-top:1px solid var(--line);font:400 16px/21px var(--font);color:#3A3A40}
+.sfoot svg{flex:none;width:22px;height:22px}
+.h7{margin:32px 0 16px;font:500 24px/30px var(--font);letter-spacing:-.3px}
+.w7{width:auto;padding:0 44px;display:inline-flex}
+.list7{display:grid}
+.urow{display:flex;align-items:center;gap:16px;padding:12px 0;cursor:pointer}
+.ud{flex:none;width:48px;display:grid;justify-items:center;gap:2px;color:#45454B}
+.ud small{font:400 14px/17px var(--font)}
+.ud b{font:500 19px/23px var(--font);color:#2B2B2F}
+.um{flex:1;min-width:0;display:grid;gap:4px}
+.usn{font:700 18px/23px var(--font);color:var(--ink);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.ut{font:400 17px/22px var(--font);color:#2B2B2F}
+.us{font:400 15px/20px var(--font);color:#45454B;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.us.cl{white-space:normal;color:#6E6E76}
+.ddate{display:flex;align-items:center;gap:12px;margin:12px 0 10px;font:400 18px/24px var(--font)}
+.wrow{display:flex;align-items:flex-start;gap:16px;padding:12px 0}
+.wt{font:400 18px/24px var(--font);color:#2B2B2F}
+.ava{flex:none;display:grid;place-items:center;border-radius:50%;overflow:hidden;color:#fff;font:600 16px/1 var(--font)}
+.ava svg{width:100%;height:100%}
+.ava.open{background:var(--track);color:var(--muted)}
+/* Team page and Add person (Nov 16) */
+.tsearch{position:relative;margin:16px 0 8px}
+.tsearch svg{position:absolute;left:14px;top:50%;width:22px;height:22px;transform:translateY(-50%);color:#6E6E76;pointer-events:none}
+.tsearch input{width:100%;box-sizing:border-box;min-height:50px;padding:12px 14px 12px 46px;border:1px solid #D9D9DF;border-radius:10px;background:#fff;color:var(--ink);font:400 17px/22px var(--font)}
+.trow{display:flex;align-items:center;gap:16px;padding:12px 0;cursor:pointer}
+.trow[hidden]{display:none}
+.ann img.aph{display:block;width:100%;max-height:320px;object-fit:cover;border-radius:10px;margin-top:10px}
+.seen{margin-top:8px;font:500 13px/18px var(--font);color:var(--mut)}
+.sortbar{display:flex;gap:6px;flex-wrap:wrap;margin:0 0 12px}
+.sortbar button{border:1px solid #D9D9DF;background:#fff;color:var(--ink);border-radius:999px;padding:6px 12px;font:500 14px/18px var(--font)}
+.sortbar button[aria-pressed="true"]{background:var(--accent);border-color:var(--accent);color:#fff}
+.lvl{display:inline-block;margin-left:6px;padding:1px 7px;border-radius:999px;background:#EEF0FF;color:#3B3FA8;font:600 11px/16px var(--font);vertical-align:2px}
+.flag{color:var(--late);font-weight:600}
+.nch{display:grid;grid-template-columns:1fr 64px 64px;align-items:center;gap:6px}
+.nch .h{font:600 12px/16px var(--font);color:var(--mut);text-align:center;text-transform:uppercase;letter-spacing:.04em}
+
+#fillList .row[hidden]{display:none}
+#fillOthers .row[hidden],#fillOthers[hidden],#fillOthersLbl[hidden]{display:none}
+.trow .m{flex:1;min-width:0}
+.trow .t{font:400 18px/23px var(--font);color:#2B2B2F}
+.trow .s{font:400 14px/18px var(--font);color:#6E6E76;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.pform .two{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.tlist .lbl.sm{margin-top:18px}
+.tpick{display:flex;align-items:center;gap:14px;padding:10px 0;cursor:pointer}
+.tpick .tic{flex:none;width:40px;height:40px;border-radius:50%;display:grid;place-items:center;color:rgba(30,30,40,.72);font:600 17px/1 var(--font)}
+a.btn{text-decoration:none;color:#fff}
+a.btn.sec{color:var(--ink)}
+.invite{display:grid;gap:10px;margin-top:6px}
+.invite a{display:flex;align-items:center;justify-content:center;min-height:50px;border-radius:10px;text-decoration:none;font:500 17px/22px var(--font)}
+.invite a.p{background:var(--accent);color:#fff}
+.invite a.s{background:#fff;color:var(--ink);box-shadow:inset 0 0 0 1px #CFCFD6}
+.cline{display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid var(--line);font:400 16px/21px var(--font);color:#2B2B2F;overflow-wrap:anywhere}
+.cline span{color:#6E6E76;min-width:52px}
+.chk{display:flex;gap:12px;align-items:flex-start;margin-top:18px;cursor:pointer}
+.chk input{flex:none;width:22px;height:22px;margin:1px 0 0;accent-color:var(--accent)}
+.chk b{display:block;font:500 17px/22px var(--font);color:#2B2B2F}
+.chk small{display:block;font:400 14px/19px var(--font);color:#6E6E76;margin-top:2px}
+.tpick .m{flex:1;min-width:0}
+.tpick .t{font:400 17px/22px var(--font);color:#2B2B2F}
+.tpick .s{font:400 13px/17px var(--font);color:#6E6E76}
+.tpick input{flex:none;appearance:none;-webkit-appearance:none;width:26px;height:26px;margin:0;border:1.5px solid #C4C4CC;border-radius:50%;background:#fff;cursor:pointer}
+.tpick input:checked{border:7px solid var(--accent)}
+/* Schedule date strip in the 7shifts look (Nov 15) */
+.strip{gap:8px;margin:0 -20px;padding:14px 20px 12px;border-bottom:1px solid var(--line)}
+.strip button{min-width:62px;padding:8px 6px 9px;border:1px solid var(--line);border-radius:12px;background:#fff;color:#2B2B2F;font:500 19px/23px var(--font);box-shadow:0 1px 2px rgba(20,20,40,.04)}
+.strip button small{font:400 13px/16px var(--font);color:#6E6E76;text-transform:none;letter-spacing:0}
+.strip button small:last-child:not(:first-child){font-weight:500;color:var(--badge)}
+.strip button[aria-current]{background:var(--band);border-color:var(--accent);color:#1D1D1F}
+.strip button[aria-current] small{color:#2F4A9A}
+.strip button[aria-current] small:last-child:not(:first-child){color:var(--badge)}
+.strip+div .t{font-weight:500!important;font-size:22px!important;line-height:28px!important}
+.foot7{flex:none;padding:12px 20px 26px;background:#fff}
+.crow{display:flex;align-items:flex-start;gap:16px;padding:14px 0;cursor:pointer}
+.cic{flex:none;width:48px;height:48px;border-radius:50%;display:grid;place-items:center;font:500 22px/1 var(--font);color:#fff}
+.cic svg{width:26px;height:26px}
+.scard7{display:block;width:100%;text-align:left;border:0;background:#fff;border-radius:12px;padding:18px 20px;box-shadow:0 2px 12px rgba(20,20,40,.10);margin:12px 0 8px;cursor:pointer;font:inherit;color:inherit}
+.scard7 .st{font:500 22px/28px var(--font)}
+.scard7 .ss{font:400 16px/21px var(--font);color:#6E6E76;margin-top:6px}
+.as{background:#F2F2F4;border-radius:14px;overflow:hidden;display:grid;margin-top:4px}
+.ash{padding:14px;text-align:center;font:400 14px/18px var(--font);color:#6E6E76}
+.as button{border:0;border-top:1px solid #DCDCE0;background:none;padding:16px;font:400 20px/24px var(--font);color:#2F6BF0;cursor:pointer}
+.ascancel{display:block;width:100%;margin-top:10px;border:0;border-radius:14px;background:#fff;box-shadow:inset 0 0 0 1px var(--line);padding:16px;font:600 20px/24px var(--font);color:#2F6BF0;cursor:pointer}
+.mb{margin-bottom:12px}
+.stats{grid-template-columns:repeat(3,1fr)}
+button.stat{border:1px solid var(--line);font:inherit;color:inherit;cursor:pointer;width:100%}
+button.stat:active{background:var(--track)}
+.svcf{display:grid;gap:4px}
+.svcf select.field{appearance:auto}
+.three{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}
 </style>
 
 <div class="page">
@@ -492,12 +644,11 @@ SCREENS["vol:msgs"] = function(){ return { head: header("Messages", { right: '<b
 SCREENS["vol:more"] = function(){
   var body = '<div class="card" style="display:flex;gap:12px;align-items:center"><span class="av" style="width:52px;height:52px;font-size:17px">' + initials(ME || "?") + '</span><div><div class="t" style="font:700 18px/22px var(--font)">' + esc(ME) + '</div><div class="small">' + esc(teamsOf(ME).join(" · ") || "Volunteer") + '</div></div></div>'
     + '<div class="lbl">Serving</div><div class="grp">'
-    + row("Availability", "Which services you can do", "push", "avail")
-    + row("Blockout dates", myBlocks().length + " coming up", "push", "avail")
+    + row("Availability", "Dates you can't serve", "push", "avail")
     + row("Team contacts", "Call or WhatsApp your team", "push", "contacts") + '</div>'
     + '<div class="lbl">Settings</div><div class="grp">'
     + row("Notifications", "What we tell you about", "push", "notifSettings")
-    + row("Calendar sync", S.settings.cal ? "On, your phone calendar" : "Off", "push", "notifSettings") + '</div>'
+    + row("Calendar sync", S.settings.cal ? "On, your phone calendar" : "Off", "push", "calsync") + '</div>'
     + '<div class="lbl">HCC</div><div class="grp">' + row("HCC Hub home", "", "hub", "") + '</div>';
   return { head: header("More"), body: body };
 };
@@ -556,14 +707,13 @@ SCREENS["admin:dash"] = function(){
   var c = { confirmed: 0, pending: 0, open: 0, declined: 0 }; sl.forEach(function(x){ c[x.person ? x.status : "open"]++; });
   var tot = sl.length || 1;
   var body = '<p class="small" style="margin:0 4px">' + todayLong() + '</p><h2 class="big">' + dashTitle(sv) + '</h2>'
-    + '<div class="card"><div style="display:flex;justify-content:space-between;align-items:baseline"><div class="t" style="font:600 16px/21px var(--font)">' + esc(SVC[sv.svc].name) + ' · ' + dm(sv.date) + '</div><span class="small">' + sl.length + ' spots</span></div>'
+    + '<div class="card"><div class="small" style="font-weight:600;letter-spacing:.05em;text-transform:uppercase;margin-bottom:6px">Who\'s serving</div><div style="display:flex;justify-content:space-between;align-items:baseline"><div class="t" style="font:600 16px/21px var(--font)">' + esc(SVC[sv.svc].name) + ' · ' + dm(sv.date) + '</div><span class="small">' + sl.length + ' spots</span></div>'
     + '<div class="bar" style="margin:10px 0 12px"><i style="width:' + (c.confirmed/tot*100) + '%;background:var(--ok)"></i><i style="width:' + (c.pending/tot*100) + '%;background:var(--chevron)"></i><i style="width:' + (c.open/tot*100) + '%;background:var(--warn)"></i><i style="width:' + (c.declined/tot*100) + '%;background:var(--late)"></i></div>'
-    + '<div class="stats"><div class="stat ok"><b>' + c.confirmed + '</b><span>Confirmed</span></div><div class="stat"><b>' + c.pending + '</b><span>Not yet</span></div><div class="stat warn"><b>' + c.open + '</b><span>Open</span></div><div class="stat late"><b>' + c.declined + '</b><span>Can\'t</span></div></div>'
-    + '<div class="btns two"><button class="btn sm soft" style="width:100%" data-a="openSvc" data-id="' + sv.id + '">Open schedule</button><button class="btn sm sec" style="width:100%" data-a="sheet" data-s="nudge">Remind not yet</button></div></div>';
+    + '<div class="stats"><button class="stat ok" data-a="sheet" data-s="statList" data-id="confirmed"><b>' + c.confirmed + '</b><span>Confirmed</span></button><button class="stat warn" data-a="sheet" data-s="statList" data-id="open"><b>' + c.open + '</b><span>Open</span></button><button class="stat late" data-a="sheet" data-s="statList" data-id="declined"><b>' + c.declined + '</b><span>Can\'t</span></button></div>'
+    + '<div class="btns"><button class="btn sm soft" style="width:100%" data-a="openSvc" data-id="' + sv.id + '">Open schedule</button></div></div>';
   var pr = pendingReqs();
   body += '<div class="lbl">Needs you<a data-a="tab" data-v="reqs">' + pr.length + ' requests</a></div><div class="grp">' + pr.slice(0,3).map(reqRowShort).join("") + (pr.length ? '' : '<div class="empty">All caught up.</div>') + '</div>';
   var lots = PEOPLE.concat(Object.keys(POOL).reduce(function(a, t){ return a.concat(POOL[t]); }, [])).filter(function(p, i, a){ return a.indexOf(p) === i && wk(p) >= 3; });
-  if (lots.length) body += '<div class="lbl">Heads up</div>' + lots.slice(0,3).map(function(p){ return '<div class="warnbox" style="margin-bottom:8px"><span>⚠︎</span><span><b>' + esc(p) + ' serves ' + wk(p) + ' times this week.</b> Give them a break?</span></div>'; }).join("");
   body += '<div class="lbl">Who\'s serving</div><div class="grp">' + upc().slice(0,3).map(function(s){ var sl = S.slots.filter(function(x){ return x.sid === s.id; }), f = sl.filter(function(x){ return x.person && x.status !== "declined"; }).length; return '<div class="row tap" data-a="openSvc" data-id="' + s.id + '"><div class="m"><div class="t">' + dShort(s.date) + ' · ' + s.svc + '</div><div class="s">' + f + ' of ' + sl.length + ' spots filled</div></div>' + (f === sl.length ? '<span class="chip c-ok">Full</span>' : '<span class="chip c-warn">' + (sl.length - f) + ' open</span>') + '<span class="chev">›</span></div>'; }).join("") + '</div>';
   return { head: header("", { left: '<span class="small" style="padding-left:6px">HCC · All ministries ▾</span>', right: '<span class="av" style="width:34px;height:34px;font-size:12px">PR</span>' }), body: body };
 };
@@ -598,7 +748,7 @@ SCREENS.reqDetail = function(o){
 };
 SCREENS["admin:sched"] = function(){
   var sv = svc(S.adminSid), dirty = S.slots.filter(function(x){ return x.dirty; }).length;
-  var body = '<div class="strip">' + upc().map(function(s){ var d = dt(s.date); return '<button data-a="openSvc" data-id="' + s.id + '"' + (s.id === sv.id ? ' aria-current="true"' : '') + '><small>' + DOW[d.getUTCDay()] + ' ' + s.svc.split(" ")[1] + '</small>' + d.getUTCDate() + (s.published ? '' : '<small>Draft</small>') + '</button>'; }).join("") + '</div>';
+  var body = '<div class="strip">' + upc().map(function(s){ var d = dt(s.date); return '<button data-a="openSvc" data-id="' + s.id + '"' + (s.id === sv.id ? ' aria-current="true"' : '') + '><small>' + DOW[d.getUTCDay()] + ' ' + (s.svc.split(" ")[1] || s.svc) + '</small>' + d.getUTCDate() + (s.published ? '' : '<small>Draft</small>') + '</button>'; }).join("") + '</div>';
   body += '<div style="display:flex;justify-content:space-between;align-items:center;margin:14px 4px 4px"><div><div class="t" style="font:700 20px/26px var(--font)">' + SVC[sv.svc].name + '</div><div class="small">' + dLong(sv.date) + ' · ' + SVC[sv.svc].time + (sv.published ? '' : ' · <b style="color:var(--warn)">Draft, volunteers can\'t see it</b>') + '</div></div></div>';
   body += '<div class="pick mt"><button data-a="sheet" data-s="copy">Copy last week</button><button data-a="sheet" data-s="templates">Templates</button><button data-a="autofill">Auto-fill open</button></div>';
   Object.keys(ROLES).forEach(function(team){
@@ -641,7 +791,7 @@ SHEETS.fill = function(o){ var x = slot(o.id), sv = svc(x.sid);
   people.sort(function(a,b){ var o = { free: 0, busy: 1, off: 2, blocked: 3 }; return o[a.st] - o[b.st]; });
   var lab = { free: ["Available","c-ok"], busy: ["Already serving","c-mut"], blocked: ["Blocked out","c-late"], off: ["Doesn't do " + sv.svc, "c-warn"] };
   return '<h4>' + esc(x.role) + '</h4><p class="s">' + dShort(sv.date) + ' · ' + SVC[sv.svc].name + (x.person ? ' · now ' + esc(x.person) : '') + '</p>'
-    + '<div class="lbl" style="margin-top:4px">Find who\'s available</div><div class="grp">' + people.map(function(e){ return '<div class="row tap" data-a="assign" data-id="' + x.id + '" data-p="' + esc(e.p) + '"><span class="av' + (e.st === "free" ? '' : ' g') + '">' + initials(e.p) + '</span><div class="m"><div class="t">' + esc(e.p) + (e.p === x.person ? ' ✓' : '') + '</div><div class="s">' + (wk(e.p) ? 'Serving ' + wk(e.p) + ' times this week' : lastServedText(e.p, sv)) + '</div></div><span class="chip ' + lab[e.st][1] + '">' + lab[e.st][0] + '</span></div>'; }).join("") + '</div>'
+    + '<div class="lbl" style="margin-top:4px">Find who\'s available</div><div class="grp">' + people.map(function(e){ return '<div class="row tap" data-a="assign" data-id="' + x.id + '" data-p="' + esc(e.p) + '"><span class="av' + (e.st === "free" ? '' : ' g') + '">' + initials(e.p) + '</span><div class="m"><div class="t">' + esc(e.p) + (e.p === x.person ? ' ✓' : '') + '</div><div class="s">' + (wk(e.p) ? 'Serving ' + wk(e.p) + (wk(e.p) === 1 ? ' time' : ' times') + ' this week' : lastServedText(e.p, sv)) + '</div></div><span class="chip ' + lab[e.st][1] + '">' + lab[e.st][0] + '</span></div>'; }).join("") + '</div>'
     + (x.person ? '<div class="btns two"><button class="btn sec" data-a="clearSlot" data-id="' + x.id + '">Leave open</button><button class="btn soft" data-a="toast" data-t="No phone number saved for ' + esc(x.person) + ' yet.">Message ' + esc(x.person) + '</button></div>' : '<div class="btns"><button class="btn soft" data-a="postOpen" data-id="' + x.id + '">Post to Open spots</button></div>'); };
 SHEETS.publish = function(){ var sv = svc(S.adminSid), dirty = S.slots.filter(function(x){ return x.dirty; }).length;
   return '<h4>Publish ' + dShort(sv.date) + ' ' + sv.svc + '?</h4><p class="s">' + (dirty ? dirty + ' change' + (dirty > 1 ? 's' : '') + ' since you last published.' : 'Volunteers will see this service.') + '</p>'
@@ -661,7 +811,7 @@ SHEETS.newChat = function(){ var gs = upc().slice(0,3).map(function(sv){ var n =
   (S.view === "admin" ? Object.keys(ROLES) : teamsOf(ME)).forEach(function(t){ gs.push([(S.view === "admin" ? "" : "My team, ") + t, (POOL[t] || []).length + " people"]); });
   return '<h4>New chat</h4><p class="s">Message a group based on the schedule.</p><div class="grp">' + gs.map(function(g){ return '<div class="row tap" data-a="makeChat" data-t="' + esc(g[0]) + '"><span class="av">★</span><div class="m"><div class="t">' + g[0] + '</div><div class="s">' + g[1] + '</div></div><span class="chev">›</span></div>'; }).join("") + '</div>'; };
 SHEETS.msgLeader = function(){ var t = teamsOf(ME)[0], l = leaderOf(t); return '<h4>Message your leader</h4><p class="s">Goes to ' + esc(l) + (t ? ', ' + esc(t) + ' leader' : '') + '.</p><textarea class="field" id="ml" placeholder="Write a message"></textarea><div class="btns"><button class="btn" data-a="leaderMsg">Send</button><button class="btn wa" data-a="leaderWa">WhatsApp instead</button></div>'; };
-SHEETS.blockout = function(){ return '<h4>Block out dates</h4><p class="s">You won\'t be scheduled on these days.</p><label class="fl" for="bf">From</label><input class="field" id="bf" placeholder="Like: 20 Dec"><label class="fl" for="bt">To</label><input class="field" id="bt" placeholder="Like: 27 Dec"><label class="fl" for="br">Reason (optional)</label><input class="field" id="br" placeholder="Like: Travel"><div class="btns"><button class="btn" data-a="addBlock">Save</button></div>'; };
+SHEETS.blockout = function(){ return '<h4>Block out dates</h4><p class="s">You won\'t be scheduled on these days.</p><label class="fl" for="bf">From</label><input class="field" id="bf" type="date" min="' + TODAY + '" value="' + TODAY + '"><label class="fl" for="bt">To</label><input class="field" id="bt" type="date" min="' + TODAY + '" value="' + TODAY + '"><label class="fl" for="br">Reason (optional)</label><input class="field" id="br" placeholder="Like: Travel"><div class="btns"><button class="btn" data-a="addBlock">Save</button></div>'; };
 SHEETS.note = function(){ var ns = noteSvc(); return '<h4>' + (ns ? dShort(ns.date) + ' ' + esc(ns.svc) : 'Service') + ' · notes</h4><div class="two"><div><label class="fl" for="na">Adults</label><input class="field" id="na" inputmode="numeric"></div><div><label class="fl" for="nk">Kids</label><input class="field" id="nk" inputmode="numeric"></div></div><label class="fl" for="nv">Visitors</label><input class="field" id="nv" inputmode="numeric"><label class="fl" for="nt">What happened</label><textarea class="field" id="nt" placeholder="Anything worth remembering"></textarea><div class="btns"><button class="btn" data-a="saveNote">Save</button></div>'; };
 
 /* ---------------- actions ---------------- */
@@ -691,16 +841,16 @@ var A = {
     S.notifs.unshift({ t: { swap: "Swap approved", pickup: "You're on!", giveaway: "Give-away approved", cant: "Your leader saw it", blockout: "Blockout approved" }[r.kind], s: reqTitle(r)[1], when: "Now" });
     if (S.stack.length) S.stack.pop(); toast("Approved. " + r.from + " is told."); render.same = true; render(); },
   decline: function(d){ var r = req(d.id); r.state = "declined"; if (r.kind === "pickup") delete S.pendingMine[r.slot]; if (S.stack.length) S.stack.pop(); toast("Declined. " + r.from + " is told."); render.same = true; render(); },
-  assignCover: function(d){ var r = req(d.id), x = slot(r.slot); x.person = d.p; x.status = "pending"; x.dirty = true; r.state = "approved"; S.stack.pop(); toast(d.p + " is on. Publish to tell them."); render(); },
-  assign: function(d){ var x = slot(d.id); x.person = d.p; x.status = "pending"; x.dirty = true; S.sheet = null; toast(d.p + " added. Publish to tell them."); render.same = true; render(); },
+  assignCover: function(d){ var r = req(d.id), x = slot(r.slot); x.person = d.p; x.status = "confirmed"; x.dirty = true; r.state = "approved"; S.stack.pop(); toast(d.p + " is on. Publish to tell them."); render(); },
+  assign: function(d){ var x = slot(d.id); x.person = d.p; x.status = "confirmed"; x.dirty = true; S.sheet = null; toast(d.p + " added. Publish to tell them."); render.same = true; render(); },
   clearSlot: function(d){ var x = slot(d.id); x.person = null; x.status = "open"; x.dirty = true; S.sheet = null; render.same = true; render(); },
   postOpen: function(d){ var x = slot(d.id); x.person = null; x.status = "open"; S.sheet = null; toast("Posted. Volunteers on " + x.team + " can say I can serve."); render.same = true; render(); },
-  autofill: function(d){ var sv = svc(S.adminSid), n = 0; S.slots.forEach(function(x){ if (x.sid === sv.id && (!x.person || x.status === "declined")) { var pick = POOL[x.team].filter(function(p){ return !servingAt(sv.id, p) && !blockedOn(p, sv); })[0]; if (pick) { x.person = pick; x.status = "pending"; x.dirty = true; n++; } } }); S.sheet = null; toast(n ? "Filled " + n + " spot" + (n > 1 ? "s" : "") + " with people who are free. Check, then publish." : "No one free for the open spots."); render.same = true; render(); },
+  autofill: function(d){ var sv = svc(S.adminSid), n = 0; S.slots.forEach(function(x){ if (x.sid === sv.id && (!x.person || x.status === "declined")) { var pick = POOL[x.team].filter(function(p){ return !servingAt(sv.id, p) && !blockedOn(p, sv); })[0]; if (pick) { x.person = pick; x.status = "confirmed"; x.dirty = true; n++; } } }); S.sheet = null; toast(n ? "Filled " + n + " spot" + (n > 1 ? "s" : "") + " with people who are free. Check, then publish." : "No one free for the open spots."); render.same = true; render(); },
   useTemplate: function(d){ S.sheet = null; toast("Applied \"" + d.t + "\" to empty spots (test copy)"); render.same = true; render(); },
   publish: function(){ var sv = svc(S.adminSid); sv.published = true; var n = S.slots.filter(function(x){ return x.dirty; }).length; S.slots.forEach(function(x){ x.dirty = false; }); S.sheet = null; toast("Published. " + (n ? n + " volunteer" + (n > 1 ? "s" : "") + " notified." : "Volunteers can see it now.")); render.same = true; render(); },
   postAnn: function(){ var to = document.querySelector("#anTo [aria-pressed=true]"); S.announcements.unshift({ id: "a" + Date.now(), who: ADMIN, to: to ? to.textContent : "Everyone", when: "Just now", title: document.getElementById("anTitle").value || "Announcement", text: document.getElementById("anText").value }); S.notifs.unshift({ t: "New announcement", s: document.getElementById("anTitle").value, when: "Now" }); S.sheet = null; S.msgTab = "ann"; toast("Posted. Switch to Volunteer to see it."); render(); },
   makeChat: function(d){ var c = { id: "c" + Date.now(), name: d.t, auto: true, msgs: [{ who: "HCC Roster", t: "Chat started for " + d.t + "." }] }; S.chats.unshift(c); S.sheet = null; S.msgTab = "chats"; push("chat", { id: c.id }); },
-  addBlock: function(){ var f = document.getElementById("bf").value.trim(), t = document.getElementById("bt").value.trim() || f, fi = parseDay(f), ti = parseDay(t); if (!fi || !ti) { toast("Type dates like 20 Dec."); render.same = true; render(); return; } myBlocks().push({ from: dm(fi), to: dm(ti), fromIso: fi, toIso: ti < fi ? fi : ti, reason: document.getElementById("br").value.trim() }); S.sheet = null; toast("Blocked out. " + leaderOf(teamsOf(ME)[0]) + " can see it."); render.same = true; render(); },
+  addBlock: function(){ var f = document.getElementById("bf").value.trim(), t = document.getElementById("bt").value.trim() || f, fi = parseDay(f), ti = parseDay(t); if (!fi || !ti) { toast("Pick a From date."); render.same = true; render(); return; } myBlocks().push({ from: dm(fi), to: dm(ti), fromIso: fi, toIso: ti < fi ? fi : ti, reason: document.getElementById("br").value.trim() }); S.sheet = null; toast("Blocked out. " + leaderOf(teamsOf(ME)[0]) + " can see it."); render.same = true; render(); },
   saveNote: function(){ var ns = noteSvc(); S.notes.unshift({ date: ns ? dShort(ns.date) : dShort(TODAY), svc: ns ? ns.svc : "", adults: +document.getElementById("na").value || 0, kids: +document.getElementById("nk").value || 0, visitors: +document.getElementById("nv").value || 0, text: document.getElementById("nt").value }); S.sheet = null; render(); },
   setting: function(d, el){ S.settings[d.k] = el.checked; },
   regular: function(d, el){ S.regular[d.k] = el.checked; }
@@ -716,7 +866,7 @@ app.addEventListener("click", function(e){
   var f = A[el.dataset.a]; if (f) f(el.dataset, el);
 });
 app.addEventListener("change", function(e){ var el = e.target; if (el.dataset && A[el.dataset.a]) A[el.dataset.a](el.dataset, el); });
-app.addEventListener("submit", function(e){ e.preventDefault(); var f = e.target, c = S.chats.filter(function(c){ return c.id === f.dataset.id; })[0], v = f.querySelector('input').value.trim(); if (!v) return; c.msgs.push({ who: S.view === "admin" ? ADMIN : ME, t: v }); render(); var b = document.getElementById("body"); b.scrollTop = b.scrollHeight; var i = app.querySelector(".compose input"); if (i) i.focus(); });
+app.addEventListener("submit", function(e){ e.preventDefault(); var f = e.target, c = S.chats.filter(function(c){ return c.id === f.dataset.id; })[0], v = f.querySelector('input').value.trim(); if (!v) return; c.msgs.push({ who: meName(), t: v, at: Date.now() }); render(); var b = document.getElementById("body"); b.scrollTop = b.scrollHeight; var i = app.querySelector(".compose input"); if (i) i.focus(); });
 
 /* ---------------- view switch and jump list ---------------- */
 document.querySelectorAll(".switch button").forEach(function(b){ b.addEventListener("click", function(){ S.view = b.dataset.v; S.stack = []; S.sheet = null; render(); }); });
@@ -732,7 +882,7 @@ function drawJumps(){
 }
 /* ================= Test copy: the 15 new features, each with an on/off switch ================= */
 var FEATS = [
-  ["picker","Picker warnings","When you fill a spot: who's away, who doesn't do that service, who's already serving, who's serving a lot."],
+  ["picker","Picker warnings","When you fill a spot: who's away, who doesn't do that service, who's already serving (you can still double book them)."],
   ["drafts","Draft tags","Changes show a yellow Draft tag until you publish, and Publish only tells the people whose spots changed."],
   ["notes","Spot notes","A short note on a spot, like \"Kids room A, bring keys\", that the volunteer sees."],
   ["templates","Templates","Save a service's line-up and drop it onto another date."],
@@ -895,14 +1045,13 @@ SCREENS["vol:more"] = function(){
   var left = todosLeft();
   var body = '<div class="card" style="display:flex;gap:12px;align-items:center"><span class="av" style="width:52px;height:52px;font-size:17px">' + initials(ME || "?") + '</span><div><div class="t" style="font:700 18px/22px var(--font)">' + esc(ME) + '</div><div class="small">' + esc(teamsOf(ME).join(" · ") || "Volunteer") + '</div></div></div>'
     + '<div class="lbl">Serving</div><div class="grp">'
-    + row("Availability", "Which services you can do", "push", "avail")
-    + row("Blockout dates", myBlocks().length + " coming up", "push", "avail")
+    + row("Availability", "Dates you can't serve", "push", "avail")
     + (on("swaps") ? row("My requests", "Swaps and give-aways, and where each stands", "push", "myReqs") : '')
     + (on("onboarding") ? row("To-dos", left ? left + " to do" : "All done", "push", "todosVol") : '')
     + row("Team contacts", "Call, WhatsApp or thank your team", "push", "contacts") + '</div>'
     + '<div class="lbl">Settings</div><div class="grp">'
     + (on("notify") ? row("Notifications", "What we tell you about", "push", "notifSettings") : '')
-    + row("Calendar sync", S.settings.cal ? "On, your phone calendar" : "Off", "push", "notifSettings") + '</div>'
+    + row("Calendar sync", S.settings.cal ? "On, your phone calendar" : "Off", "push", "calsync") + '</div>'
     + '<div class="lbl">HCC</div><div class="grp">' + row("HCC Hub home", "", "hub", "") + row("Not " + ME + "?", "Pick your name", "whoami", "") + row("Leader view", "For team leaders, needs the leader PIN", "toAdmin", "") + '</div>';
   return { head: header("More"), body: body };
 };
@@ -988,10 +1137,10 @@ SCREENS.reqDetail = function(o){
 };
 SCREENS["admin:sched"] = function(){
   var sv = svc(S.adminSid), dirty = S.slots.filter(function(x){ return x.dirty && x.sid === sv.id; }).length;
-  var body = '<div class="strip">' + upc().map(function(s){ var d = dt(s.date); return '<button data-a="openSvc" data-id="' + s.id + '"' + (s.id === sv.id ? ' aria-current="true"' : '') + '><small>' + DOW[d.getUTCDay()] + ' ' + s.svc.split(" ")[1] + '</small>' + d.getUTCDate() + (s.published ? '' : '<small>Draft</small>') + '</button>'; }).join("") + '</div>';
+  var body = '<div class="strip">' + upc().map(function(s){ var d = dt(s.date); return '<button data-a="openSvc" data-id="' + s.id + '"' + (s.id === sv.id ? ' aria-current="true"' : '') + '><small>' + DOW[d.getUTCDay()] + ' ' + (s.svc.split(" ")[1] || s.svc) + '</small>' + d.getUTCDate() + (s.published ? '' : '<small>Draft</small>') + '</button>'; }).join("") + '</div>';
   body += '<div style="display:flex;justify-content:space-between;align-items:center;margin:14px 4px 8px"><div><div class="t" style="font:700 20px/26px var(--font)">' + SVC[sv.svc].name + '</div><div class="small">' + dLong(sv.date) + ' · ' + SVC[sv.svc].time + (sv.published ? '' : ' · <b style="color:var(--warn)">Draft, volunteers can\'t see it</b>') + '</div></div></div>';
   body += evBanner(sv.date);
-  body += '<div class="pick mt"><button data-a="sheet" data-s="copy">Copy last week</button>' + (on("templates") ? '<button data-a="sheet" data-s="templates">Templates</button>' : '') + '<button data-a="autofill">Auto-fill open</button>' + (on("events") ? '<button data-a="sheet" data-s="addEvent">Add event</button>' : '') + '</div>';
+  body += '<div class="pick mt"><button data-a="sheet" data-s="copy">Copy last week</button>' + (on("templates") ? '<button data-a="sheet" data-s="templates">Templates</button>' : '') + '<button data-a="autofill">Auto-fill open</button>' + (on("events") ? '<button data-a="sheet" data-s="addEvent">Add event banner</button>' : '') + '</div>';
   Object.keys(ROLES).forEach(function(team){
     var sl = S.slots.filter(function(x){ return x.sid === sv.id && x.team === team; }); if (!sl.length) return;
     var ks = ckFor(team, sv.svc);
@@ -1061,14 +1210,14 @@ SHEETS.change = function(o){ var x = slot(o.id), sv = svc(x.sid);
     + '<div class="row tap" data-a="giveaway" data-id="' + x.id + '"><div class="m"><div class="t">Give it away</div><div class="s">Post to Open spots; anyone on ' + esc(x.team) + ' can take it</div></div><span class="chev">›</span></div></div>'
     + '<p class="small mt">Your leader approves before anything changes.</p>'; };
 SHEETS.fill = function(o){ var x = slot(o.id), sv = svc(x.sid), pick = on("picker");
-  var people = POOL[x.team].map(function(p){ var st = blockedOn(p, sv) ? "blocked" : (servingAt(sv.id, p) && x.person !== p) ? "busy" : (S.regularBy && S.regularBy[p] && S.regularBy[p][sv.svc] === false) ? "off" : (wk(p) || 0) >= 3 ? "lots" : "free"; return { p: p, st: st }; });
-  if (pick) people.sort(function(a,b){ var o = { free: 0, lots: 1, busy: 2, off: 3, blocked: 4 }; return o[a.st] - o[b.st]; });
-  var lab = { free: ["Available","c-ok"], lots: ["Serving a lot","c-warn"], busy: ["Already serving","c-mut"], blocked: ["Away","c-late"], off: ["Doesn't do " + sv.svc, "c-warn"] };
+  var people = POOL[x.team].map(function(p){ var st = blockedOn(p, sv) ? "blocked" : (servingAt(sv.id, p) && x.person !== p) ? "busy" : (S.regularBy && S.regularBy[p] && S.regularBy[p][sv.svc] === false) ? "off" : "free"; return { p: p, st: st }; });
+  if (pick) people.sort(function(a,b){ var o = { free: 0, busy: 1, off: 2, blocked: 3 }; return o[a.st] - o[b.st]; });
+  var lab = { free: ["Available","c-ok"], busy: ["Already serving","c-warn"], blocked: ["Away","c-late"], off: ["Doesn't do " + sv.svc, "c-warn"] };
   var h = on("bids") && !x.person ? hands(x) : [];
   var out = '<h4>' + esc(x.role) + '</h4><p class="s">' + dShort(sv.date) + ' · ' + SVC[sv.svc].name + (x.person ? ' · now ' + esc(x.person) : ' · open') + '</p>';
   if (h.length) out += '<div class="lbl" style="margin-top:4px">Raised their hand</div><div class="grp">' + h.map(function(r){ return '<div class="row"><span class="av">' + initials(r.from) + '</span><div class="m"><div class="t">' + esc(r.from) + '</div><div class="s">Asked to serve this spot</div></div><button class="btn sm" data-a="assignHand" data-id="' + r.id + '">Pick</button></div>'; }).join("") + '</div>';
-  out += '<div class="lbl"' + (h.length ? '' : ' style="margin-top:4px"') + '>' + (pick ? 'Find who\'s available' : 'Pick someone') + '</div><div class="grp">' + people.map(function(e){ return '<div class="row tap" data-a="assign" data-id="' + x.id + '" data-p="' + esc(e.p) + '"><span class="av' + (!pick || e.st === "free" ? '' : ' g') + '">' + initials(e.p) + '</span><div class="m"><div class="t">' + esc(e.p) + (e.p === x.person ? ' ✓' : '') + '</div>' + (pick ? '<div class="s">' + (wk(e.p) ? 'Serving ' + wk(e.p) + ' times this week' : e.st === "blocked" ? 'Blocked out that day' : lastServedText(e.p, sv)) + '</div>' : '') + '</div>' + (pick ? '<span class="chip ' + lab[e.st][1] + '">' + lab[e.st][0] + '</span>' : '') + '</div>'; }).join("") + '</div>';
-  if (on("notes")) out += '<label class="fl" for="spotNote">Note for whoever serves</label><input class="field" id="spotNote" placeholder="Like: Kids room A, bring keys" value="' + esc(x.note || "") + '"><div class="btns"><button class="btn sm soft" style="width:100%" data-a="saveSpotNote" data-id="' + x.id + '">Save note</button></div>';
+  out += '<div class="lbl"' + (h.length ? '' : ' style="margin-top:4px"') + '>' + (pick ? 'Find who\'s available' : 'Pick someone') + '</div><div class="grp">' + people.map(function(e){ return '<div class="row tap" data-a="assign" data-id="' + x.id + '" data-p="' + esc(e.p) + '"><span class="av' + (!pick || e.st === "free" ? '' : ' g') + '">' + initials(e.p) + '</span><div class="m"><div class="t">' + esc(e.p) + (e.p === x.person ? ' ✓' : '') + '</div>' + (pick ? '<div class="s">' + (wk(e.p) ? 'Serving ' + wk(e.p) + (wk(e.p) === 1 ? ' time' : ' times') + ' this week' : e.st === "blocked" ? 'Blocked out that day' : lastServedText(e.p, sv)) + '</div>' : '') + '</div>' + (pick ? '<span class="chip ' + lab[e.st][1] + '">' + lab[e.st][0] + '</span>' : '') + '</div>'; }).join("") + '</div>';
+  if (on("notes")) out += '<label class="fl" for="spotNote">Add note for volunteer</label><input class="field" id="spotNote" placeholder="Like: Kids room A, bring keys" value="' + esc(x.note || "") + '"><div class="btns"><button class="btn sm soft" style="width:100%" data-a="saveSpotNote" data-id="' + x.id + '">Save note</button></div>';
   out += (x.person ? '<div class="btns two"><button class="btn sec" data-a="clearSlot" data-id="' + x.id + '">Leave open</button><button class="btn soft" data-a="toast" data-t="No phone number saved for ' + esc(x.person) + ' yet.">Message ' + esc(x.person) + '</button></div>' : '<div class="btns"><button class="btn soft" data-a="postOpen" data-id="' + x.id + '">Post to Open spots</button></div>');
   return out; };
 SHEETS.publish = function(){ var sv = svc(S.adminSid), changed = S.slots.filter(function(x){ return x.dirty && x.sid === sv.id && x.person; }), all = S.slots.filter(function(x){ return x.sid === sv.id && x.person; });
@@ -1077,21 +1226,20 @@ SHEETS.publish = function(){ var sv = svc(S.adminSid), changed = S.slots.filter(
   return '<h4>Publish ' + dShort(sv.date) + ' ' + sv.svc + '?</h4><p class="s">' + (on("drafts") ? (changed.length ? changed.length + ' spot' + (changed.length > 1 ? 's' : '') + ' changed since you last published.' : 'No changes since you last published.') : 'Volunteers will see this service.') + '</p>'
     + (names.length ? '<div class="card small" style="color:var(--ink)"><b>' + (on("drafts") ? 'Only these people are told' : 'Everyone on this service is told') + ':</b> ' + esc(names.join(", ")) + '.' + (on("drafts") ? ' Everyone else already knows, so they won\'t hear again.' : '') + '</div>' : '')
     + (skip.length ? '<div class="warnbox mt"><span>ⓘ</span><span>' + esc(skip.join(", ")) + ' turned off schedule messages, so they\'ll only see it in the app.</span></div>' : '')
-    + '<div class="grp mt"><label class="row tap"><div class="m"><div class="t">Ask them to confirm</div></div><input type="checkbox" class="tog" checked></label></div>'
     + '<div class="btns"><button class="btn" data-a="publish">Publish</button><button class="btn sec" data-a="closeSheet">Not yet</button></div>'; };
 SHEETS.templates = function(){ var sv = svc(S.adminSid);
   return '<h4>Templates</h4><p class="s">Drop a saved line-up onto ' + dShort(sv.date) + ' ' + sv.svc + '. It only fills empty spots.</p>' + (S.templates.length ? '' : '<p class="small">No templates saved yet.</p>') + '<div class="grp">' + S.templates.map(function(t, i){ return '<div class="row tap" data-a="useTemplate" data-id="' + i + '"><div class="m"><div class="t">' + esc(t.name) + '</div><div class="s">' + esc(t.sv) + ' · ' + Object.keys(t.lines).length + ' spots · saved by ' + esc(t.by) + '</div></div><span class="chev">›</span></div>'; }).join("") + '</div>'
     + '<label class="fl" for="tplName">Save this service as a template</label><input class="field" id="tplName" placeholder="Like: Sunday AM, Band C"><div class="btns"><button class="btn sec" data-a="saveTemplate">Save template</button></div>'; };
 SHEETS.announce = function(){
   var groups = [["Everyone"]].concat(Object.keys(ROLES).map(function(t){ return [t]; })).concat([["Leaders"]]);
-  if (on("audience")) upc().filter(function(s){ return s.published; }).slice(0,4).forEach(function(s){ var n = S.slots.filter(function(x){ return x.sid === s.id && x.person && x.status !== "declined"; }).length; groups.push(["Serving " + dShort(s.date) + " " + s.svc.split(" ")[1] + " (" + n + ")", s.id]); });
+  if (on("audience")) upc().filter(function(s){ return s.published; }).slice(0,4).forEach(function(s){ var n = S.slots.filter(function(x){ return x.sid === s.id && x.person && x.status !== "declined"; }).length; groups.push(["Serving " + dShort(s.date) + " " + (s.svc.split(" ")[1] || s.svc) + " (" + n + ")", s.id]); });
   return '<h4>New announcement</h4><label class="fl" for="anTo">To</label><div class="pick" id="anTo">' + groups.map(function(g, i){ return '<button data-a="pickReason"' + (g[1] ? ' data-sid="' + g[1] + '"' : '') + ' aria-pressed="' + (i === 0) + '">' + esc(g[0]) + '</button>'; }).join("") + '</div>'
   + '<label class="fl" for="anTitle">Title</label><input class="field" id="anTitle" placeholder="Short headline">'
   + '<label class="fl" for="anText">Message</label><textarea class="field" id="anText" placeholder="What everyone should know"></textarea>'
   + '<div class="grp mt"><label class="row tap"><div class="m"><div class="t">Also share on WhatsApp</div><div class="s">Opens WhatsApp for you to send</div></div><input type="checkbox" class="tog"></label></div>'
   + '<div class="btns"><button class="btn" data-a="postAnn">Post</button></div>'; };
 SHEETS.shout = function(o){ return '<h4>Shout-out for ' + esc(o.id) + '</h4><p class="s">Shows on ' + esc(teamsOf(o.id)[0] || "their team") + '\'s Messages, and ' + esc(o.id) + ' gets a notification.</p><div class="pick" id="shBadge">' + ["Faithful servant","Team player","Above and beyond","Early bird"].map(function(b, i){ return '<button data-a="pickReason" aria-pressed="' + (i === 0) + '">' + b + '</button>'; }).join("") + '</div><label class="fl" for="shText">Message (optional)</label><textarea class="field" id="shText" placeholder="What they did"></textarea><div class="btns"><button class="btn" data-a="sendShout" data-id="' + esc(o.id) + '">Send shout-out</button></div>'; };
-SHEETS.addEvent = function(){ var sv = svc(S.adminSid); return '<h4>Add an event</h4><p class="s">Shows as a banner on that day for leaders and volunteers.</p><label class="fl" for="evDate">Day</label><select class="field" id="evDate">' + upc().filter(function(s, i, a){ return a.findIndex(function(t){ return t.date === s.date; }) === i; }).map(function(s){ return '<option value="' + s.date + '"' + (s.date === sv.date ? ' selected' : '') + '>' + dShort(s.date) + '</option>'; }).join("") + '</select><label class="fl" for="evTitle">Title</label><input class="field" id="evTitle" placeholder="Like: Baptism Sunday"><label class="fl" for="evNote">Note (optional)</label><input class="field" id="evNote" placeholder="What people should know"><div class="btns"><button class="btn" data-a="saveEvent">Add event</button></div>'; };
+SHEETS.addEvent = function(){ var sv = svc(S.adminSid); return '<h4>Add event banner</h4><p class="s">Shows as a banner on that day for leaders and volunteers.</p><label class="fl" for="evDate">Day</label><input class="field" id="evDate" type="date" min="' + TODAY + '" value="' + (function(){ var d = typeof adminDaySel === "function" ? adminDaySel() : (sv ? sv.date : TODAY); return d < TODAY ? TODAY : d; })() + '"><label class="fl" for="evTitle">Title</label><input class="field" id="evTitle" placeholder="Like: Baptism Sunday"><label class="fl" for="evNote">Note (optional)</label><input class="field" id="evNote" placeholder="What people should know"><div class="btns"><button class="btn" data-a="saveEvent">Add banner</button></div>'; };
 SHEETS.addTodo = function(){ return '<h4>Add a to-do</h4><p class="s">New volunteers on these teams see it on Home until they confirm.</p><label class="fl" for="tdTitle">Title</label><input class="field" id="tdTitle" placeholder="Like: Child-safety policy"><label class="fl" for="tdText">What to do</label><input class="field" id="tdText" placeholder="Like: Read the policy and confirm"><label class="fl">Teams</label><div class="pick" id="tdTeams">' + Object.keys(POOL).map(function(t){ return '<button data-a="toggleBtn" aria-pressed="false">' + esc(t) + '</button>'; }).join("") + '</div><div class="btns"><button class="btn" data-a="saveTodo">Add to-do</button></div>'; };
 
 /* ---------- actions ---------- */
@@ -1106,7 +1254,7 @@ A.feat = function(d, el){ S.feat[d.k] = el.checked; toast(FEATS.filter(function(
 A.flag = function(d){ var ls = lastSvc(); if (!ls) return; var k = ls.id + "|" + d.p; if (S.attend[k] === d.v) delete S.attend[k]; else S.attend[k] = d.v; render.same = true; render(); };
 A.saveSpotNote = function(d){ var x = slot(d.id); x.note = (document.getElementById("spotNote").value || "").trim(); S.sheet = null; toast(x.note ? "Note saved. " + (x.person || "Whoever serves") + " sees it on their card." : "Note removed."); render.same = true; render(); };
 A.useTemplate = function(d){ var t = S.templates[+d.id], n = 0, sv = svc(S.adminSid);
-  S.slots.forEach(function(x){ if (x.sid !== sv.id || (x.person && x.status !== "declined")) return; var p = t.lines[x.team + "|" + x.role]; if (p && !servingAt(sv.id, p) && !blockedOn(p, sv)) { x.person = p; x.status = "pending"; x.dirty = true; n++; } });
+  S.slots.forEach(function(x){ if (x.sid !== sv.id || (x.person && x.status !== "declined")) return; var p = t.lines[x.team + "|" + x.role]; if (p && !servingAt(sv.id, p) && !blockedOn(p, sv)) { x.person = p; x.status = "confirmed"; x.dirty = true; n++; } });
   S.sheet = null; toast(n ? "Filled " + n + " empty spot" + (n > 1 ? "s" : "") + " from \"" + t.name + "\". Check, then publish." : "\"" + t.name + "\" had nobody free for the empty spots."); render.same = true; render(); };
 A.saveTemplate = function(){ var sv = svc(S.adminSid), name = (document.getElementById("tplName").value || "").trim() || (sv.svc + " line-up"), lines = {};
   S.slots.forEach(function(x){ if (x.sid === sv.id && x.person && x.status !== "declined") lines[x.team + "|" + x.role] = x.person; });
@@ -1115,7 +1263,7 @@ A.publish = function(){ var sv = svc(S.adminSid); sv.published = true; var ch = 
   S.slots.forEach(function(x){ if (x.sid === sv.id) x.dirty = false; }); S.sheet = null; toast("Published. " + n + " volunteer" + (n === 1 ? "" : "s") + " told."); render.same = true; render(); };
 A.postAnn = function(){ var to = document.querySelector("#anTo [aria-pressed=true]"); S.announcements.unshift({ id: "a" + Date.now(), who: ADMIN, to: to ? to.textContent : "Everyone", aud: to && to.dataset.sid, when: "Just now", title: document.getElementById("anTitle").value || "Announcement", text: document.getElementById("anText").value }); S.notifs.unshift({ t: "New announcement", s: document.getElementById("anTitle").value, when: "Now" }); S.sheet = null; S.msgTab = "ann"; toast(to && to.dataset.sid ? "Posted to the people serving then." : "Posted. Volunteers see it in Messages."); render(); };
 A.sendShout = function(d){ var b = document.querySelector("#shBadge [aria-pressed=true]"); S.shouts.unshift({ to: d.id, from: S.view === "admin" ? ADMIN : ME, badge: b ? b.textContent : "Thank you", text: (document.getElementById("shText").value || "").trim(), when: "Just now", team: teamsOf(d.id)[0] || "" }); S.sheet = null; toast("Shout-out sent to " + d.id + "."); render.same = true; render(); };
-A.saveEvent = function(){ var t = (document.getElementById("evTitle").value || "").trim(); if (!t) return; S.events.push({ id: "e" + Date.now(), date: document.getElementById("evDate").value, title: t, note: document.getElementById("evNote").value }); S.sheet = null; toast("Event added. It shows on that day for everyone."); render.same = true; render(); };
+A.saveEvent = function(){ var t = (document.getElementById("evTitle").value || "").trim(); if (!t) return; if (!/^\d{4}-\d{2}-\d{2}$/.test(document.getElementById("evDate").value || "")) { toast("Pick a day for the event."); return; } S.events.push({ id: "e" + Date.now(), date: document.getElementById("evDate").value, title: t, note: document.getElementById("evNote").value }); S.sheet = null; toast("Event added. It shows on that day for everyone."); render.same = true; render(); };
 A.toggleBtn = function(d, el){ el.setAttribute("aria-pressed", String(el.getAttribute("aria-pressed") !== "true")); };
 A.saveTodo = function(){ var teams = [].map.call(document.querySelectorAll("#tdTeams [aria-pressed=true]"), function(b){ return b.textContent; }); S.todos.push({ id: "t" + Date.now(), title: document.getElementById("tdTitle").value || "To-do", text: document.getElementById("tdText").value, teams: teams }); S.sheet = null; toast("To-do added."); render.same = true; render(); };
 app.addEventListener("submit", function(e){ var f = e.target; if (f.dataset.a !== "addItem") return; e.stopImmediatePropagation(); e.preventDefault(); var v = f.querySelector("input").value.trim(); if (!v) return; S.checklists.filter(function(k){ return k.id === f.dataset.id; })[0].items.push(v); render.same = true; render(); }, true);
@@ -1158,7 +1306,7 @@ function seedReal(D){
   D.schedule.forEach(function(r){ var id = r[0] + "|" + r[1]; if (!byId[id]) { byId[id] = { id: id, date: r[0], svc: r[1], published: true }; services.push(byId[id]); } });
   services.sort(function(a, b){ return a.date < b.date ? -1 : a.date > b.date ? 1 : order.indexOf(a.svc) - order.indexOf(b.svc); });
   function add(sv, team, role, person){ var key = sv.id + "|" + team + "|" + role; count[key] = (count[key] || 0) + 1;
-    slots.push({ id: key + "|" + (count[key] - 1), sid: sv.id, team: team, role: role, person: person || null, status: person ? (sv.date < TODAY ? "confirmed" : "pending") : "open", dirty: false }); }
+    slots.push({ id: key + "|" + (count[key] - 1), sid: sv.id, team: team, role: role, person: person || null, status: person ? "confirmed" : "open", dirty: false }); }
   var rows = {}; D.schedule.forEach(function(r){ var k = r[0] + "|" + r[1]; (rows[k] = rows[k] || []).push(r); });
   services.forEach(function(sv){
     var have = {};
@@ -1238,11 +1386,11 @@ function saveNow(){
   if (inflight) { again = true; return; }
   var body = snapshot(); if (body === lastSaved) return;
   inflight = true;
-  fetch("/api/state", { method: "PUT", headers: { "content-type": "application/json" }, body: '{"rev":' + rev + ',"data":' + body + '}' })
+  fetch("/api/state", { method: "PUT", headers: authHeaders(), body: '{"rev":' + rev + ',"data":' + body + '}' })
     .then(function(r){ return r.json().then(function(j){ return { s: r.status, j: j }; }, function(){ return { s: r.status }; }); })
     .then(function(x){
       inflight = false;
-      if (x.s === 200) { rev = x.j.rev; lastSaved = body; failed = false; }
+      if (x.s === 200) { rev = x.j.rev; lastSaved = body; failed = false; if (x.j.kept && x.j.kept.length) keptBack(x.j.kept); }
       else if (x.s === 409 && x.j && x.j.data) {
         var base = lastSaved ? JSON.parse(lastSaved) : null;
         if (!base) { adopt(x.j); toast("The roster was just set up on another phone, so this phone now shows that copy."); render.same = true; render(); }
@@ -1337,7 +1485,7 @@ SHEETS.addCk = function(){
   var teams = Object.keys(ROLES).filter(function(t){ return Object.keys(ROLES[t]).some(function(k){ return ROLES[t][k].length; }); });
   return '<h4>Add a checklist</h4><p class="s">Volunteers on that team tick it off on their serve details.</p><label class="fl" for="ckTitle">Name</label><input class="field" id="ckTitle" placeholder="Like: Media setup">'
     + '<div class="two"><div><label class="fl" for="ckTeam">Team</label><select class="field" id="ckTeam">' + teams.map(function(t){ return '<option>' + esc(t) + '</option>'; }).join("") + '</select></div><div><label class="fl" for="ckSvc">Service</label><select class="field" id="ckSvc">' + Object.keys(SVC).map(function(k){ return '<option>' + esc(k) + '</option>'; }).join("") + '</select></div></div>'
-    + '<label class="fl" for="ckDue">Done by (optional)</label><input class="field" id="ckDue" placeholder="Like: 9:30 AM"><label class="fl" for="ckItems">Items, one per line</label><textarea class="field" id="ckItems" placeholder="Load slides&#10;Test mics"></textarea>'
+    + '<label class="fl" for="ckDue">Done by (optional)</label><select class="field" id="ckDue">' + qtrTimes() + '</select><label class="fl" for="ckItems">Items, one per line</label><textarea class="field" id="ckItems" placeholder="Load slides&#10;Test mics"></textarea>'
     + '<div class="btns"><button class="btn" data-a="saveCk">Save checklist</button></div>';
 };
 A.saveCk = function(){ var t = (document.getElementById("ckTitle").value || "").trim(), items = (document.getElementById("ckItems").value || "").split(/\n/).map(function(x){ return x.trim(); }).filter(Boolean);
@@ -1376,6 +1524,1218 @@ JUMPS = {
     ["Shout-outs", function(){ A.tab({ v: "msgs" }); S.msgTab = "ann"; render(); }]]
 };
 drawJumps.v = null;
+
+
+/* ---------- 7shifts look (Nov 15): Home, serve details, Messaging, open spots switch ---------- */
+FEATS.push(["openspots","Open spots","Open spots up for grabs on Home, and the list where volunteers take a spot."]);
+var ORG = "Hyderabad Christian Center";
+var PAL = ["#E8B4D2","#8FCFC2","#B5CB8C","#F3B1A2","#A6BDF2","#EFCB82","#C6B1EA","#93D1E8"];
+var DOTS = ["#E9A6CF","#16B2D6","#2DD4B4","#F59E0B","#7C83F7","#F06A6A","#5BBE6A","#C084FC"];
+var NUM = ["no","one","two","three","four","five"];
+function hashN(t){ var h = 0; t = String(t || ""); for (var i = 0; i < t.length; i++) h = (h * 31 + t.charCodeAt(i)) >>> 0; return h; }
+var BLUES = ["#4A72FF","#1E3A8A","#38BDF8","#0E8FB0","#6366F1","#5B7FA6","#7C9CF5","#0369A1"];
+function dot(role){ return '<i class="rdot" style="background:' + BLUES[hashN(role) % BLUES.length] + '"></i>'; }
+var PERSON = '<svg viewBox="0 0 40 40" aria-hidden="true"><circle cx="20" cy="15.5" r="7.5" fill="rgba(255,255,255,.88)"/><path d="M5 38c1.5-8.5 8-12.5 15-12.5S33.5 29.5 35 38z" fill="rgba(255,255,255,.88)"/></svg>';
+function ava(p, size){ size = size || 44; return '<span class="ava" style="width:' + size + 'px;height:' + size + 'px;background:' + PAL[hashN(p) % PAL.length] + '" aria-hidden="true">' + PERSON + '</span>'; }
+function SV(d, inner, w){ return '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="' + (w || 1.6) + '" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">' + inner + '</svg>'; }
+var ICON7 = {
+  home: SV(0, '<path class="f" d="M4 11.2 12 4.5l8 6.7V20h-5.2v-5.4H9.2V20H4z"/>'),
+  cal: SV(0, '<rect x="4" y="5" width="16" height="15" rx="2"/><path d="M8 3v4M16 3v4M4 9.5h16"/><path d="M8.5 13h.01M12 13h.01M15.5 13h.01M8.5 16.5h.01M12 16.5h.01M15.5 16.5h.01" stroke-width="2.4"/>'),
+  chat: SV(0, '<path class="f" d="M12 4.5c4.7 0 8.5 3 8.5 6.7s-3.8 6.7-8.5 6.7c-.9 0-1.8-.1-2.6-.3L5 19.5l1.1-3.3c-1.6-1.2-2.6-3-2.6-5 0-3.7 3.8-6.7 8.5-6.7z"/>'),
+  more: SV(0, '<path d="M4 7h16M4 12h16M4 17h16"/>')
+};
+var BELL = SV(0, '<path d="M6 16.5v-5a6 6 0 0 1 12 0v5l1.6 2H4.4z"/><path d="M10 20.5a2 2 0 0 0 4 0"/>', 1.5);
+var CHECK = SV(0, '<path d="M20 11.5v.5a8 8 0 1 1-4.7-7.3"/><path d="M8.5 11.5l3 3L20 6"/>', 1.8);
+var PENCIL = SV(0, '<path d="M12 4H6.5A2.5 2.5 0 0 0 4 6.5v11A2.5 2.5 0 0 0 6.5 20h11a2.5 2.5 0 0 0 2.5-2.5V12"/><path d="M18.5 3.5l2 2L12 14l-3 1 1-3z"/>', 1.6);
+var CH_ICON = {
+  team: SV(0, '<rect x="9.5" y="3.5" width="5" height="4" rx="1"/><rect x="3.5" y="15.5" width="5" height="4" rx="1"/><rect x="9.5" y="15.5" width="5" height="4" rx="1"/><rect x="15.5" y="15.5" width="5" height="4" rx="1"/><path d="M12 7.5v4M6 15.5v-4h12v4M12 11.5v4"/>'),
+  shouts: SV(0, '<path d="M8 3h8l-2 6h-4z"/><circle cx="12" cy="15" r="5.5"/><path d="M12 12.3l.9 1.8 2 .3-1.4 1.4.3 2-1.8-.9-1.8.9.3-2-1.4-1.4 2-.3z"/>'),
+  all: SV(0, '<path d="M12 21s-6.5-5.6-6.5-11a6.5 6.5 0 0 1 13 0C18.5 15.4 12 21 12 21z"/><circle cx="12" cy="10" r="2.4"/>')
+};
+var CH_COLOR = { team: "#2BB39B", shouts: "#F26A21", all: "#3D6EF5" };
+
+/* times: arrive -> end; a service with no end time ends 2 hours after it starts */
+function minsOf(t){ var a = to24(t); return a[0] * 60 + a[1]; }
+function fmtMins(m){ m = ((m % 1440) + 1440) % 1440; var h = Math.floor(m / 60), mm = m % 60; return (h % 12 || 12) + ":" + ("0" + mm).slice(-2) + " " + (h < 12 ? "AM" : "PM"); }
+function svcStart(k){ var x = SVC[k] || {}; return x.call || x.time || ""; }
+function svcEnd(k){ var x = SVC[k] || {}; return x.end || (x.time ? fmtMins(minsOf(x.time) + 120) : ""); }
+function rangeTxt(k){ return svcStart(k) + " – " + svcEnd(k); }
+function bigT(t){ var m = String(t).match(/^(\S+)\s*(AM|PM)$/i); return m ? '<span><b>' + esc(m[1]) + '</b><small>' + m[2].toUpperCase() + '</small></span>' : '<span><b>' + esc(t) + '</b></span>'; }
+function bigRange(k){ return '<div class="trange">' + bigT(svcStart(k)) + '<span class="arr">→</span>' + bigT(svcEnd(k)) + '</div>'; }
+function upperDate(iso){ var d = dt(iso); return (DOW[d.getUTCDay()] + ", " + MON[d.getUTCMonth()] + " " + d.getUTCDate()).toUpperCase(); }
+
+/* weather for Hyderabad, from Open-Meteo; nothing shows if it can't load */
+var WX = {}, wxAsked = false;
+function wxLoad(){
+  if (wxAsked || typeof fetch !== "function") return; wxAsked = true;
+  fetch("https://api.open-meteo.com/v1/forecast?latitude=17.385&longitude=78.4867&daily=weather_code,temperature_2m_max&timezone=Asia%2FKolkata&forecast_days=16")
+    .then(function(r){ return r.ok ? r.json() : null; })
+    .then(function(j){ if (!j || !j.daily || !j.daily.time) return; j.daily.time.forEach(function(d, i){ WX[d] = { c: j.daily.weather_code[i], t: Math.round(j.daily.temperature_2m_max[i]) }; }); render.same = true; render(); })
+    .catch(function(){});
+}
+function wxIcon(c){
+  var cloud = '<path d="M7 17h10.5a3.5 3.5 0 0 0 .3-7A5.5 5.5 0 0 0 7.2 9 4 4 0 0 0 7 17z"/>', cloudHi = '<path d="M7 14h10.5a3.5 3.5 0 0 0 .3-7A5.5 5.5 0 0 0 7.2 6 4 4 0 0 0 7 14z"/>';
+  if (c <= 1) return SV(0, '<circle cx="12" cy="12" r="4"/><path d="M12 2.5v2M12 19.5v2M5.3 5.3l1.4 1.4M17.3 17.3l1.4 1.4M2.5 12h2M19.5 12h2M5.3 18.7l1.4-1.4M17.3 6.7l1.4-1.4"/>');
+  if (c >= 95) return SV(0, cloudHi + '<path d="M12.5 15l-2 3.5h3l-2 3.5"/>');
+  if ((c >= 51 && c <= 67) || (c >= 80 && c <= 82)) return SV(0, cloudHi + '<path d="M8.5 17.5v2.5M12 17.5v2.5M15.5 17.5v2.5"/>');
+  if (c === 45 || c === 48) return SV(0, cloudHi + '<path d="M5 18h14M7 21h10"/>');
+  return SV(0, cloud);
+}
+function wx(d){ var w = WX[d]; return w ? '<span class="wx">' + wxIcon(w.c) + w.t + '°C</span>' : ''; }
+
+/* the bell: new notifications since this phone last looked */
+function seenKey(){ return "roster.seen." + (S.view === "admin" ? "admin" : ME); }
+function unread(){ var n = +(LS.get(seenKey()) || 0); return Math.max(0, S.notifs.length - n); }
+function bellBtn(){ var n = unread(); return '<button class="bell" data-a="push" data-s="notifs" aria-label="Notifications' + (n ? ', ' + n + ' new' : '') + '">' + BELL + (n ? '<span class="bdg">' + n + '</span>' : '') + '</button>'; }
+var baseNotifs7 = SCREENS.notifs;
+SCREENS.notifs = function(o){ LS.set(seenKey(), String(S.notifs.length)); return baseNotifs7(o); };
+
+function meName(){ return S.view === "admin" ? (ME || ADMIN) : ME; }
+
+tabbar = function(){
+  var t = S.view === "admin"
+    ? [["dash","Dashboard",ICON.dash],["sched","Schedule",ICON7.cal],["reqs","Requests",ICON.inbox, pendingReqs().length],["msgs","Messaging",ICON7.chat],["more","More",ICON7.more]]
+    : [["home","Home",ICON7.home],["sched","Schedule",ICON7.cal],["msgs","Messaging",ICON7.chat],["more","More",ICON7.more, todosLeft()]];
+  var cur = S.tab[S.view];
+  return '<nav class="tabs">' + t.map(function(x){
+    return '<button data-a="tab" data-v="' + x[0] + '"' + (x[0] === cur && !S.stack.length ? ' aria-current="page"' : '') + '>' + x[2] + (x[3] && on("badges") ? '<span class="dot">' + x[3] + '</span>' : '') + x[1] + '</button>';
+  }).join("") + '</nav>';
+};
+var baseTab7 = A.tab;
+A.tab = function(d){
+  if (S.view === "vol" && d.v === "pool") { baseTab7({ v: "home" }); if (on("openspots")) push("vol:pool"); return; }
+  baseTab7(d);
+};
+
+/* ---------- Home ---------- */
+function tasksLeftFor(x){ var sv = svc(x.sid), n = on("onboarding") ? todosLeft() : 0;
+  ckFor(x.team, sv.svc).forEach(function(k){ k.items.forEach(function(_, i){ if (!S.ticks[sv.id + "|" + k.id + "|" + i]) n++; }); }); return n; }
+function shiftCard(x){ var sv = svc(x.sid), n = tasksLeftFor(x);
+  return '<div class="scard" data-a="detail" data-id="' + x.id + '" role="button" tabindex="0">' + bigRange(sv.svc)
+    + '<div class="sline">' + dot(x.role) + '<span>' + esc(x.role) + ' | ' + esc(x.team) + ' (' + ORG + ')</span></div>'
+    + '<div class="sfoot">' + CHECK + 'You have ' + n + ' incomplete task' + (n === 1 ? '' : 's') + '.</div></div>'; }
+function dateCol(iso){ var d = dt(iso); return '<div class="ud"><small>' + DOW[d.getUTCDay()] + '</small><b>' + d.getUTCDate() + '</b><small>' + MON[d.getUTCMonth()].toUpperCase() + '</small></div>'; }
+function bySvc(list){ var o = {}, out = []; list.forEach(function(x){ if (!o[x.sid]) { o[x.sid] = []; out.push(o[x.sid]); } o[x.sid].push(x); }); return out; }
+function upRows(list, n){ var g = bySvc(list); if (n) g = g.slice(0, n); return g.map(function(xs){ var x = xs[0], sv = svc(x.sid);
+  return '<div class="urow" data-a="detail" data-id="' + x.id + '">' + dateCol(sv.date) + '<div class="um"><div class="usn">' + esc(SVC[sv.svc] ? SVC[sv.svc].name : sv.svc) + '</div><div class="ut">' + esc(rangeTxt(sv.svc)) + evTag(sv.date) + '</div><div class="us">' + ORG + '</div>'
+    + xs.map(function(y){ return '<div class="us">' + dot(y.role) + esc(y.role) + ' | ' + esc(y.team) + '</div>'; }).join("") + '</div><span class="chev">›</span></div>'; }).join(""); }
+function upRow(x){ var sv = svc(x.sid);
+  return '<div class="urow" data-a="detail" data-id="' + x.id + '">' + dateCol(sv.date) + '<div class="um"><div class="ut">' + esc(rangeTxt(sv.svc)) + evTag(sv.date) + '</div><div class="us">' + ORG + '</div><div class="us">' + dot(x.role) + esc(x.role) + ' | ' + esc(x.team) + '</div></div>'
+    + '<span class="chev">›</span></div>'; }
+function openRow(x){ var sv = svc(x.sid);
+  return '<div class="urow" data-a="push" data-s="vol:pool">' + dateCol(sv.date) + '<div class="um"><div class="ut">' + esc(rangeTxt(sv.svc)) + '</div><div class="us">' + dot(x.role) + esc(x.role) + ' | ' + esc(x.team) + '</div></div>'
+    + (S.pendingMine[x.id] ? '<span class="chip c-acc">Hand raised</span>' : '') + '<span class="chev">›</span></div>'; }
+SCREENS["vol:home"] = function(){
+  wxLoad();
+  var m = mine(), today = m.filter(function(x){ return svc(x.sid).date === TODAY; }), later = m.filter(function(x){ return svc(x.sid).date !== TODAY; });
+  var body = '<div class="band"><div class="btop"><button class="me" data-a="tab" data-v="more" aria-label="Your profile">' + ava(ME, 60) + '</button>' + bellBtn() + '</div>'
+    + '<div class="bdate">' + upperDate(TODAY) + wx(TODAY) + '</div>'
+    + '<div class="bgreet">' + greet() + ',<br>' + esc(ME) + '.</div>';
+  if (on("home")) body += '<div class="bhead">' + (today.length ? 'You have<br>' + (NUM[bySvc(today).length] || bySvc(today).length) + ' serve' + (bySvc(today).length > 1 ? 's' : '') + ' today.' : 'You have<br>no serves today.') + evBanner(TODAY) + '</div>';
+  body += today.map(shiftCard).join("") + '</div>';
+  if (on("swaps")) S.requests.filter(function(r){ return r.kind === "swap" && r.to === ME && r.state === "pending" && r.stage === 1; }).forEach(function(r){ var x = slot(r.slot); if (!x) return; var sv = svc(x.sid);
+    body += '<div class="card" style="margin-top:16px"><div class="t" style="font:500 17px/22px var(--font)">' + esc(r.from) + ' asks to swap</div><div class="small">You take ' + esc(x.role) + ', ' + dShort(sv.date) + ' ' + sv.svc + '</div>' + (r.note ? '<p style="margin:8px 0 0;font-size:15px">"' + esc(r.note) + '"</p>' : '') + '<div class="btns two"><button class="btn sm" style="width:100%" data-a="acceptSwap" data-id="' + r.id + '">Accept</button><button class="btn sm sec" style="width:100%" data-a="declineSwap" data-id="' + r.id + '">Decline</button></div><p class="small" style="margin:8px 0 0">Then your leader approves.</p></div>'; });
+  if (on("onboarding")) todosFor(ME).filter(function(t){ return !(S.todoDone[t.id] || {})[ME]; }).slice(0,1).forEach(function(t){
+    body += '<div class="card" style="margin-top:16px"><div class="small" style="text-transform:uppercase;letter-spacing:.06em;font-weight:600">To do</div><div class="t" style="font:500 17px/22px var(--font);margin-top:2px">' + esc(t.title) + '</div><p style="margin:4px 0 0;font-size:15px">' + esc(t.text) + '</p><div class="btns"><button class="btn sm" style="width:100%" data-a="doneTodo" data-id="' + t.id + '">I\'ve done this</button></div></div>'; });
+  var team = ((today[0] || m[0]) || {}).team || teamsOf(ME)[0];
+  if (team) {
+    var lead = LEADERS[team];
+    if (lead && lead !== ME) body += '<h3 class="h7">Message your leader on duty</h3><button class="btn w7" data-a="dmWith" data-id="' + esc(lead) + '">Start chat</button>';
+    else body += '<h3 class="h7">Message your team</h3><button class="btn w7" data-a="openCh" data-id="' + esc("ch:team:" + team) + '">Start chat</button>';
+  }
+  body += '<div class="lbl">Your upcoming serves<a data-a="tab" data-v="sched">View all</a></div>'
+    + (later.length ? '<div class="list7">' + upRows(later, 3) + '</div>' : '<div class="empty">Nothing else coming up.</div>');
+  if (on("openspots")) { var open = openFor(ME);
+    body += '<div class="lbl">Open spots up for grabs<a data-a="push" data-s="vol:pool">View all</a></div>'
+      + (open.length ? '<div class="list7">' + open.slice(0,3).map(openRow).join("") + '</div>' : '<div class="empty">No open spots on your teams.</div>'); }
+  return { head: '', body: body };
+};
+var basePool7 = SCREENS["vol:pool"];
+SCREENS["vol:pool"] = function(o){
+  if (!on("openspots")) return { head: header("Open spots"), body: '<div class="empty">Open spots are turned off.</div>' };
+  return basePool7(o);
+};
+var baseSched7 = SCREENS["vol:sched"];
+SCREENS["vol:sched"] = function(){
+  if (S.volSchedMode !== "mine") return baseSched7();
+  var m = mine();
+  var body = '<div class="seg"><button data-a="volMode" data-v="mine" aria-current="true">My serves</button><button data-a="volMode" data-v="all">Full roster</button></div>'
+    + (m.length ? '<div class="list7">' + upRows(m) + '</div>' : '<div class="empty">No serves coming up.</div>')
+    + '<div class="btns"><button class="btn soft" data-a="ics">Add all to my calendar</button></div>';
+  return { head: header("Schedule"), body: body };
+};
+
+/* ---------- serve details ---------- */
+SCREENS.detail = function(o){
+  var x = slot(o.id); if (!x) return { head: header("Serve details"), body: '<div class="empty">This serve is no longer on the roster.</div>' };
+  wxLoad();
+  var sv = svc(x.sid), me = x.person === ME && S.view === "vol", d = dt(sv.date), info = SVC[sv.svc] || {};
+  var with_ = S.slots.filter(function(y){ return y.sid === x.sid && y.team === x.team && y.id !== x.id; });
+  var body = '<div class="ddate">' + DOW[d.getUTCDay()] + ', ' + MON[d.getUTCMonth()] + ' ' + d.getUTCDate() + (sv.date === TODAY ? ' (Today)' : '') + wx(sv.date) + '</div>' + bigRange(sv.svc)
+    + '<div class="sline wrap">' + dot(x.role) + '<span>' + esc(x.role) + ' | ' + esc(x.team) + ' (' + ORG + ')</span></div>'
+    + '<p class="small" style="margin:8px 0 0">Arrive by ' + esc(svcStart(sv.svc)) + '. ' + esc(info.name || sv.svc) + ' starts ' + esc(info.time || "") + '.</p>'
+    + (x.status === "declined" ? '<div style="margin:10px 0 0">' + statusChip(x) + '</div>' : '') + evBanner(sv.date);
+  if (on("notes") && x.note) body += '<div class="card" style="margin-top:14px"><div class="small" style="text-transform:uppercase;letter-spacing:.06em;font-weight:600">Note from your leader</div><p style="margin:4px 0 0">' + esc(x.note) + '</p></div>';
+  body += '<div class="lbl">Serving with</div>' + (with_.length ? '<div class="list7">' + with_.map(function(y){
+    return '<div class="wrow">' + (y.person ? ava(y.person, 48) : '<span class="ava open" style="width:48px;height:48px">?</span>') + '<div class="um"><div class="wt">' + esc(y.person || "Open spot") + '</div><div class="us">' + esc(rangeTxt(sv.svc)) + '</div><div class="us">' + dot(y.role) + esc(y.role) + ' | ' + esc(y.team) + '</div></div>'
+      + (y.status === "declined" ? statusChip(y) : '') + '</div>'; }).join("") + '</div>' : '<div class="empty">No one else on ' + esc(x.team) + ' for this service.</div>');
+  body += planBlock(sv);
+  ckFor(x.team, sv.svc).forEach(function(k){
+    var done = k.items.filter(function(_, i){ return S.ticks[sv.id + "|" + k.id + "|" + i]; }).length;
+    body += '<div class="lbl">' + esc(k.title) + '<span class="small" style="font-size:15px">' + done + '/' + k.items.length + '</span></div><div class="grp">' + k.items.map(function(t, i){ var key = sv.id + "|" + k.id + "|" + i, tk = S.ticks[key];
+      return '<label class="row tap"><input type="checkbox" data-a="tick" data-k="' + key + '"' + (tk ? ' checked' : '') + ' style="width:20px;height:20px;accent-color:var(--accent)"><div class="m"><div class="t" style="font-weight:400">' + esc(t) + '</div>' + (tk ? '<div class="s">Done by ' + esc(tk.by) + ' · ' + esc(tk.at) + '</div>' : '') + '</div></label>'; }).join("") + '</div>';
+  });
+  if (me) body += '<div class="btns"><button class="btn soft" data-a="ics" data-id="' + x.id + '">Add to calendar</button></div>';
+  var foot = me && x.status !== "declined" ? '<div class="foot7"><button class="btn" data-a="sheet" data-s="cover" data-id="' + x.id + '">Request Coverage</button></div>' : '';
+  return { head: header("Serve details"), body: body, foot: foot, noTabs: !!foot };
+};
+
+/* ---------- Messaging: channels, direct messages, shout-outs ---------- */
+function chatOf(id){ return S.chats.filter(function(c){ return c.id === id; })[0]; }
+function ensureChat(id, name, extra){ var c = chatOf(id); if (!c) { c = { id: id, name: name, msgs: [] }; for (var k in extra) c[k] = extra[k]; S.chats.push(c); } return c; }
+function rolesOf(p){ var r = []; S.slots.forEach(function(x){ if (x.person === p && r.indexOf(x.role) < 0) r.push(x.role); }); return r.sort(); }
+function chans(){
+  var me = meName(), admin = S.view === "admin", out = [];
+  if (!admin) rolesOf(me).forEach(function(r){ out.push({ id: "ch:role:" + r, name: r, kind: "role" }); });
+  (admin ? Object.keys(POOL) : teamsOf(me)).forEach(function(t){ out.push({ id: "ch:team:" + t, name: t, kind: "team" }); });
+  if (on("shoutouts")) out.push({ id: "shouts", name: "Team shout-outs", kind: "shouts" });
+  out.push({ id: "ch:all", name: ORG, kind: "all" });
+  return out;
+}
+function chIcon(ch){
+  if (ch.kind === "role") return '<span class="cic" style="background:' + PAL[hashN(ch.name) % PAL.length] + ';color:#2B2B2F">' + esc(ch.name.charAt(0).toUpperCase()) + '</span>';
+  return '<span class="cic" style="background:' + CH_COLOR[ch.kind] + '">' + CH_ICON[ch.kind] + '</span>';
+}
+function lastAt(c){ var l = c && c.msgs[c.msgs.length - 1]; return (l && l.at) || 0; }
+function lastLine(c, empty){ var l = c && c.msgs[c.msgs.length - 1]; return l ? esc(l.who) + ': ' + esc(l.t) : empty; }
+function dmOther(c){ var me = meName(); return c.dm[0] === me ? c.dm[1] : c.dm[0]; }
+function annCard(a){ return '<div class="card ann" style="margin-bottom:10px"><div style="display:flex;gap:10px;align-items:center">' + ava(a.who, 36) + '<div><div class="t">' + esc(a.who) + '</div><div class="small">To ' + esc(a.to) + ' · ' + esc(a.when) + '</div></div></div><div class="t" style="margin-top:8px">' + esc(a.title) + '</div><p>' + esc(a.text) + '</p></div>'; }
+function msgs7(){
+  var body = '<div class="seg"><button data-a="msgTab" data-v="chats"' + (S.msgTab !== "ann" ? ' aria-current="true"' : '') + '>Messages</button><button data-a="msgTab" data-v="ann"' + (S.msgTab === "ann" ? ' aria-current="true"' : '') + '>Announcements</button></div>';
+  if (S.msgTab === "ann") {
+    var sh = visibleShouts(), an = visibleAnns();
+    if (S.view === "admin") body += '<div class="btns" style="margin:0 0 12px"><button class="btn soft" data-a="sheet" data-s="announce">New announcement</button></div>';
+    body += sh.map(shoutCard).join("") + an.map(function(a){ return annCard(a); }).join("");
+    if (!sh.length && !an.length) body += '<div class="empty">No announcements yet.</div>';
+    return body;
+  }
+  if (on("shoutouts")) body += '<button class="scard7" data-a="sheet" data-s="shoutPick"><div class="st">🎉 Serve shout-outs</div><div class="ss">Thank someone you served with</div></button>';
+  var me = meName(), rows = [], n = 0;
+  chans().forEach(function(ch){
+    var c = ch.kind === "shouts" ? null : chatOf(ch.id), top = ch.kind === "shouts" ? visibleShouts()[0] : null;
+    var sub = ch.kind === "shouts" ? (top ? esc(top.from) + ' thanked ' + esc(top.to) + '.' : 'No shout-outs yet.') : lastLine(c, 'No messages yet. Send something to the channel.');
+    rows.push({ at: lastAt(c), i: n++, html: '<div class="crow" ' + (ch.kind === "shouts" ? 'data-a="push" data-s="shouts7"' : 'data-a="openCh" data-id="' + esc(ch.id) + '"') + '>' + chIcon(ch) + '<div class="um"><div class="wt">' + esc(ch.name) + '</div>' + (ch.kind !== "all" ? '<div class="us">' + ORG + '</div>' : '') + '<div class="us cl">' + sub + '</div></div></div>' });
+  });
+  S.chats.forEach(function(c){
+    if (c.id.indexOf("ch:") === 0) return;
+    if (c.dm) { if (c.dm.indexOf(me) < 0) return;
+      rows.push({ at: lastAt(c), i: n++, html: '<div class="crow" data-a="push" data-s="chat" data-id="' + esc(c.id) + '">' + ava(dmOther(c), 48) + '<div class="um"><div class="wt">' + esc(dmOther(c)) + '</div><div class="us cl">' + lastLine(c, 'No messages yet.') + '</div></div></div>' });
+      return; }
+    rows.push({ at: lastAt(c), i: n++, html: '<div class="crow" data-a="push" data-s="chat" data-id="' + esc(c.id) + '"><span class="cic" style="background:#8A94A6">' + CH_ICON.team + '</span><div class="um"><div class="wt">' + esc(c.name) + '</div><div class="us cl">' + lastLine(c, 'No messages yet.') + '</div></div></div>' });
+  });
+  rows.sort(function(a, b){ return (b.at - a.at) || (a.i - b.i); });
+  return body + '<div class="lbl sm">Recent messages</div><div class="list7">' + rows.map(function(r){ return r.html; }).join("") + '</div>';
+}
+var COMPOSE = '<button class="ic" data-a="sheet" data-s="compose" aria-label="New conversation">' + PENCIL + '</button>';
+SCREENS["vol:msgs"] = function(){ return { head: header("Messaging", { right: COMPOSE }), body: msgs7() }; };
+SCREENS["admin:msgs"] = function(){ return { head: header("Messaging", { right: COMPOSE }), body: msgs7() }; };
+SCREENS.chat = function(o){
+  var c = chatOf(o.id); if (!c) return { head: header("Chat"), body: '<div class="empty">This chat is gone.</div>' };
+  var me = meName(), title = c.dm ? dmOther(c) : c.name;
+  var sub = c.dm ? 'Direct message' : c.id.indexOf("ch:") === 0 ? 'Channel · ' + ORG : c.auto ? 'Made from the schedule' : 'Group chat';
+  var body = '<p class="small" style="text-align:center;margin:6px 0 10px">' + esc(sub) + '</p>' + (c.msgs.length ? c.msgs.map(function(m){ return '<div class="bubble ' + (m.who === me ? 'me' : 'them') + '">' + (m.who === me ? '' : '<small>' + esc(m.who) + '</small>') + esc(m.t) + '</div>'; }).join("") : '<div class="empty">No messages yet. Say hello.</div>');
+  return { head: header(title), body: body, foot: '<form class="compose" data-a="send" data-id="' + esc(c.id) + '"><input name="t" placeholder="Message" aria-label="Message" autocomplete="off"><button aria-label="Send">↑</button></form>', noTabs: true };
+};
+SCREENS.shouts7 = function(){
+  var sh = visibleShouts();
+  return { head: header("Team shout-outs"), body: '<div class="btns" style="margin:4px 0 14px"><button class="btn soft" data-a="sheet" data-s="shoutPick">Send a shout-out</button></div>' + (sh.length ? sh.map(shoutCard).join("") : '<div class="empty">No shout-outs yet.</div>') };
+};
+A.openCh = function(d){
+  var ch = chans().filter(function(c){ return c.id === d.id; })[0];
+  var name = ch ? ch.name : d.id === "ch:all" ? ORG : String(d.id).replace(/^ch:[a-z]+:/, "");
+  ensureChat(d.id, name, { channel: true }); S.sheet = null; push("chat", { id: d.id });
+};
+A.dmWith = function(d){
+  var me = meName(), p = d.id; if (!me || !p || p === me) return;
+  var pair = [me, p].sort(), id = "dm:" + pair.join("|");
+  ensureChat(id, p, { dm: pair }); S.sheet = null; push("chat", { id: id });
+};
+SHEETS.compose = function(){
+  return '<div class="as"><div class="ash">Start a new conversation</div>' + (S.view === "admin" ? '<button data-a="sheet" data-s="announce">New announcement</button>' : '')
+    + '<button data-a="sheet" data-s="newDm">New direct message</button><button data-a="sheet" data-s="newCh">New channel message</button></div><button class="ascancel" data-a="closeSheet">Cancel</button>';
+};
+SHEETS.newDm = function(){ var me = meName();
+  return '<h4>New direct message</h4><p class="s">Only you and they can see it.</p><div class="grp">' + everyone().filter(function(p){ return p !== me; }).sort().map(function(p){ return '<div class="row tap" data-a="dmWith" data-id="' + esc(p) + '">' + ava(p, 36) + '<div class="m"><div class="t">' + esc(p) + '</div><div class="s">' + esc(teamsOf(p).join(" · ")) + '</div></div><span class="chev">›</span></div>'; }).join("") + '</div>';
+};
+SHEETS.newCh = function(){
+  return '<h4>New channel message</h4><p class="s">Everyone in the channel sees it.</p><div class="grp">' + chans().filter(function(c){ return c.kind !== "shouts"; }).map(function(ch){ return '<div class="row tap" data-a="openCh" data-id="' + esc(ch.id) + '">' + chIcon(ch) + '<div class="m"><div class="t">' + esc(ch.name) + '</div></div><span class="chev">›</span></div>'; }).join("") + '</div>';
+};
+SHEETS.shoutPick = function(){
+  var me = meName(), people = [];
+  if (S.view === "admin") people = everyone();
+  else {
+    var past = S.slots.filter(function(x){ return x.person === me && svc(x.sid) && svc(x.sid).date <= TODAY; }).sort(function(a, b){ return svc(a.sid).date < svc(b.sid).date ? 1 : -1; })[0];
+    if (past) S.slots.forEach(function(y){ if (y.sid === past.sid && y.team === past.team && y.person && people.indexOf(y.person) < 0) people.push(y.person); });
+    if (people.length < 2) teamsOf(me).forEach(function(t){ (POOL[t] || []).forEach(function(p){ if (people.indexOf(p) < 0) people.push(p); }); });
+  }
+  people = people.filter(function(p){ return p !== me; }).sort();
+  return '<h4>Who do you want to thank?</h4><p class="s">The shout-out shows in Team shout-outs.</p><div class="grp">' + (people.length ? people.map(function(p){ return '<div class="row tap" data-a="sheet" data-s="shout" data-id="' + esc(p) + '">' + ava(p, 36) + '<div class="m"><div class="t">' + esc(p) + '</div><div class="s">' + esc(teamsOf(p).join(" · ")) + '</div></div><span class="chev">›</span></div>'; }).join("") : '<div class="empty">No one to thank yet.</div>') + '</div>';
+};
+
+/* ---------- leader screens ---------- */
+var baseDash7 = SCREENS["admin:dash"];
+SCREENS["admin:dash"] = function(){
+  wxLoad();
+  var r = baseDash7(), m = r.body.match(/^<p class="small"[^>]*>[^<]*<\/p><h2 class="big">([\s\S]*?)<\/h2>/);
+  var band = '<div class="band"><div class="btop"><span class="org">HCC · All ministries</span>' + bellBtn() + '</div><div class="bdate">' + upperDate(TODAY) + wx(TODAY) + '</div><div class="bgreet">' + greet() + ',<br>' + esc(ME || "Leader") + '.</div>' + (m ? '<div class="bhead sm">' + m[1] + '</div>' : '') + '</div>';
+  r.body = band + (m ? r.body.slice(m[0].length) : r.body); r.head = ''; return r;
+};
+var baseMore7 = SCREENS["admin:more"];
+SCREENS["admin:more"] = function(){
+  var r = baseMore7(), g = '<div class="lbl">Services</div><div class="grp">' + row("Service times", "Arrive, start and end times on everyone's serves", "push", "svcTimes") + '</div>';
+  r.body = r.body.indexOf('<div class="lbl">This phone</div>') >= 0 ? r.body.replace('<div class="lbl">This phone</div>', g + '<div class="lbl">This phone</div>') : r.body + g; return r;
+};
+SCREENS.svcTimes = function(){
+  var body = '<p class="small" style="margin:8px 0 0">Shown on everyone\'s serves as arrive → end. Write times like 9:00 AM.</p>' + Object.keys(SVC).map(function(k){ var x = SVC[k], i = k.replace(/\W/g, "");
+    return '<div class="lbl">' + esc(x.name || k) + '</div><div class="three"><div><label class="fl" for="c' + i + '">Arrive</label><input class="field" id="c' + i + '" value="' + esc(x.call || "") + '"></div><div><label class="fl" for="t' + i + '">Starts</label><input class="field" id="t' + i + '" value="' + esc(x.time || "") + '"></div><div><label class="fl" for="e' + i + '">Ends</label><input class="field" id="e' + i + '" value="' + esc(svcEnd(k)) + '"></div></div>'; }).join("")
+    + '<div class="btns"><button class="btn" data-a="saveTimes">Save</button></div>';
+  return { head: header("Service times", { right: '<button class="ic" data-a="sheet" data-s="newSvc" aria-label="Add a service" style="font-size:30px">+</button>' }), body: body };
+};
+A.saveTimes = function(){
+  var bad = 0;
+  Object.keys(SVC).forEach(function(k){ var i = k.replace(/\W/g, ""), x = SVC[k];
+    [["c","call"],["t","time"],["e","end"]].forEach(function(f){ var el = document.getElementById(f[0] + i); if (!el) return;
+      var v = el.value.trim().toUpperCase().replace(/\s+/g, " ").replace(/^(\d{1,2}:\d{2})(AM|PM)$/, "$1 $2");
+      if (!/^\d{1,2}:\d{2} (AM|PM)$/.test(v)) { bad++; return; } x[f[1]] = v; }); });
+  toast(bad ? "Some times weren't saved. Write them like 9:00 AM." : "Service times saved."); render.same = true; render();
+};
+
+/* no Confirm step (Nov 15): anyone on the roster counts as confirmed */
+function noPending(){ (S.slots || []).forEach(function(x){ if (x.person && x.status === "pending") x.status = "confirmed"; }); }
+var baseEnsure7 = ensureShape;
+ensureShape = function(){ baseEnsure7(); noPending(); };
+SHEETS.cover = function(o){ var x = slot(o.id), sv = svc(x.sid);
+  return '<h4>Request Coverage</h4><p class="s">' + esc(x.role) + ', ' + dShort(sv.date) + ' · ' + esc(rangeTxt(sv.svc)) + '</p><div class="grp">'
+    + (on("swaps") ? '<div class="row tap" data-a="sheet" data-s="swap" data-id="' + x.id + '"><div class="m"><div class="t">Swap with someone</div><div class="s">They take this, you take one of theirs</div></div><span class="chev">›</span></div>' : '')
+    + '<div class="row tap" data-a="sheet" data-s="cant" data-id="' + x.id + '"><div class="m"><div class="t">Ask my leader to find someone</div><div class="s">Your leader is told right away</div></div><span class="chev">›</span></div></div>'
+    + '<p class="small mt">Your leader approves before anything changes.</p>'; };
+
+/* switch: "Services I usually serve" on Availability (Nov 15) */
+/* Usual services was removed from Availability (Nov 16, user comment "remove this section"); leaders see everyone as available. */
+var baseAvail7 = SCREENS.avail;
+SCREENS.avail = function(o){ var r = baseAvail7(o);
+  var i = r.body.indexOf('<div class="lbl">Blockout dates'); if (i > 0) r.body = r.body.slice(i); return r; };
+var baseFill7 = SHEETS.fill;
+SHEETS.fill = function(o){ var keep = S.regularBy; S.regularBy = tempOverlay({}, o); try { return baseFill7(o); } finally { S.regularBy = keep; } };
+/* search by name in the pick-someone list (Nov 16) */
+SHEETS.fill = (function(base){ return function(o){ var out = base(o);
+  return out.replace(/(<div class="lbl"[^>]*>)(?:Find who's available|Pick someone)(<\/div>)(<div class="grp")/, '$1Assign volunteer$2<div class="tsearch" style="margin:6px 0 8px">' + SRCH + '<input id="fillSearch" type="search" placeholder="Search by name" aria-label="Search by name" autocomplete="off"></div>$3 id="fillList"')
+    .replace(/(<\/div>)(<label class="fl" for="spotNote"|<div class="btns)/, function(m, a, b){ return a + fillOthers(o) + '<p class="small" id="fillNone" hidden>No one by that name.</p>' + b; }); }; })(SHEETS.fill);
+/* search finds anyone at church, not just this team (Nov 16): others show only while you type */
+function fillOthers(o){ var x = slot(o.id), sv = x && svc(x.sid); if (!x || !sv) return '';
+  var team = POOL[x.team] || [], rest = everyone().filter(function(p){ return team.indexOf(p) < 0; }); if (!rest.length) return '';
+  return '<div class="lbl" id="fillOthersLbl" hidden>Not on ' + esc(x.team) + '</div><div class="grp" id="fillOthers" hidden>' + rest.map(function(p){
+    var st = blockedOn(p, sv) ? ["Away","c-late"] : (servingAt(sv.id, p) && x.person !== p) ? ["Already serving","c-warn"] : ["Available","c-ok"], ts = teamsOf(p);
+    return '<div class="row tap" data-a="assign" data-id="' + x.id + '" data-p="' + esc(p) + '" hidden><span class="av g">' + initials(p) + '</span><div class="m"><div class="t">' + esc(p) + (p === x.person ? ' ✓' : '') + '</div><div class="s">' + esc(ts.length ? ts.join(" · ") : "Not on a team yet") + '</div></div><span class="chip ' + st[1] + '">' + st[0] + '</span></div>'; }).join("") + '</div>'; }
+app.addEventListener("input", function(e){
+  if (!e.target || e.target.id !== "fillSearch") return;
+  var q = e.target.value.trim().toLowerCase(), n = 0;
+  app.querySelectorAll('#fillList .row[data-a="assign"]').forEach(function(r){ var hit = !q || (r.dataset.p || "").toLowerCase().indexOf(q) >= 0; r.hidden = !hit; if (hit) n++; });
+  var m = 0; app.querySelectorAll('#fillOthers .row[data-a="assign"]').forEach(function(r){ var hit = !!q && (r.dataset.p || "").toLowerCase().indexOf(q) >= 0; r.hidden = !hit; if (hit) m++; });
+  var og = document.getElementById("fillOthers"), ol = document.getElementById("fillOthersLbl"); if (og) og.hidden = !m; if (ol) ol.hidden = !m;
+  var none = document.getElementById("fillNone"); if (none) none.hidden = n + m > 0;
+});
+
+/* dashboard counts open their list (Nov 15) */
+SHEETS.statList = function(o){
+  var sv = dashSvc(), st = o.id, T = { confirmed: "Confirmed", open: "Open spots", declined: "Can't make it" };
+  var list = S.slots.filter(function(x){ return x.sid === sv.id && (st === "open" ? !x.person || x.status === "open" : x.person && x.status === st); })
+    .sort(function(a, b){ return (a.team + a.role).localeCompare(b.team + b.role); });
+  return '<h4>' + T[st] + '</h4><p class="s">' + esc(SVC[sv.svc].name) + ' · ' + dShort(sv.date) + '</p>'
+    + (list.length ? '<div class="grp">' + list.map(function(x){
+        var act = st === "confirmed" ? 'data-a="push" data-s="person" data-id="' + esc(x.person) + '"' : 'data-a="sheet" data-s="fill" data-id="' + x.id + '"';
+        return '<div class="row tap" ' + act + '>' + (x.person ? ava(x.person, 36) : '<span class="ava open" style="width:36px;height:36px">?</span>') + '<div class="m"><div class="t">' + esc(st === "open" ? x.role : x.person) + '</div><div class="s">' + (st === "open" ? '' : esc(x.role) + ' | ') + esc(x.team) + '</div></div>' + (st === "confirmed" ? '' : '<span class="chip c-acc">Fill</span>') + '<span class="chev">›</span></div>'; }).join("") + '</div>'
+      : '<div class="empty">' + (st === "open" ? "Every spot is filled." : st === "declined" ? "No one has said they can't make it." : "No one yet.") + '</div>');
+};
+
+/* add a service from Service times (Nov 15) */
+var DAYS7 = ["Sunday","Monday","Tuesday","Wednesday","Thursday","Friday","Saturday"];
+SHEETS.newSvc = function(){
+  return '<h4>Add a service</h4><p class="s">It repeats every week on the day you pick. New dates start as drafts until you publish them.</p><div class="svcf">'
+    + '<label class="fl" for="nsName">Name</label><input class="field" id="nsName" placeholder="Like: Friday Prayer">'
+    + '<label class="fl" for="nsDay">Day</label><select class="field" id="nsDay">' + DAYS7.map(function(d, i){ return '<option value="' + i + '"' + (i === 5 ? ' selected' : '') + '>' + d + '</option>'; }).join("") + '</select>'
+    + '<div class="three"><div><label class="fl" for="nsC">Arrive</label><input class="field" id="nsC" placeholder="6:30 PM"></div><div><label class="fl" for="nsT">Starts</label><input class="field" id="nsT" placeholder="7:00 PM"></div><div><label class="fl" for="nsE">Ends</label><input class="field" id="nsE" placeholder="8:30 PM"></div></div>'
+    + '<label class="fl" for="nsLike">Positions</label><select class="field" id="nsLike">' + Object.keys(SVC).map(function(k){ return '<option value="' + esc(k) + '">Same as ' + esc(SVC[k].name || k) + '</option>'; }).join("") + '</select>'
+    + '</div><div class="btns"><button class="btn" data-a="addSvc">Add service</button><button class="btn sec" data-a="closeSheet">Cancel</button></div>';
+};
+function fixT(v){ v = String(v || "").trim().toUpperCase().replace(/\s+/g, " ").replace(/^(\d{1,2}:\d{2})(AM|PM)$/, "$1 $2"); return /^\d{1,2}:\d{2} (AM|PM)$/.test(v) ? v : ""; }
+A.addSvc = function(){
+  var g = function(id){ return (document.getElementById(id) || {}).value || ""; };
+  var name = g("nsName").trim(), day = +g("nsDay"), call = fixT(g("nsC")), time = fixT(g("nsT")), end = fixT(g("nsE")), like = g("nsLike");
+  if (!name) { toast("Give the service a name."); render(); return; }
+  if (!time) { toast("Write the start time like 7:00 PM."); render(); return; }
+  if (Object.keys(SVC).some(function(k){ return (SVC[k].name || k).toLowerCase() === name.toLowerCase(); })) { toast("There's already a service called " + name + "."); render(); return; }
+  var code = name, n = 2; while (SVC[code]) code = name + " " + n++;
+  SVC[code] = { name: name, call: call || time, time: time, end: end || fmtMins(minsOf(time) + 120), day: DAYS7[day] };
+  if (like) Object.keys(ROLES).forEach(function(t){ if (ROLES[t][like]) ROLES[t][code] = ROLES[t][like].slice(); });
+  var last = S.services.reduce(function(m, v){ return v.date > m ? v.date : m; }, TODAY), d = dt(TODAY), made = 0;
+  var stop = dt(last); if (stop - d < 27 * 864e5) stop = new Date(d.getTime() + 27 * 864e5);
+  for (; d <= stop; d = new Date(d.getTime() + 864e5)) { if (d.getUTCDay() !== day) continue;
+    var iso = d.toISOString().slice(0, 10), sv = { id: iso + "|" + code, date: iso, svc: code, published: false }; S.services.push(sv); made++;
+    Object.keys(ROLES).forEach(function(t){ var c = {}; (ROLES[t][code] || []).forEach(function(r){ var k = sv.id + "|" + t + "|" + r; c[k] = (c[k] || 0) + 1;
+      S.slots.push({ id: k + "|" + (c[k] - 1), sid: sv.id, team: t, role: r, person: null, status: "open", dirty: true }); }); }); }
+  S.services.sort(function(a, b){ return a.date < b.date ? -1 : a.date > b.date ? 1 : 0; });
+  S.sheet = null; toast(name + " added: " + made + " dates as drafts. Fill them and publish from Schedule."); render.same = true; render();
+};
+
+/* dashboard shows the next service of any kind (Nov 15), skipping today's ones that have ended */
+dashSvc = function(){
+  var now = new Date(Date.now() + 330 * 60000), nowM = now.getUTCHours() * 60 + now.getUTCMinutes();
+  function st(sv){ var c = SVC[sv.svc] || {}; try { return minsOf(c.time || "12:00 AM"); } catch (e) { return 0; } }
+  function en(sv){ var c = SVC[sv.svc] || {}; try { return c.end ? minsOf(c.end) : st(sv) + 120; } catch (e) { return st(sv) + 120; } }
+  var u = upc().filter(function(sv){ return sv.date > TODAY || en(sv) > nowM; });
+  if (!u.length) u = upc();
+  u = u.slice().sort(function(a, b){ return a.date < b.date ? -1 : a.date > b.date ? 1 : st(a) - st(b); });
+  return u[0];
+};
+
+/* Team page: search and add people (Nov 16) */
+var TCOL = PAL;
+var SRCH = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><circle cx="10.5" cy="10.5" r="6.5"/><path d="M15.5 15.5 21 21"/></svg>';
+function teamPositions(t){ var a = []; Object.keys(ROLES[t] || {}).forEach(function(k){ (ROLES[t][k] || []).forEach(function(r){ if (a.indexOf(r) < 0) a.push(r); }); }); return a; }
+function leadsOf(p){ return Object.keys(LEADERS).filter(function(t){ return LEADERS[t] === p; }); }
+var baseContacts8 = SCREENS.contacts;
+SCREENS.contacts = function(o){
+  if (S.view !== "admin") return baseContacts8(o);
+  var people = everyone().concat(Object.keys(LEADERS).map(function(t){ return LEADERS[t]; })).filter(function(p, i, a){ return p && a.indexOf(p) === i; }).sort(function(x, y){ return x.toLowerCase() < y.toLowerCase() ? -1 : 1; });
+  var body = '<div class="tsearch">' + SRCH + '<input id="teamSearch" type="search" placeholder="Search" aria-label="Search people" autocomplete="off"></div>'
+    + '<div class="small" style="margin:0 0 4px">' + people.length + ' people</div><div class="list7" id="teamList">'
+    + people.map(function(p){ var t = teamsOf(p), l = leadsOf(p);
+      return '<div class="trow" data-a="push" data-s="person" data-id="' + esc(p) + '" data-n="' + esc(p.toLowerCase()) + '">' + ava(p, 48) + '<div class="m"><div class="t">' + esc(p) + '</div><div class="s">' + esc((l.length ? "Leads " + l.join(", ") + (t.length ? " · " : "") : "") + (t.join(", ") || (l.length ? "" : "No team yet"))) + '</div></div></div>'; }).join("")
+    + '</div><div class="empty" id="teamNone" hidden>No one matches.</div>';
+  return { head: header("Team", { right: '<button class="ic" data-a="sheet" data-s="addPerson" aria-label="Add a person" style="font-size:30px">+</button>' }), body: body };
+};
+app.addEventListener("input", function(e){
+  if (!e.target || e.target.id !== "teamSearch") return;
+  var q = e.target.value.trim().toLowerCase(), n = 0;
+  app.querySelectorAll("#teamList .trow").forEach(function(r){ var hit = !q || r.dataset.n.indexOf(q) >= 0; r.hidden = !hit; if (hit) n++; });
+  var none = document.getElementById("teamNone"); if (none) none.hidden = n > 0;
+});
+function teamPicker(sel){
+  return '<div class="lbl sm">Teams</div><p class="small" style="margin:0 0 4px">They can be put in any position on the teams you tick.</p><div class="tlist">'
+    + Object.keys(POOL).map(function(t, i){ var pos = teamPositions(t);
+      return '<label class="tpick"><span class="tic" style="background:' + TCOL[i % TCOL.length] + '">' + esc(t.charAt(0)) + '</span><span class="m"><span class="t" style="display:block">' + esc(t) + '</span><span class="s" style="display:block">' + esc(pos.slice(0, 4).join(", ") + (pos.length > 4 ? " and " + (pos.length - 4) + " more" : "")) + '</span></span><input type="checkbox" name="pTeam" value="' + esc(t) + '"' + (sel.indexOf(t) >= 0 ? ' checked' : '') + '></label>'; }).join("") + '</div>';
+}
+SHEETS.addPerson = function(){
+  return '<h4>Add a person</h4><p class="s">They show up on Team and can be put on the roster right away.</p><div class="pform">'
+    + '<div class="two"><div><label class="fl" for="apFirst">First name</label><input class="field" id="apFirst" autocomplete="off"></div><div><label class="fl" for="apLast">Last name</label><input class="field" id="apLast" autocomplete="off"></div></div>'
+    + teamPicker([]) + '</div><div class="btns"><button class="btn" data-a="addPerson">Add person</button><button class="btn sec" data-a="closeSheet">Cancel</button></div>';
+};
+SHEETS.editTeams = function(o){
+  return '<h4>' + esc(o.id) + '\'s teams</h4><p class="s">Untick a team to take them off it. Serves already on the roster stay.</p>' + teamPicker(teamsOf(o.id))
+    + '<div class="btns"><button class="btn" data-a="saveTeams" data-id="' + esc(o.id) + '">Save</button><button class="btn sec" data-a="closeSheet">Cancel</button></div>';
+};
+function pickedTeams(){ return Array.prototype.map.call(app.querySelectorAll('input[name="pTeam"]:checked'), function(i){ return i.value; }); }
+function setTeams(p, ts){ Object.keys(POOL).forEach(function(t){ var a = POOL[t], i = a.indexOf(p); if (ts.indexOf(t) >= 0) { if (i < 0) a.push(p); } else if (i >= 0) a.splice(i, 1); }); }
+A.addPerson = function(){
+  var f = (document.getElementById("apFirst").value || "").trim().replace(/\s+/g, " "), l = (document.getElementById("apLast").value || "").trim().replace(/\s+/g, " ");
+  if (!f) { toast("Add a first name."); render(); return; }
+  var name = l ? f + " " + l : f, ts = pickedTeams();
+  var all = everyone().concat(Object.keys(LEADERS).map(function(t){ return LEADERS[t]; }));
+  if (all.some(function(p){ return p && p.toLowerCase() === name.toLowerCase(); })) { toast(name + " is already on Team. Add a last name to tell them apart."); render(); return; }
+  if (!S.cfg) S.cfg = {}; if (!S.cfg.people) S.cfg.people = PEOPLE; if (!S.cfg.pool) S.cfg.pool = POOL;
+  if (PEOPLE.indexOf(name) < 0) PEOPLE.push(name);
+  setTeams(name, ts);
+  S.sheet = null; toast(name + " added" + (ts.length ? " to " + ts.join(", ") + "." : ". Add them to a team from their page so you can roster them.")); render.same = true; render();
+};
+A.saveTeams = function(d){ var p = d.id, ts = pickedTeams(); if (PEOPLE.indexOf(p) < 0) PEOPLE.push(p); setTeams(p, ts); S.sheet = null; toast(p + "'s teams saved."); render.same = true; render(); };
+var basePerson8 = SCREENS.person;
+SCREENS.person = function(o){
+  var r = basePerson8(o);
+  if (S.view === "admin") r.body = r.body.replace('<div class="lbl">Coming up</div>', '<div class="btns"><button class="btn sec" data-a="sheet" data-s="editTeams" data-id="' + esc(o.id) + '">Edit teams</button></div><div class="lbl">Coming up</div>');
+  return r;
+};
+
+/* Services and roles: edit teams and positions in the app (Nov 16) */
+var baseMore8 = SCREENS["admin:more"];
+SCREENS["admin:more"] = function(){
+  var r = baseMore8();
+  r.body = r.body.replace(/<div class="row tap" data-a="toast" data-s="Services and roles[^>]*>/, '<div class="row tap" data-a="push" data-s="svcRoles">');
+  return r;
+};
+function rolesCfg(){ if (!S.cfg) S.cfg = {}; if (!S.cfg.roles) S.cfg.roles = ROLES; if (!S.cfg.pool) S.cfg.pool = POOL; }
+SCREENS.svcRoles = function(){
+  var body = '<p class="small" style="margin:12px 0 4px">Tap a team to add or remove positions. Service times are under More &gt; Service times.</p><div class="list7">'
+    + Object.keys(ROLES).map(function(t, i){ var per = Object.keys(SVC).filter(function(k){ return (ROLES[t][k] || []).length; }).map(function(k){ return k + " " + ROLES[t][k].length; });
+      return '<div class="tpick" data-a="push" data-s="teamRoles" data-id="' + esc(t) + '"><span class="tic" style="background:' + TCOL[i % TCOL.length] + '">' + esc(t.charAt(0)) + '</span><span class="m"><span class="t" style="display:block">' + esc(t) + '</span><span class="s" style="display:block">' + esc(per.join(" · ") || "No positions yet") + ' · ' + (POOL[t] || []).length + ' people</span></span><span class="chev">›</span></div>'; }).join("") + '</div>';
+  return { head: header("Services and roles", { right: '<button class="ic" data-a="sheet" data-s="addTeam" aria-label="Add a team" style="font-size:30px">+</button>' }), body: body };
+};
+SCREENS.teamRoles = function(o){
+  var t = o.id, R = ROLES[t] || {};
+  var body = Object.keys(SVC).map(function(k, si){ var list = R[k] || [];
+    return '<div class="lbl">' + esc(SVC[k].name || k) + '</div><div class="grp">'
+      + (list.length ? list.map(function(r, i){ return '<div class="row"><span class="m"><span class="t">' + dot(r) + esc(r) + '</span></span><button class="btn sm sec" style="width:auto;padding:0 14px" data-a="rmRole" data-id="' + esc(t) + '" data-v="' + esc(k) + '" data-p="' + i + '">Remove</button></div>'; }).join("") : '<div class="row"><span class="m"><span class="s">No positions on ' + esc(SVC[k].name || k) + ' yet.</span></span></div>')
+      + '<div class="row"><input class="field" id="ar' + si + '" placeholder="New position, like Bass" style="flex:1;min-height:42px"><button class="btn sm" style="width:auto;padding:0 16px" data-a="addRole" data-id="' + esc(t) + '" data-v="' + esc(k) + '" data-p="' + si + '">Add</button></div></div>'; }).join("")
+    + '<p class="small mt">Adding a position puts an open spot on every upcoming ' + esc(t) + ' service of that kind. Removing one takes away an open spot; anyone already in that position stays on the roster.</p>';
+  return { head: header(t), body: body };
+};
+SHEETS.addTeam = function(){
+  return '<h4>Add a team</h4><p class="s">Then add its positions and people.</p><label class="fl" for="atName">Team name</label><input class="field" id="atName" placeholder="Like: Prayer Team" autocomplete="off"><div class="btns"><button class="btn" data-a="addTeam">Add team</button><button class="btn sec" data-a="closeSheet">Cancel</button></div>';
+};
+A.addTeam = function(){
+  var n = (document.getElementById("atName").value || "").trim().replace(/\s+/g, " ");
+  if (!n) { toast("Add a team name."); render(); return; }
+  if (Object.keys(ROLES).concat(Object.keys(POOL)).some(function(t){ return t.toLowerCase() === n.toLowerCase(); })) { toast("There's already a team called " + n + "."); render(); return; }
+  rolesCfg(); ROLES[n] = {}; POOL[n] = [];
+  S.sheet = null; push("teamRoles", { id: n }); toast(n + " added. Add its positions here, and its people from Team.");
+};
+A.addRole = function(d){
+  var t = d.id, k = d.v, el = document.getElementById("ar" + d.p), r = el ? el.value.trim().replace(/\s+/g, " ") : "";
+  if (!r) { toast("Type a position first."); render(); return; }
+  rolesCfg(); if (!ROLES[t]) ROLES[t] = {}; if (!ROLES[t][k]) ROLES[t][k] = []; ROLES[t][k].push(r);
+  var n = 0;
+  upc().filter(function(sv){ return sv.svc === k; }).forEach(function(sv){ var base = sv.id + "|" + t + "|" + r, i = 0; while (S.slots.some(function(x){ return x.id === base + "|" + i; })) i++;
+    S.slots.push({ id: base + "|" + i, sid: sv.id, team: t, role: r, person: null, status: "open", dirty: true }); n++; });
+  toast(r + " added to " + t + (n ? ": " + n + " open spot" + (n > 1 ? "s" : "") + " on upcoming services. Publish from Schedule." : "."));
+  render.same = true; render();
+};
+A.rmRole = function(d){
+  var t = d.id, k = d.v, i = +d.p, list = (ROLES[t] || {})[k] || [], r = list[i]; if (r == null) return;
+  rolesCfg(); list.splice(i, 1);
+  var gone = 0, kept = 0;
+  upc().filter(function(sv){ return sv.svc === k; }).forEach(function(sv){
+    var mine = S.slots.filter(function(x){ return x.sid === sv.id && x.team === t && x.role === r; });
+    var open = mine.filter(function(x){ return !x.person; })[0];
+    if (open) { S.slots.splice(S.slots.indexOf(open), 1); gone++; } else if (mine.length) kept++; });
+  toast(r + " removed" + (gone ? ", " + gone + " open spot" + (gone > 1 ? "s" : "") + " taken off" : "") + (kept ? ". " + kept + " filled spot" + (kept > 1 ? "s" : "") + " stay until you change them on Schedule." : "."));
+  render.same = true; render();
+};
+
+/* Leader PIN checked by the server; phone, email and invites for leaders (Nov 16) */
+var APP_URL = "https://hcc-roster.flat-glade-359b.workers.dev/";
+adminOk = function(){ var k = LS.get("roster.admin"); return !!S.pinHash && !!k && (S.pinHash === "set" || k === S.pinHash); };
+A.pinGo = function(){
+  var p1 = (document.getElementById("pin1").value || "").trim(), e2 = document.getElementById("pin2"), first = !S.pinHash;
+  if (!/^\d{4,8}$/.test(p1)) { toast("Use 4 to 8 digits."); render(); return; }
+  if (first && e2.value.trim() !== p1) { toast("The two PINs don't match."); render(); return; }
+  function open(k, msg){ LS.set("roster.admin", k); CONTACTS = null; toast(msg); S.stack = []; render(); }
+  if (first) { hashPin(p1).then(function(h){ S.pinHash = h; open(h, "PIN saved. Admin is open on this phone."); clearTimeout(saveTimer); saveNow(); }); return; }
+  fetch("/api/unlock", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ pin: p1 }) })
+    .then(function(r){ return r.json().then(function(j){ return { st: r.status, j: j }; }); })
+    .then(function(x){ if (x.j && x.j.ok) open(x.j.key, "Admin is open on this phone.");
+      else { toast(x.st === 429 ? "Too many wrong tries. Wait 15 minutes and try again." : "That PIN isn't right."); render(); } })
+    .catch(function(){ toast("Couldn't check the PIN. Check your connection and try again."); render(); });
+};
+var baseLock8 = A.lockAdmin; A.lockAdmin = function(d, el){ CONTACTS = null; baseLock8(d, el); };
+var CONTACTS = null, contactsBusy = false;
+function contactsKey(){ return LS.get("roster.admin") || ""; }
+function loadContacts(){
+  if (CONTACTS || contactsBusy || !adminOk()) return; contactsBusy = true;
+  fetch("/api/contacts", { headers: { "x-roster-key": contactsKey() } }).then(function(r){ return r.ok ? r.json() : { contacts: {} }; })
+    .then(function(j){ CONTACTS = (j && j.contacts) || {}; contactsBusy = false; render.same = true; render(); })
+    .catch(function(){ CONTACTS = {}; contactsBusy = false; });
+}
+function saveContacts(tries){
+  tries = tries || 0;
+  return fetch("/api/contacts", { method: "PUT", headers: { "content-type": "application/json", "x-roster-key": contactsKey() }, body: JSON.stringify({ contacts: CONTACTS || {} }) })
+    .then(function(r){ if (!r.ok) throw new Error(r.status); })
+    .catch(function(){ if (tries < 2) { clearTimeout(saveTimer); saveNow(); setTimeout(function(){ saveContacts(tries + 1); }, 1500); return; }
+      toast("Phone and email didn't save. Lock and reopen Admin, then try again."); render(); });
+}
+function ct(p){ return (CONTACTS && CONTACTS[p]) || {}; }
+function digits(ph){ var d = String(ph || "").replace(/\D/g, ""); if (d.length === 10) d = "91" + d; if (d.length === 11 && d.charAt(0) === "0") d = "91" + d.slice(1); return d; }
+function okEmail(e){ return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(e); }
+function inviteText(p){ return "Hi " + p.split(" ")[0] + "! You're on the HCC Roster. Open " + APP_URL + " on your phone, pick your name, and you'll see when you're serving. You can add it to your home screen too."; }
+
+/* Add person: email, phone and an Invite option */
+SHEETS.addPerson = function(){
+  return '<h4>Add a person</h4><p class="s">They show up on Team and can be put on the roster right away.</p><div class="pform">'
+    + '<div class="two"><div><label class="fl" for="apFirst">First name</label><input class="field" id="apFirst" autocomplete="off"></div><div><label class="fl" for="apLast">Last name</label><input class="field" id="apLast" autocomplete="off"></div></div>'
+    + '<label class="fl" for="apEmail">Email</label><input class="field" id="apEmail" type="email" inputmode="email" autocomplete="off">'
+    + '<label class="fl" for="apPhone">Phone number</label><input class="field" id="apPhone" type="tel" inputmode="tel" autocomplete="off" placeholder="Like: 98765 43210">'
+    + teamPicker([])
+    + '<label class="chk"><input type="checkbox" id="apInvite" checked><span><b>Invite to Roster</b><small>After adding, pick WhatsApp, text or email to send them the app link from your phone.</small></span></label>'
+    + '</div><p class="small mt">Phone and email are only seen by leaders.</p><div class="btns"><button class="btn" data-a="addPerson">Add person</button><button class="btn sec" data-a="closeSheet">Cancel</button></div>';
+};
+var baseAddPerson8 = A.addPerson;
+A.addPerson = function(d, el){
+  var em = (document.getElementById("apEmail").value || "").trim(), ph = (document.getElementById("apPhone").value || "").trim(), inv = document.getElementById("apInvite").checked;
+  if (em && !okEmail(em)) { toast("That email doesn't look right."); render(); return; }
+  if (ph && digits(ph).length < 10) { toast("That phone number looks too short."); render(); return; }
+  var f = (document.getElementById("apFirst").value || "").trim().replace(/\s+/g, " "), l = (document.getElementById("apLast").value || "").trim().replace(/\s+/g, " "), name = l ? f + " " + l : f;
+  var had = everyone().length;
+  baseAddPerson8(d, el);
+  if (everyone().length === had) return;
+  if (em || ph) { if (!CONTACTS) CONTACTS = {}; CONTACTS[name] = { phone: ph, email: em }; saveContacts(); }
+  if (inv) { S.stack.push({ s: "person", id: name }); S.sheet = { s: "invite", id: name }; render.same = true; render(); }
+};
+SHEETS.invite = function(o){
+  var p = o.id, c = ct(p), w = digits(c.phone), msg = encodeURIComponent(inviteText(p)), links = [];
+  if (w) links.push('<a class="p" data-inv="' + esc(p) + '" href="https://wa.me/' + w + '?text=' + msg + '" target="_blank" rel="noopener">WhatsApp</a>');
+  if (w) links.push('<a class="s" data-inv="' + esc(p) + '" href="sms:+' + w + '?&body=' + msg + '">Text message</a>');
+  if (c.email) links.push('<a class="' + (w ? 's' : 'p') + '" data-inv="' + esc(p) + '" href="mailto:' + encodeURIComponent(c.email) + '?subject=' + encodeURIComponent("You're on the HCC Roster") + '&body=' + msg + '">Email</a>');
+  return '<h4>Invite ' + esc(p) + '</h4><p class="s">Opens a message on your phone with the app link. Nothing is sent until you press send there.</p>'
+    + (links.length ? '<div class="card small" style="color:var(--ink);margin-bottom:12px">' + esc(inviteText(p)) + '</div><div class="invite">' + links.join("") + '</div>'
+      : '<div class="empty">Add a phone number or email for ' + esc(p) + ' first.</div><div class="btns"><button class="btn" data-a="sheet" data-s="editContact" data-id="' + esc(p) + '">Add phone or email</button></div>')
+    + '<div class="btns"><button class="btn sec" data-a="closeSheet">' + (links.length ? 'Done' : 'Not now') + '</button></div>';
+};
+app.addEventListener("click", function(e){
+  var a = e.target.closest && e.target.closest("a[data-inv]"); if (!a) return;
+  var p = a.getAttribute("data-inv"); if (!CONTACTS) CONTACTS = {}; CONTACTS[p] = Object.assign({}, ct(p), { invited: TODAY }); saveContacts();
+});
+SHEETS.editContact = function(o){
+  var p = o.id, c = ct(p);
+  return '<h4>' + esc(p) + '\'s details</h4><p class="s">Only leaders see these.</p>'
+    + '<label class="fl" for="ecEmail">Email</label><input class="field" id="ecEmail" type="email" inputmode="email" autocomplete="off" value="' + esc(c.email || "") + '">'
+    + '<label class="fl" for="ecPhone">Phone number</label><input class="field" id="ecPhone" type="tel" inputmode="tel" autocomplete="off" value="' + esc(c.phone || "") + '">'
+    + '<div class="btns"><button class="btn" data-a="saveContact" data-id="' + esc(p) + '">Save</button><button class="btn sec" data-a="closeSheet">Cancel</button></div>';
+};
+A.saveContact = function(d){
+  var em = (document.getElementById("ecEmail").value || "").trim(), ph = (document.getElementById("ecPhone").value || "").trim();
+  if (em && !okEmail(em)) { toast("That email doesn't look right."); render(); return; }
+  if (ph && digits(ph).length < 10) { toast("That phone number looks too short."); render(); return; }
+  if (!CONTACTS) CONTACTS = {}; CONTACTS[d.id] = Object.assign({}, ct(d.id), { phone: ph, email: em }); saveContacts();
+  S.sheet = null; toast(d.id + "'s details saved."); render.same = true; render();
+};
+
+/* Team list and person page show contact details to leaders */
+var baseContacts9 = SCREENS.contacts;
+SCREENS.contacts = function(o){ if (S.view === "admin") loadContacts(); var r = baseContacts9(o);
+  return r; };
+var basePerson9 = SCREENS.person;
+SCREENS.person = function(o){
+  var r = basePerson9(o), p = o.id; if (S.view !== "admin") return r;
+  loadContacts(); var c = ct(p), w = digits(c.phone);
+  var acts = '<div class="two">' + (w ? '<a class="btn wa" href="https://wa.me/' + w + '" target="_blank" rel="noopener">WhatsApp</a><a class="btn sec" href="tel:+' + w + '">Call</a>'
+    : '<button class="btn wa" data-a="sheet" data-s="editContact" data-id="' + esc(p) + '">WhatsApp</button><button class="btn sec" data-a="sheet" data-s="editContact" data-id="' + esc(p) + '">Call</button>') + '</div>';
+  r.body = r.body.replace(/<div class="two"><button class="btn wa" data-a="toast"[\s\S]*?<\/button><button class="btn sec" data-a="toast"[\s\S]*?<\/button><\/div>/, acts);
+  var info = '<div class="lbl sm">Contact</div>'
+    + (CONTACTS === null ? '<div class="small">Loading…</div>' : '<div class="cline"><span>Phone</span>' + esc(c.phone || "Not added") + '</div><div class="cline"><span>Email</span>' + esc(c.email || "Not added") + '</div>')
+    + '<div class="btns two"><button class="btn sec" data-a="sheet" data-s="editContact" data-id="' + esc(p) + '">Edit details</button><button class="btn soft" data-a="sheet" data-s="invite" data-id="' + esc(p) + '">' + (c.invited ? 'Invite again' : 'Invite to app') + '</button></div>'
+    + (c.invited ? '<p class="small" style="margin:6px 0 0">Invite opened ' + esc(dShort(c.invited)) + '.</p>' : '');
+  r.body = r.body.replace('<div class="btns"><button class="btn sec" data-a="sheet" data-s="editTeams"', info + '<div class="btns"><button class="btn sec" data-a="sheet" data-s="editTeams"');
+  return r;
+};
+
+/* One-off services on chosen dates, like a Mon to Wed revival (Nov 16) */
+function isoAdd(iso, n){ return new Date(dt(iso).getTime() + n * 864e5).toISOString().slice(0, 10); }
+function lastLike(){ var l = S.cfg && S.cfg.lastLike; return l && SVC[l] ? l : SVC["Wed PM"] ? "Wed PM" : Object.keys(SVC)[0]; }
+SHEETS.newOneOff = function(){
+  return '<h4>Add a one-off service</h4><p class="s">For a service on certain dates only, like a revival from Monday to Wednesday. Every date starts as a draft until you publish it.</p><div class="svcf">'
+    + '<label class="fl" for="ooName">Name</label><input class="field" id="ooName" placeholder="Like: Revival">'
+    + '<div class="pform"><div class="two"><div><label class="fl" for="ooFrom">First day</label><input class="field" id="ooFrom" type="date" value="' + TODAY + '" min="' + TODAY + '"></div><div><label class="fl" for="ooTo">Last day</label><input class="field" id="ooTo" type="date" value="' + TODAY + '" min="' + TODAY + '"></div></div></div>'
+    + '<p class="small" style="margin:6px 0 0">Same first and last day for a single service.</p>'
+    + '<p class="small" style="margin:10px 0 0">Times start at 7:00 PM. Change the start and the others move with it.</p>'
+    + '<div class="three"><div><label class="fl" for="ooC">Arrive</label><input class="field" id="ooC" value="6:30 PM" data-auto="1"></div><div><label class="fl" for="ooT">Starts</label><input class="field" id="ooT" value="7:00 PM"></div><div><label class="fl" for="ooE">Ends</label><input class="field" id="ooE" value="9:00 PM" data-auto="1"></div></div>'
+    + '<label class="fl" for="ooLike">Positions</label><select class="field" id="ooLike">' + Object.keys(SVC).map(function(k){ return '<option value="' + esc(k) + '"' + (k === lastLike() ? ' selected' : '') + '>Same as ' + esc(SVC[k].name || k) + '</option>'; }).join("") + '</select>'
+    + '</div><div class="btns"><button class="btn" data-a="addOneOff">Add service</button><button class="btn sec" data-a="closeSheet">Cancel</button></div>'
+    + '<p class="small mt">Happens every week? <a href="#" data-a="sheet" data-s="newSvc" style="color:var(--accent)">Add a weekly service</a> instead.</p>';
+};
+A.addOneOff = function(){
+  var g = function(id){ return (document.getElementById(id) || {}).value || ""; };
+  var name = g("ooName").trim().replace(/\s+/g, " "), from = g("ooFrom"), to = g("ooTo") || from, call = fixT(g("ooC")), time = fixT(g("ooT") || "7:00 PM"), end = fixT(g("ooE")), like = g("ooLike");
+  if (!name) { toast("Give the service a name."); render(); return; }
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(from)) { toast("Pick the first day."); render(); return; }
+  if (from < TODAY) { toast("The first day can't be in the past."); render(); return; }
+  if (to < from) { toast("The last day is before the first day."); render(); return; }
+  if ((dt(to) - dt(from)) / 864e5 > 30) { toast("Keep it to 31 days or fewer. For something every week, add a weekly service."); render(); return; }
+  if (!time) { toast("Write the start time like 8:00 PM."); render(); return; }
+  var code = name, n = 2; while (SVC[code]) code = name + " " + n++;
+  var clash = S.services.some(function(sv){ return sv.svc === code; }); if (clash) { toast("Pick another name."); render(); return; }
+  SVC[code] = { name: name, call: call || fmtMins(minsOf(time) - 30), time: time, end: end || fmtMins(minsOf(time) + 120), oneoff: true };
+  if (like) { if (!S.cfg) S.cfg = {}; S.cfg.lastLike = like; Object.keys(ROLES).forEach(function(t){ if (ROLES[t][like]) ROLES[t][code] = ROLES[t][like].slice(); }); }
+  var made = 0, first = "";
+  for (var iso = from; iso <= to; iso = isoAdd(iso, 1)) {
+    var sv = { id: iso + "|" + code, date: iso, svc: code, published: false }; S.services.push(sv); made++; if (!first) first = sv.id;
+    Object.keys(ROLES).forEach(function(t){ var c = {}; (ROLES[t][code] || []).forEach(function(r){ var k = sv.id + "|" + t + "|" + r; c[k] = (c[k] || 0) + 1;
+      S.slots.push({ id: k + "|" + (c[k] - 1), sid: sv.id, team: t, role: r, person: null, status: "open", dirty: true }); }); }); }
+  S.services.sort(function(a, b){ return a.date < b.date ? -1 : a.date > b.date ? 1 : 0; });
+  S.adminSid = first; S.sheet = null; S.stack = []; S.tab.admin = "sched";
+  toast(name + " added on " + made + " date" + (made > 1 ? "s" : "") + " as drafts. Fill the spots, then publish."); render.same = true; render();
+};
+var baseSched9 = SCREENS["admin:sched"];
+SCREENS["admin:sched"] = function(){
+  var r = baseSched9();
+  if (r && r.head && r.head.indexOf('data-s="newOneOff"') < 0) r.head = r.head.replace(/^<div class="hd">(<span style="width:40px"><\/span>)?/, '<div class="hd"><button class="ic" data-a="sheet" data-s="newOneOff" aria-label="Add a service" style="font-size:30px">+</button>');
+  var sv = svc(S.adminSid);
+  if (r && sv && !sv.published) r.body += '<div class="btns mt"><button class="btn sm danger" style="width:100%" data-a="sheet" data-s="discardSvc">Discard this draft</button></div>';
+  return r;
+};
+/* discard a draft service if plans change (Nov 16): only services never published */
+SHEETS.discardSvc = function(){ var sv = svc(S.adminSid); if (!sv) return '';
+  var on1 = S.slots.filter(function(x){ return x.sid === sv.id && x.person; }).map(function(x){ return x.person; }).filter(function(p, i, a){ return a.indexOf(p) === i; });
+  return '<h4>Discard ' + dShort(sv.date) + ' ' + esc(SVC[sv.svc] && SVC[sv.svc].name || sv.svc) + '?</h4><p class="s">This removes the service and its spots. It was never published, so nobody was told about it.</p>'
+    + (on1.length ? '<div class="card small" style="color:var(--ink)"><b>Already on it:</b> ' + esc(on1.join(", ")) + '. They won\'t be told, since they never saw it.</div>' : '')
+    + '<div class="btns"><button class="btn danger" data-a="discardSvc">Discard draft</button><button class="btn sec" data-a="closeSheet">Keep it</button></div>'; };
+A.discardSvc = function(){ var sv = svc(S.adminSid); if (!sv || sv.published) { S.sheet = null; render(); return; }
+  var gone = {}; S.slots.forEach(function(x){ if (x.sid === sv.id) gone[x.id] = 1; });
+  S.slots = S.slots.filter(function(x){ return x.sid !== sv.id; });
+  S.requests = S.requests.filter(function(q){ return !gone[q.slot]; });
+  S.services = S.services.filter(function(x){ return x.id !== sv.id; });
+  ["plans", "attend", "ticks"].forEach(function(k){ if (S[k]) delete S[k][sv.id]; });
+  var code = sv.svc;
+  if (SVC[code] && SVC[code].oneoff && !S.services.some(function(x){ return x.svc === code; })) { delete SVC[code]; Object.keys(ROLES).forEach(function(t){ delete ROLES[t][code]; }); }
+  var next = S.services.filter(function(x){ return x.date >= sv.date; })[0] || S.services[S.services.length - 1];
+  S.adminSid = next ? next.id : null; S.sheet = null;
+  toast(dShort(sv.date) + " " + (SVC[code] && SVC[code].name || code) + " discarded."); render.same = true; render(); };
+SHEETS.newSvc = (function(base){ return function(o){ return base(o) + '<p class="small mt">Only on certain dates? <a href="#" data-a="sheet" data-s="newOneOff" style="color:var(--accent)">Add a one-off service</a> instead.</p>'; }; })(SHEETS.newSvc);
+
+/* one-off form: last day follows the first day; times start at 7:00 PM, arrive and end follow the start until edited (Nov 16) */
+document.addEventListener("input", function(e){
+  var t = e.target; if (!t || !t.id) return;
+  if (t.id === "ooFrom") { var to = document.getElementById("ooTo"); if (to && /^\d{4}-\d{2}-\d{2}$/.test(t.value)) { to.min = t.value; to.value = t.value; } return; }
+  if (t.id === "ooC" || t.id === "ooE") { t.removeAttribute("data-auto"); return; }
+  if (t.id !== "ooT") return;
+  var v = fixT(t.value); if (!v) return; var m = minsOf(v);
+  var c = document.getElementById("ooC"), en = document.getElementById("ooE");
+  if (c && c.getAttribute("data-auto")) c.value = fmtMins(m - 30);
+  if (en && en.getAttribute("data-auto")) en.value = fmtMins(m + 120);
+});
+document.addEventListener("change", function(e){ var t = e.target; if (t && t.id === "ooFrom") { var to = document.getElementById("ooTo"); if (to && /^\d{4}-\d{2}-\d{2}$/.test(t.value) && to.value !== t.value) { to.min = t.value; to.value = t.value; } } });
+
+/* ===== From the 7shifts videos (Nov 16), each with its own switch ===== */
+FEATS.push(["annmore","More announcement groups","Send to a role, or to the people not serving on a date. Volunteers only see announcements meant for them."]);
+FEATS.push(["seen","Seen counts","Leaders see how many people opened each announcement, like Seen by 3 of 27."]);
+FEATS.push(["annphoto","Photos on announcements","Add one picture to an announcement."]);
+FEATS.push(["levels","Levels","Mark each person as Volunteer, Assistant leader or Leader. It shows on Team and their profile."]);
+FEATS.push(["flags","Flag a spot","Leaders flag a spot with a short reason, like New, needs help. It shows on the schedule."]);
+FEATS.push(["sortsched","Sort the full roster","On Full roster, volunteers sort by time, role, person or team, and can show every team."]);
+/* Temporary availability was removed from the Availability page (Nov 16, user comment "remove this section"). */
+FEATS.push(["notifchan","Phone and email","In Notifications, each kind of message has its own Phone and Email switch."]);
+
+LOCAL.rosterSort = 1; LOCAL.rosterAll = 1;
+function objOf(k){ if (!S[k] || typeof S[k] !== "object" || Array.isArray(S[k])) S[k] = {}; return S[k]; }
+
+/* announcements: who each one is for */
+function allRoles(){ var r = []; Object.keys(ROLES).forEach(function(t){ Object.keys(ROLES[t]).forEach(function(v){ (ROLES[t][v] || []).forEach(function(x){ if (r.indexOf(x) < 0) r.push(x); }); }); }); return r.sort(); }
+function servingIn(sid){ var a = []; S.slots.forEach(function(x){ if (x.sid === sid && x.person && x.status !== "declined" && a.indexOf(x.person) < 0) a.push(x.person); }); return a; }
+function annTo(a){
+  if (a.aud) return servingIn(a.aud);
+  if (a.not) { var on1 = servingIn(a.not); return everyone().filter(function(p){ return on1.indexOf(p) < 0; }); }
+  if (a.role) { var r = []; S.slots.forEach(function(x){ if (x.role === a.role && x.person && r.indexOf(x.person) < 0) r.push(x.person); });
+    if (!r.length) Object.keys(ROLES).forEach(function(t){ var has = Object.keys(ROLES[t]).some(function(v){ return (ROLES[t][v] || []).indexOf(a.role) >= 0; }); if (has) (POOL[t] || []).forEach(function(p){ if (r.indexOf(p) < 0) r.push(p); }); });
+    return r; }
+  if (POOL[a.to]) return POOL[a.to].slice();
+  if (a.to === "Leaders") { var l = []; Object.keys(LEADERS).forEach(function(t){ if (LEADERS[t] && l.indexOf(LEADERS[t]) < 0) l.push(LEADERS[t]); }); Object.keys(objOf("levels")).forEach(function(p){ if (S.levels[p] !== "volunteer" && l.indexOf(p) < 0) l.push(p); }); return l; }
+  return everyone();
+}
+var baseVisAnns = visibleAnns;
+visibleAnns = function(){ if (!on("annmore") || S.view === "admin") return baseVisAnns(); return S.announcements.filter(function(a){ return annTo(a).indexOf(ME) >= 0; }); };
+var baseAnnSheet = SHEETS.announce;
+SHEETS.announce = function(o){ var h = baseAnnSheet(o);
+  if (on("annmore")) { var extra = allRoles().map(function(r){ return '<button data-a="pickReason" data-role="' + esc(r) + '" aria-pressed="false">' + esc(r) + '</button>'; }).join("")
+      + upc().filter(function(sv){ return sv.published; }).slice(0, 3).map(function(sv){ return '<button data-a="pickReason" data-not="' + esc(sv.id) + '" aria-pressed="false">Not serving ' + dShort(sv.date) + ' ' + esc(sv.svc.split(" ")[1] || sv.svc) + '</button>'; }).join("");
+    h = h.replace(/(<div class="pick" id="anTo">[\s\S]*?)(<\/div>)/, '$1' + extra + '$2'); }
+  if (on("annphoto")) h = h.replace('<div class="btns"><button class="btn" data-a="postAnn">', '<label class="fl" for="anPhoto">Photo</label><input class="field" id="anPhoto" type="file" accept="image/*"><div id="anPrev"></div><div class="btns"><button class="btn" data-a="postAnn">');
+  annPhoto = ""; return h; };
+var annPhoto = "";
+app.addEventListener("change", function(e){
+  var f = e.target; if (!f || f.id !== "anPhoto" || !f.files || !f.files[0]) return;
+  var rd = new FileReader();
+  rd.onload = function(){ var img = new Image(); img.onload = function(){ var k = Math.min(1, 640 / Math.max(img.width, img.height)), c = document.createElement("canvas"); c.width = Math.round(img.width * k); c.height = Math.round(img.height * k);
+      c.getContext("2d").drawImage(img, 0, 0, c.width, c.height); annPhoto = c.toDataURL("image/jpeg", 0.65);
+      var pv = document.getElementById("anPrev"); if (pv) pv.innerHTML = '<img class="aph" style="width:100%;border-radius:10px;margin-top:8px" alt="Photo to post" src="' + annPhoto + '">'; };
+    img.onerror = function(){ toast("That picture couldn't be read. Try a JPG or PNG."); render.same = true; render(); }; img.src = rd.result; };
+  rd.readAsDataURL(f.files[0]);
+});
+var basePostAnn = A.postAnn;
+A.postAnn = function(d){ var to = document.querySelector("#anTo [aria-pressed=true]"), role = to && to.dataset.role, not = to && to.dataset.not, n0 = S.announcements.length, ph = annPhoto;
+  basePostAnn(d);
+  if (S.announcements.length === n0) return; var a = S.announcements[0];
+  if (role) a.role = role; if (not) a.not = not;
+  if (ph) { a.photo = ph; var kept = 0; S.announcements.forEach(function(x){ if (x.photo && ++kept > 5) delete x.photo; }); }
+  annPhoto = ""; if (role || not || ph) { render.same = true; render(); } };
+var baseAnnCard = annCard;
+annCard = function(a){ var h = baseAnnCard(a), add = "";
+  if (a.photo && on("annphoto")) add += '<img class="aph" alt="Photo with this announcement" src="' + esc(a.photo) + '">';
+  if (S.view === "admin" && on("seen")) { var to = annTo(a), seen = (objOf("annSeen")[a.id] || {}), n = to.filter(function(p){ return seen[p]; }).length; add += '<div class="seen">Seen by ' + n + ' of ' + to.length + '</div>'; }
+  if (S.view !== "admin" && ME && on("seen")) { var m = objOf("annSeen"); if (!m[a.id]) m[a.id] = {}; if (!m[a.id][ME]) m[a.id][ME] = TODAY; }
+  return add ? h.replace(/<\/div>$/, add + '</div>') : h; };
+
+/* levels */
+var LVL = [["volunteer","Volunteer"],["assistant","Assistant leader"],["leader","Leader"]];
+function levelOf(p){ var l = objOf("levels")[p]; return l || (leadsOf(p).length ? "leader" : "volunteer"); }
+function lvlTag(p){ var l = levelOf(p); return on("levels") && l !== "volunteer" ? '<span class="lvl">' + (l === "leader" ? "Leader" : "Asst. leader") + '</span>' : ''; }
+var baseContacts10 = SCREENS.contacts;
+SCREENS.contacts = function(o){ var r = baseContacts10(o); if (!on("levels") || S.view !== "admin" || !r) return r;
+  r.body = r.body.replace(/(<div class="trow"[^>]*data-id="([^"]*)"[^>]*>[\s\S]*?<div class="t">)([^<]*)(<\/div>)/g, function(m, a, id, name, z){ return a + name + lvlTag(name) + z; }); return r; };
+var basePerson10 = SCREENS.person;
+SCREENS.person = function(o){ var r = basePerson10(o); if (!on("levels") || !r) return r; var p = o.id, l = levelOf(p);
+  if (S.view !== "admin") { r.body += (l !== "volunteer" ? '<p class="small" style="margin:10px 4px 0">' + (l === "leader" ? "Leader" : "Assistant leader") + '</p>' : ''); return r; }
+  r.body += '<div class="lbl sm">Level</div><div class="pick">' + LVL.map(function(v){ return '<button data-a="setLevel" data-id="' + esc(p) + '" data-v="' + v[0] + '" aria-pressed="' + (l === v[0]) + '">' + v[1] + '</button>'; }).join("") + '</div>'
+    + '<p class="small" style="margin:6px 4px 0">A level is a label. Leader view still needs the leader PIN.</p>'; return r; };
+A.setLevel = function(d){ objOf("levels")[d.id] = d.v; toast(d.id + " is now " + LVL.filter(function(v){ return v[0] === d.v; })[0][1].toLowerCase() + "."); render.same = true; render(); };
+var baseAddPersonSheet10 = SHEETS.addPerson;
+SHEETS.addPerson = function(o){ var h = baseAddPersonSheet10(o); if (!on("levels")) return h;
+  var sel = '<label class="fl" for="apLevel">Level</label><select class="field" id="apLevel">' + LVL.map(function(v){ return '<option value="' + v[0] + '">' + v[1] + '</option>'; }).join("") + '</select>';
+  var i = h.indexOf('<div class="btns'); return i < 0 ? h + sel : h.slice(0, i) + sel + h.slice(i); };
+var baseAddPerson10 = A.addPerson;
+A.addPerson = function(d, el){ var nm = ((document.getElementById("apName") || {}).value || "").trim().replace(/\s+/g, " "), lv = (document.getElementById("apLevel") || {}).value, before = everyone().length;
+  baseAddPerson10(d, el); if (on("levels") && nm && lv && lv !== "volunteer" && everyone().length > before) { objOf("levels")[nm] = lv; } };
+
+/* flag a spot */
+var baseFill10 = SHEETS.fill;
+SHEETS.fill = function(o){ var keep = S.regularBy; if (false && on("usual")) S.regularBy = tempOverlay(keep, o);
+  var h; try { h = baseFill10(o); } finally { S.regularBy = keep; }
+  if (!on("flags") || S.view !== "admin") return h; var f = objOf("flags")[o.id];
+  var box = '<div class="lbl sm">Flag</div>' + (f ? '<div class="cline"><span class="flag">⚑ ' + esc(f) + '</span></div><div class="btns"><button class="btn sm sec" style="width:100%" data-a="unflag" data-id="' + o.id + '">Remove flag</button></div>'
+    : '<div class="two" style="display:grid;grid-template-columns:1fr auto;gap:8px"><input class="field" id="flagWhy" placeholder="Like: New, needs help" maxlength="60"><button class="btn sm soft" data-a="flagSpot" data-id="' + o.id + '">Flag</button></div>');
+  return h.replace(/(<p class="s">[\s\S]*?<\/p>)/, '$1' + box); };
+A.flagSpot = function(d){ var v = ((document.getElementById("flagWhy") || {}).value || "").trim(); if (!v) { toast("Write a short reason for the flag."); render.same = true; render(); return; } objOf("flags")[d.id] = v.slice(0, 60); S.sheet = null; toast("Spot flagged."); render.same = true; render(); };
+A.unflag = function(d){ delete objOf("flags")[d.id]; toast("Flag removed."); render.same = true; render(); };
+var baseSched10 = SCREENS["admin:sched"];
+SCREENS["admin:sched"] = function(){ var r = baseSched10(); if (!on("flags") || !r) return r; var f = objOf("flags");
+  Object.keys(f).forEach(function(id){ var i = r.body.indexOf('data-s="fill" data-id="' + id + '"'); if (i < 0) return; var j = r.body.indexOf('<div class="s">', i); if (j < 0) return; j += 15;
+    r.body = r.body.slice(0, j) + '<span class="flag">⚑ ' + esc(f[id]) + '</span> · ' + r.body.slice(j); }); return r; };
+
+/* sort the full roster */
+var baseVolSched10 = SCREENS["vol:sched"];
+SCREENS["vol:sched"] = function(){ if (!on("sortsched") || S.volSchedMode === "mine") return baseVolSched10();
+  var by = S.rosterSort || "time", all = !!S.rosterAll, mine1 = teamsOf(ME);
+  var body = '<div class="seg"><button data-a="volMode" data-v="mine">My serves</button><button data-a="volMode" data-v="all" aria-current="true">Full roster</button></div>'
+    + '<div class="sortbar">' + [["time","Time"],["role","Role"],["person","Person"],["team","Team"]].map(function(b){ return '<button data-a="rosterSort" data-v="' + b[0] + '" aria-pressed="' + (by === b[0]) + '">' + b[1] + '</button>'; }).join("")
+    + '<button data-a="rosterAll" aria-pressed="' + all + '">' + (all ? 'All teams' : 'My teams') + '</button></div>';
+  upc().filter(function(sv){ return sv.published; }).slice(0, 4).forEach(function(sv){
+    var list = S.slots.filter(function(x){ return x.sid === sv.id && (all || mine1.indexOf(x.team) >= 0); });
+    var key = { time: function(x){ return ""; }, role: function(x){ return x.role; }, person: function(x){ return x.person || "~"; }, team: function(x){ return x.team + " " + x.role; } }[by];
+    if (by !== "time") list = list.slice().sort(function(a, b){ return key(a).localeCompare(key(b)); });
+    body += '<div class="lbl">' + dShort(sv.date) + ' · ' + esc(SVC[sv.svc] ? SVC[sv.svc].name : sv.svc) + ' · ' + esc(rangeTxt(sv.svc)) + '</div>' + evBanner(sv.date)
+      + (list.length ? '<div class="grp">' + list.map(function(x){ return '<div class="row">' + (x.person ? ava(x.person, 36) : '<span class="ava open" style="width:36px;height:36px">?</span>') + '<div class="m"><div class="t">' + esc(x.person || "Open") + (x.person === ME ? ' (you)' : '') + '</div><div class="s">' + esc(x.role) + ' | ' + esc(x.team) + '</div></div></div>'; }).join("") + '</div>' : '<div class="empty">No spots for your teams.</div>');
+  });
+  return { head: header("Schedule"), body: body }; };
+A.rosterSort = function(d){ S.rosterSort = d.v; render.same = true; render(); };
+A.rosterAll = function(){ S.rosterAll = !S.rosterAll; render.same = true; render(); };
+
+/* temporary availability */
+function tempFor(p, iso){ var l = (objOf("tempBy")[p] || []); for (var i = l.length - 1; i >= 0; i--) if (l[i].from <= iso && iso <= l[i].to) return l[i]; return null; }
+function tempOverlay(base, o){ if (!false) return base; var x = o && slot(o.id), sv = x && svc(x.sid); if (!sv) return base; var out = {};
+  Object.keys(base || {}).forEach(function(p){ out[p] = base[p]; });
+  Object.keys(objOf("tempBy")).forEach(function(p){ var t = tempFor(p, sv.date); if (!t) return; var r = {}; Object.keys((base || {})[p] || {}).forEach(function(k){ r[k] = base[p][k]; }); r[sv.svc] = t.svcs.indexOf(sv.svc) >= 0; out[p] = r; });
+  return out; }
+var baseAvail10 = SCREENS.avail;
+SCREENS.avail = function(o){ var r = baseAvail10(o); if (!false || !r || !ME) return r; var l = (objOf("tempBy")[ME] || []).filter(function(t){ return t.to >= TODAY; });
+  var sec = '<div class="lbl">Temporary availability<a data-a="sheet" data-s="tempAvail">Add</a></div>'
+    + (l.length ? '<div class="grp">' + l.map(function(t){ return '<div class="row"><div class="m"><div class="t">' + dShort(t.from) + (t.to !== t.from ? ' to ' + dShort(t.to) : '') + '</div><div class="s">' + (t.svcs.length ? 'Only ' + esc(t.svcs.map(function(k){ return SVC[k] ? SVC[k].name : k; }).join(", ")) : 'No services') + '</div></div><button class="btn sm sec" data-a="rmTemp" data-id="' + esc(t.id) + '">Remove</button></div>'; }).join("") + '</div>'
+      : '<p class="small" style="margin:4px 4px 0">For a stretch when your usual services change, like only Sunday mornings in December.</p>');
+  var i = r.body.indexOf('<div class="lbl">Blockout dates'); r.body = i < 0 ? r.body + sec : r.body.slice(0, i) + sec + r.body.slice(i); return r; };
+SHEETS.tempAvail = function(){ return '<h4>Temporary availability</h4><p class="s">Between these dates, you can only serve the services you tick. Your usual services come back after.</p>'
+  + '<div class="two"><div><label class="fl" for="taFrom">From</label><input class="field" id="taFrom" type="date" value="' + TODAY + '" min="' + TODAY + '"></div><div><label class="fl" for="taTo">To</label><input class="field" id="taTo" type="date" value="' + TODAY + '" min="' + TODAY + '"></div></div>'
+  + '<div class="lbl sm">I can serve</div><div class="grp">' + Object.keys(SVC).filter(function(k){ return !SVC[k].oneoff; }).map(function(k){ return '<label class="row tap"><div class="m"><div class="t">' + esc(SVC[k].name || k) + '</div></div><input type="checkbox" class="tog ta" value="' + esc(k) + '"></label>'; }).join("") + '</div>'
+  + '<div class="btns"><button class="btn" data-a="addTemp">Save</button><button class="btn sec" data-a="closeSheet">Cancel</button></div>'; };
+A.addTemp = function(){ var f = (document.getElementById("taFrom") || {}).value, t = (document.getElementById("taTo") || {}).value || f;
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(f || "")) { toast("Pick the first day."); render.same = true; render(); return; }
+  if (t < f) { toast("The last day is before the first day."); render.same = true; render(); return; }
+  var svcs = [].slice.call(document.querySelectorAll(".sheet input.ta:checked")).map(function(i){ return i.value; });
+  var m = objOf("tempBy"); (m[ME] = m[ME] || []).push({ id: "t" + Date.now(), from: f, to: t, svcs: svcs });
+  S.sheet = null; toast("Saved. Leaders see it when they fill those dates."); render.same = true; render(); };
+A.rmTemp = function(d){ var m = objOf("tempBy"); m[ME] = (m[ME] || []).filter(function(t){ return t.id !== d.id; }); toast("Removed."); render.same = true; render(); };
+app.addEventListener("change", function(e){ var t = e.target; if (t && t.id === "taFrom") { var to = document.getElementById("taTo"); if (to && t.value) { to.min = t.value; if (to.value < t.value) to.value = t.value; } } });
+
+/* phone and email switches */
+var baseNotifSet10 = SCREENS.notifSettings;
+SCREENS.notifSettings = function(){ if (!on("notifchan") || S.view === "admin") return baseNotifSet10();
+  var kinds = [["sched","Schedule","When you're put on the roster or it changes"],["pool","Open spots","When a spot opens on your team"],["ann","Announcements","From your leaders"],["msgs","Messages","Chats you're in"]];
+  var st = S.settings, val = function(k, ch){ var v = st[k + "_" + ch]; return v === undefined ? (ch === "ph" ? !!st[k] : false) : !!v; };
+  var body = '<div class="grp"><div class="row nch"><div></div><div class="h">Phone</div><div class="h">Email</div></div>'
+    + kinds.map(function(k){ return '<div class="row nch"><div class="m"><div class="t">' + k[1] + '</div><div class="s">' + k[2] + '</div></div>'
+      + ["ph","em"].map(function(ch){ return '<div style="text-align:center"><input type="checkbox" class="tog" aria-label="' + k[1] + ' by ' + (ch === "ph" ? "phone" : "email") + '" data-a="setting" data-k="' + k[0] + '_' + ch + '"' + (val(k[0], ch) ? ' checked' : '') + '></div>'; }).join("") + '</div>'; }).join("") + '</div>'
+    + '<div class="grp mt"><label class="row tap"><div class="m"><div class="t">Also on WhatsApp</div><div class="s">A copy of schedule messages</div></div><input type="checkbox" class="tog" data-a="setting" data-k="wa"' + (st.wa ? ' checked' : '') + '></label>'
+    + '<label class="row tap"><div class="m"><div class="t">Calendar sync</div><div class="s">Your serves in your phone calendar</div></div><input type="checkbox" class="tog" data-a="setting" data-k="cal"' + (st.cal ? ' checked' : '') + '></label></div>'
+    + '<p class="small" style="margin:8px 4px 0">Email goes to the address your leader has for you.</p>';
+  return { head: header("Notifications"), body: body }; };
+var baseSetting10 = A.setting;
+A.setting = function(d, el){ baseSetting10(d, el); if (/_ph$/.test(d.k)) S.settings[d.k.slice(0, -3)] = el.checked; };
+/* ---------- volunteer sign-in, team leader view, team thank-you chats (Nov 16) ---------- */
+FEATS.push(["volpin","Volunteer sign-in","Each volunteer signs in with their own PIN. Only they can change their availability and their emergency contact."]);
+FEATS.push(["teamlead","Team leader view","Assistant leaders open a leader view for their own team only. The leader PIN still sees everything."]);
+FEATS.push(["teamthanks","Team thank-you chats","Each team gets a Thanks chat in Messaging. Shout-outs post there too."]);
+var VPINS = null, vpinBusy = false, EMERG_ME, emBusy = false, EMERG_ALL = null, emAllBusy = false;
+function loadVpins(force){ if ((VPINS && !force) || vpinBusy) return; vpinBusy = true;
+  fetch("/api/vpin", { cache: "no-store" }).then(function(r){ return r.ok ? r.json() : { names: [] }; })
+    .then(function(j){ VPINS = (j && j.names) || []; vpinBusy = false; render.same = true; render(); }, function(){ VPINS = []; vpinBusy = false; }); }
+function vk(){ var v = null; try { v = JSON.parse(LS.get("roster.vkey") || "null"); } catch (e) {} return v && v.name === ME && v.key ? v.key : ""; }
+function volHeaders(h){ h = h || {}; var k = vk(); if (k) { h["x-vol-name"] = encodeURIComponent(ME); h["x-vol-key"] = k; } return h; }
+function authHeaders(){ var h = { "content-type": "application/json" }, a = LS.get("roster.admin"); if (a && a !== "set") h["x-roster-key"] = a; return volHeaders(h); }
+function keptBack(names){
+  fetch("/api/state", { cache: "no-store" }).then(function(r){ return r.ok ? r.json() : null; }).then(function(j){ if (j && j.data) adopt(j);
+    toast("Only " + names.join(", ") + " can change " + (names.length > 1 ? "their own" : "their") + " availability, so that change was put back."); render.same = true; render(); }, function(){});
+}
+function pickKeys(o, ks){ var r = {}; ks.forEach(function(k){ if (o[k]) r[k] = o[k]; }); return r; }
+function leadTeams(p){ var t = leadsOf(p).slice(), l = objOf("levels")[p]; if (on("levels") && (l === "assistant" || l === "leader")) teamsOf(p).forEach(function(x){ if (t.indexOf(x) < 0) t.push(x); }); return t; }
+var baseAdminOk11 = adminOk;
+function scopeTeams(){ if (!on("teamlead") || baseAdminOk11() || !ME || LS.get("roster.scope") !== ME || (on("volpin") && !vk())) return null; var t = leadTeams(ME); return t.length ? t : null; }
+function scoped(){ return S.view === "admin" ? scopeTeams() : null; }
+adminOk = function(){ return baseAdminOk11() || !!scopeTeams(); };
+function scopeBanner(sc){ return ''; } /* banner replaced by the admin-style Volunteer view switch in More (Nov 16) */
+
+/* the sign-in screen after picking a name */
+SCREENS.vpin = function(){ loadVpins(); var has = VPINS && VPINS.indexOf(ME) >= 0;
+  return { head: plainHead(has ? "Hi, " + ME : "Pick your own PIN"), noTabs: true, body: '<div class="card"><p class="small" style="margin:0 0 10px">'
+    + (VPINS === null ? "Checking…" : has ? "Type your own PIN to open your roster on this phone." : "Pick a 4 to 8 digit PIN just for you. Then only you can change your availability and your emergency contact.") + '</p>'
+    + '<label class="fl" for="vp1">' + (has ? "Your PIN" : "New PIN") + '</label><input class="field" id="vp1" type="password" inputmode="numeric" autocomplete="off" maxlength="8">'
+    + (has ? '' : '<label class="fl" for="vp2">Type it again</label><input class="field" id="vp2" type="password" inputmode="numeric" autocomplete="off" maxlength="8">')
+    + '<div class="btns"><button class="btn" data-a="vpinGo">' + (has ? "Sign in" : "Save my PIN") + '</button><button class="btn sec" data-a="whoami">Not ' + esc(ME) + '?</button></div>'
+    + (has ? '<p class="small mt" style="margin-bottom:0">Forgot it? Ask a leader to reset your PIN.</p>' : '') + '</div>' };
+};
+A.vpinGo = function(){
+  var p1 = (document.getElementById("vp1").value || "").trim(), e2 = document.getElementById("vp2");
+  if (!/^\d{4,8}$/.test(p1)) { toast("Use 4 to 8 digits."); render(); return; }
+  if (e2 && e2.value.trim() !== p1) { toast("The two PINs don't match."); render(); return; }
+  var who = ME;
+  fetch("/api/vpin", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ name: who, pin: p1 }) })
+    .then(function(r){ return r.json().then(function(j){ return { st: r.status, j: j }; }, function(){ return { st: r.status, j: {} }; }); })
+    .then(function(x){
+      if (x.j && x.j.ok && who === ME) { LS.set("roster.vkey", JSON.stringify({ name: who, key: x.j.key })); if (VPINS && VPINS.indexOf(who) < 0) VPINS.push(who); EMERG_ME = undefined; S.stack = []; toast(x.j.first ? "PIN saved. Only you can change your availability now." : "Signed in."); render(); }
+      else { toast(x.st === 429 ? "Too many wrong tries. Wait 15 minutes and try again." : "That PIN isn't right."); render(); } })
+    .catch(function(){ toast("Couldn't check the PIN. Check your connection and try again."); render(); });
+};
+var baseSetMe11 = A.setMe; A.setMe = function(d, el){ EMERG_ME = undefined; baseSetMe11(d, el); };
+var baseWho11 = A.whoami; A.whoami = function(d, el){ LS.set("roster.vkey", null); LS.set("roster.scope", null); EMERG_ME = undefined; baseWho11(d, el); };
+A.toTeamLead = function(){ LS.set("roster.scope", ME); S.view = "admin"; S.tab.admin = "sched"; S.stack = []; S.sheet = null; toast("Team leader view for " + leadTeams(ME).join(", ") + "."); render(); };
+A.leaveTeamLead = function(){ LS.set("roster.scope", null); S.view = "vol"; S.stack = []; S.sheet = null; render(); };
+
+/* the gate, and the team leader's narrower view */
+var baseRender11 = render;
+render = function(){
+  if (on("volpin") && S.view === "vol" && ME && !vk()) { if (!S.stack[0] || S.stack[0].s !== "vpin") S.stack = [{ s: "vpin" }]; S.sheet = null; }
+  else if (S.stack[0] && S.stack[0].s === "vpin") S.stack = [];
+  var sc = scoped(), keepR = ROLES, keepP = POOL;
+  if (sc) { ROLES = pickKeys(ROLES, sc); POOL = pickKeys(POOL, sc); }
+  try { baseRender11(); } finally { ROLES = keepR; POOL = keepP; }
+};
+var baseVisReq11 = visibleReq;
+visibleReq = function(r){ if (!baseVisReq11(r)) return false; var sc = scoped(); if (!sc) return true; var x = r.slot && slot(r.slot);
+  return x ? sc.indexOf(x.team) >= 0 : teamsOf(r.from).some(function(t){ return sc.indexOf(t) >= 0; }); };
+["admin:dash", "admin:sched", "admin:reqs", "admin:msgs"].forEach(function(k){ var base = SCREENS[k];
+  SCREENS[k] = function(o){ var r = base(o), sc = scoped(); if (!sc || !r) return r;
+    r.head = r.head.replace(/<button class="ic" data-a="sheet" data-s="newOneOff"[^>]*>\+<\/button>/, '<span style="width:40px"></span>');
+    r.body = scopeBanner(sc) + r.body.replace(/<div class="btns mt"><button class="btn sm danger"[^>]*data-s="discardSvc">[^<]*<\/button><\/div>/, '');
+    return r; }; });
+var baseMore11 = SCREENS["admin:more"];
+SCREENS["admin:more"] = function(){ var sc = scoped(); if (!sc) return baseMore11();
+  return { head: header("More"), body: scopeBanner(sc) + '<div class="card"><div class="t">You lead ' + esc(sc.join(", ")) + '</div><div class="small">You can fill spots, answer requests, run your team\'s checklists and to-dos, and message your team. Features, templates, services and the leader PIN stay with the main leaders.</div></div>'
+    + '<div class="lbl">People</div><div class="grp">' + row("Team", "Your team's people", "push", "contacts") + row("Availability and blockouts", blockSummary(), "tab", "reqs")
+    + (on("onboarding") ? row("Onboarding to-dos", "Who on your team has read and confirmed", "push", "todosAdmin") : '') + '</div>'
+    + '<div class="lbl">Planning</div><div class="grp">' + row("Service notes", on("attendance") ? "Attendance and what happened" : "What happened", "push", "notes")
+    + (on("checklists") ? row("Checklists", "Your team's setup lists", "push", "checklistsAdmin") : '') + '</div>'
+    + '<div class="lbl">Settings</div><div class="grp">' + (on("notify") ? row("Notifications", "", "push", "notifSettings") : '') + row("HCC Hub home", "", "hub", "") + '</div>'
+    + '<div class="lbl">This phone</div><div class="grp">' + row("Volunteer view", "See the roster as a volunteer", "leaveTeamLead", "") + '</div>' };
+};
+
+/* team leaders only see their own teams' checklists and to-dos (Nov 16) */
+(function(){
+  function withOnly(key, keep, fn){ var all = S[key]; S[key] = all.filter(keep); try { return fn(); } finally { S[key] = all; } }
+  var bCk = SCREENS.checklistsAdmin, bTd = SCREENS.todosAdmin, bAdd = SHEETS.addCk;
+  SCREENS.checklistsAdmin = function(o){ var sc = scoped(); if (!sc) return bCk(o); return withOnly("checklists", function(k){ return sc.indexOf(k.team) >= 0; }, function(){ return bCk(o); }); };
+  SCREENS.todosAdmin = function(o){ var sc = scoped(); if (!sc) return bTd(o); return withOnly("todos", function(t){ return t.teams.some(function(x){ return sc.indexOf(x) >= 0; }); }, function(){ return bTd(o); }); };
+})();
+/* volunteer More: emergency contact and the team leader view */
+var baseVolMore11 = SCREENS["vol:more"];
+SCREENS["vol:more"] = function(){ var r = baseVolMore11(); if (!r) return r;
+  if (on("volpin") && vk()) { loadEmergMe();
+    r.body = r.body.replace('<div class="lbl">Settings</div>', '<div class="lbl">Safety</div><div class="grp">' + row("Emergency contact", EMERG_ME === undefined ? "Loading…" : EMERG_ME ? EMERG_ME.name + (EMERG_ME.relation ? ", " + EMERG_ME.relation : "") : "Not added yet. Only you can change it.", "push", "emerg") + '</div><div class="lbl">Settings</div>'); }
+  if (on("teamlead") && leadTeams(ME).length && (!on("volpin") || vk()))
+    r.body = r.body.replace('<div class="lbl">HCC</div><div class="grp">', '<div class="lbl">Leading</div><div class="grp">' + row("Team leader view", "Manage " + leadTeams(ME).join(", ") + " only", "toTeamLead", "") + '</div><div class="lbl">HCC</div><div class="grp">');
+  return r; };
+function loadEmergMe(){ if (EMERG_ME !== undefined || emBusy || !vk()) return; emBusy = true;
+  fetch("/api/emergency", { headers: volHeaders() }).then(function(r){ return r.ok ? r.json() : { contact: null }; })
+    .then(function(j){ EMERG_ME = (j && j.contact) || null; emBusy = false; render.same = true; render(); }, function(){ EMERG_ME = null; emBusy = false; }); }
+SCREENS.emerg = function(){ loadEmergMe(); var c = EMERG_ME || {};
+  return { head: header("Emergency contact"), body: '<div class="card"><p class="small" style="margin:0 0 6px">Who should we call if something happens while you serve? Only you can change this. Main leaders can see it.</p>'
+    + '<label class="fl" for="emN">Name</label><input class="field" id="emN" autocomplete="off" value="' + esc(c.name || "") + '">'
+    + '<label class="fl" for="emR">How they know you</label><input class="field" id="emR" placeholder="Like Mother or Husband" autocomplete="off" value="' + esc(c.relation || "") + '">'
+    + '<label class="fl" for="emP">Phone</label><input class="field" id="emP" type="tel" autocomplete="off" value="' + esc(c.phone || "") + '">'
+    + '<div class="btns"><button class="btn" data-a="saveEmerg">Save</button>' + (EMERG_ME ? '<button class="btn sec" data-a="rmEmerg">Remove</button>' : '') + '</div></div>' };
+};
+function putEmerg(c, msg){
+  fetch("/api/emergency", { method: "PUT", headers: volHeaders({ "content-type": "application/json" }), body: JSON.stringify({ contact: c }) })
+    .then(function(r){ if (!r.ok) throw new Error(r.status); EMERG_ME = c; EMERG_ALL = null; if (S.stack.length) S.stack.pop(); toast(msg); render(); })
+    .catch(function(){ toast("Couldn't save it. Sign in again and try once more."); render(); });
+}
+A.saveEmerg = function(){ var g = function(id){ return (document.getElementById(id).value || "").trim(); }, c = { name: g("emN"), relation: g("emR"), phone: g("emP") };
+  if (!c.name || !c.phone) { toast("Add a name and a phone number."); render(); return; } putEmerg(c, "Emergency contact saved."); };
+A.rmEmerg = function(){ putEmerg(null, "Emergency contact removed."); };
+
+/* main leader: see a volunteer's emergency contact and reset their PIN */
+function loadEmergAll(){ if (EMERG_ALL || emAllBusy || !baseAdminOk11()) return; emAllBusy = true;
+  fetch("/api/emergency", { headers: { "x-roster-key": LS.get("roster.admin") || "" } }).then(function(r){ return r.ok ? r.json() : { contacts: {} }; })
+    .then(function(j){ EMERG_ALL = (j && j.contacts) || {}; emAllBusy = false; render.same = true; render(); }, function(){ EMERG_ALL = {}; emAllBusy = false; }); }
+var basePerson11 = SCREENS.person;
+SCREENS.person = function(o){ var r = basePerson11(o), p = o.id; if (!r || S.view !== "admin" || !on("volpin") || !baseAdminOk11()) return r;
+  loadVpins(); loadEmergAll(); var e = EMERG_ALL && EMERG_ALL[p], has = VPINS && VPINS.indexOf(p) >= 0;
+  r.body += '<div class="card mt"><div class="lbl sm">Emergency contact</div>'
+    + (EMERG_ALL === null ? '<div class="small">Loading…</div>' : e ? '<div class="cline"><span>Name</span>' + esc(e.name + (e.relation ? ", " + e.relation : "")) + '</div><div class="cline"><span>Phone</span>' + esc(e.phone) + '</div>' : '<div class="small">Not added yet.</div>')
+    + '<p class="small" style="margin:6px 0 0">Only ' + esc(p) + ' can change this, after signing in.</p>'
+    + '<div class="lbl sm">Sign-in</div><div class="small">' + (VPINS === null ? 'Loading…' : has ? 'Signs in with their own PIN.' : 'Hasn\'t picked a PIN yet.') + '</div>'
+    + (has ? '<div class="btns"><button class="btn sec" data-a="sheet" data-s="resetVpin" data-id="' + esc(p) + '">Reset their PIN</button></div>' : '') + '</div>';
+  return r; };
+SHEETS.resetVpin = function(o){ return '<h4>Reset ' + esc(o.id) + '\'s PIN?</h4><p class="s">They pick a new PIN the next time they open the app. Until then, anyone who picks their name can set it.</p><div class="btns"><button class="btn danger" data-a="resetVpin" data-id="' + esc(o.id) + '">Reset PIN</button><button class="btn sec" data-a="closeSheet">Keep it</button></div>'; };
+A.resetVpin = function(d){
+  fetch("/api/vpin", { method: "POST", headers: { "content-type": "application/json", "x-roster-key": LS.get("roster.admin") || "" }, body: JSON.stringify({ name: d.id, reset: true }) })
+    .then(function(r){ if (!r.ok) throw new Error(r.status); if (VPINS) VPINS = VPINS.filter(function(n){ return n !== d.id; }); S.sheet = null; toast(d.id + "'s PIN is reset."); render(); })
+    .catch(function(){ S.sheet = null; toast("Couldn't reset it. Lock and reopen Admin, then try again."); render(); });
+};
+
+/* a Thanks chat per team, built on the team channels */
+CH_COLOR.thanks = "#E8A317"; CH_ICON.thanks = CH_ICON.shouts;
+var baseChans11 = chans;
+chans = function(){ var out = baseChans11(); if (!on("teamthanks")) return out;
+  var ts = S.view === "admin" ? Object.keys(POOL) : teamsOf(meName()), at = 0;
+  out.forEach(function(c, i){ if (c.kind === "team") at = i + 1; });
+  out.splice.apply(out, [at, 0].concat(ts.map(function(t){ return { id: "ch:thanks:" + t, name: "Thanks, " + t, kind: "thanks" }; })));
+  return out; };
+var baseChat11 = SCREENS.chat;
+SCREENS.chat = function(o){ var r = baseChat11(o); if (!r || String(o.id).indexOf("ch:thanks:") !== 0) return r; var team = String(o.id).slice(10);
+  r.body = r.body.replace(/<p class="small" style="text-align:center;margin:6px 0 10px">[^<]*<\/p>/, '<p class="small" style="text-align:center;margin:6px 0 10px">Say thanks to anyone on ' + esc(team) + '. Everyone on the team sees it.</p>'
+    + (on("shoutouts") ? '<div class="btns" style="margin:0 0 12px"><button class="btn soft" data-a="sheet" data-s="shoutPick">Send a shout-out</button></div>' : ''));
+  return r; };
+var baseShout11 = A.sendShout;
+A.sendShout = function(d, el){ baseShout11(d, el); var h = S.shouts[0]; if (!on("teamthanks") || !h || !h.team) return;
+  ensureChat("ch:thanks:" + h.team, "Thanks, " + h.team, { channel: true }).msgs.push({ who: h.from, t: "Shout-out for " + h.to + ": " + h.badge + (h.text ? ". " + h.text : ""), at: Date.now() });
+  render.same = true; render(); };
+
+/* blockout dates: To follows From and can't be earlier */
+document.addEventListener("change", function(e){ if (!e.target || e.target.id !== "bf") return; var t = document.getElementById("bt"); if (!t) return; t.min = e.target.value; if (!t.value || t.value < e.target.value) t.value = e.target.value; });
+/* ---------- schedule header like 7shifts: month picker, today, week strip (Nov 16) ---------- */
+FEATS.push(["weekhead","Week strip on Schedule","Schedule opens with the month, a today button, My serves or Full roster, and a Sun to Sat week strip. A dot marks days you serve."]);
+LOCAL.wkDay = 1;
+(function(){ var st = document.createElement("style"); st.textContent =
+  '.wkm{border:0;background:none;color:var(--ink);font:600 20px/26px var(--font);display:inline-flex;align-items:center;gap:6px;cursor:pointer;padding:4px 8px}'
+  + '.wkm svg{width:14px;height:14px;stroke:currentColor;fill:none;stroke-width:2}'
+  + '.wkcal{position:relative;display:inline-flex;align-items:center;justify-content:center}.wkcal svg{width:26px;height:26px;stroke:var(--ink);fill:none;stroke-width:1.6}'
+  + '.wkcal b{position:absolute;top:10px;left:0;right:0;text-align:center;font:700 9px/10px var(--font);color:var(--ink)}'
+  + '.wkstrip{display:flex;align-items:stretch;gap:2px;margin:2px -4px 12px}'
+  + '.wkstrip .nav{flex:0 0 22px;border:0;background:none;color:var(--muted);font:400 22px/1 var(--font);cursor:pointer;padding:0}'
+  + '.wkd{flex:1 1 0;min-width:0;border:0;background:none;border-radius:10px;padding:6px 0 4px;cursor:pointer;color:var(--muted);display:flex;flex-direction:column;align-items:center;gap:2px}'
+  + '.wkd small{font:500 13px/16px var(--font)}.wkd span{font:400 22px/26px var(--font);color:var(--ink)}'
+  + '.wkd i{width:5px;height:5px;border-radius:50%;background:transparent;margin-top:2px}.wkd i.on{background:var(--accent)}'
+  + '.wkd[aria-current]{background:var(--band);box-shadow:inset 0 0 0 1px var(--accent)}.wkd[aria-current] span{color:#1D1D1F;font-weight:600}.wkd[aria-current] small{color:#2F4A9A;font-weight:600}'
+  + '.wkd.today:not([aria-current]) span{color:var(--accent);font-weight:600}';
+  document.head.appendChild(st); })();
+function isoAddDays(iso, n){ var d = dt(iso); d.setUTCDate(d.getUTCDate() + n); return d.toISOString().slice(0, 10); }
+function wkSel(){ return S.wkDay || TODAY; }
+function myDates(){ var o = {}; S.slots.forEach(function(x){ if (x.person === ME && x.status !== "declined") { var sv = svc(x.sid); if (sv && sv.published !== false) o[sv.date] = 1; } }); return o; }
+function wkHead(){ var sel = dt(wkSel()), td = dt(TODAY).getUTCDate();
+  return '<div class="hd"><button class="ic wkcal" data-a="wkToday" aria-label="Go to today"><svg viewBox="0 0 24 24"><rect x="3.5" y="5" width="17" height="15.5" rx="2.5"/><path d="M3.5 9.5h17M8 3v4M16 3v4"/></svg><b>' + td + '</b></button>'
+    + '<h3><button class="wkm" data-a="sheet" data-s="wkMonth" aria-label="Pick a month">' + MONTHS[sel.getUTCMonth()] + (sel.getUTCFullYear() !== dt(TODAY).getUTCFullYear() ? ' ' + sel.getUTCFullYear() : '') + '<svg viewBox="0 0 24 24"><path d="M6 9l6 6 6-6"/></svg></button></h3><span style="width:40px"></span></div>'; }
+function wkStrip(){ var sel = wkSel(), start = isoAddDays(sel, -dt(sel).getUTCDay()), dots = myDates(), out = '';
+  for (var i = 0; i < 7; i++) { var iso = isoAddDays(start, i);
+    out += '<button class="wkd' + (iso === TODAY ? ' today' : '') + '" data-a="wkDay" data-v="' + iso + '"' + (iso === sel ? ' aria-current="date"' : '') + ' aria-label="' + esc(dLong(iso)) + (dots[iso] ? ', you serve' : '') + '"><small>' + DOW[dt(iso).getUTCDay()] + '</small><span>' + dt(iso).getUTCDate() + '</span><i' + (dots[iso] ? ' class="on"' : '') + '></i></button>'; }
+  return '<div class="wkstrip"><button class="nav" data-a="wkDay" data-v="' + isoAddDays(start, -7) + '" aria-label="Last week">‹</button>' + out + '<button class="nav" data-a="wkDay" data-v="' + isoAddDays(start, 7) + '" aria-label="Next week">›</button></div>'; }
+function wkSlotRow(x){ return '<div class="row">' + (x.person ? ava(x.person, 36) : '<span class="ava open" style="width:36px;height:36px">?</span>') + '<div class="m"><div class="t">' + esc(x.person || "Open") + (x.person === ME ? ' (you)' : '') + '</div><div class="s">' + esc(x.role) + ' | ' + esc(x.team) + '</div></div></div>'; }
+var baseVolSched12 = SCREENS["vol:sched"];
+SCREENS["vol:sched"] = function(){ if (!on("weekhead")) return baseVolSched12();
+  var sel = wkSel(), mode = S.volSchedMode === "mine" ? "mine" : "all";
+  var body = '<div class="seg"><button data-a="volMode" data-v="mine"' + (mode === "mine" ? ' aria-current="true"' : '') + '>My serves</button><button data-a="volMode" data-v="all"' + (mode === "all" ? ' aria-current="true"' : '') + '>Full roster</button></div>' + wkStrip();
+  if (mode === "mine") {
+    var m = S.slots.filter(function(x){ var sv = svc(x.sid); return x.person === ME && x.status !== "declined" && sv && sv.published !== false && sv.date >= sel; })
+      .sort(function(a, b){ var p = svc(a.sid).date, q = svc(b.sid).date; return p < q ? -1 : p > q ? 1 : 0; });
+    var day = S.services.filter(function(sv){ return sv.date === sel && sv.published !== false; }), after = m.filter(function(x){ return svc(x.sid).date > sel; });
+    body += '<div class="lbl">' + esc(dLong(sel)) + '</div>' + (day.length ? '<div class="list7">' + day.map(function(sv){ var xs = m.filter(function(x){ return x.sid === sv.id; }); return xs.length ? upRows(xs)
+        : '<div class="urow" data-a="volMode" data-v="all">' + dateCol(sv.date) + '<div class="um"><div class="usn">' + esc(SVC[sv.svc] ? SVC[sv.svc].name : sv.svc) + '</div><div class="ut">' + esc(rangeTxt(sv.svc)) + evTag(sv.date) + '</div><div class="us">' + ORG + '</div><div class="us">You\'re not serving. Tap to see who is.</div></div><span class="chev">›</span></div>'; }).join("") + '</div>' : '<div class="empty">No services on this day.</div>')
+      + '<div class="lbl">Coming up after</div>' + (after.length ? '<div class="list7">' + upRows(after) + '</div>' : '<div class="empty">No more serves after this day.</div>')
+      + '<div class="btns"><button class="btn soft" data-a="ics">Add all to my calendar</button></div>';
+  } else {
+    var all = !!S.rosterAll, mt = teamsOf(ME), svs = S.services.filter(function(sv){ return sv.date === sel && sv.published; });
+    body += '<div class="lbl">' + esc(dLong(sel)) + (mt.length ? '<a data-a="rosterAll">' + (all ? 'My teams' : 'All teams') + '</a>' : '') + '</div>';
+    if (!svs.length) body += '<div class="empty">No services on this day.</div>';
+    svs.forEach(function(sv){ var list = S.slots.filter(function(x){ return x.sid === sv.id && (all || !mt.length || mt.indexOf(x.team) >= 0); });
+      body += '<div class="lbl sm">' + esc(SVC[sv.svc] ? SVC[sv.svc].name : sv.svc) + ' · ' + esc(rangeTxt(sv.svc)) + '</div>' + evBanner(sv.date)
+        + (list.length ? '<div class="grp">' + list.map(wkSlotRow).join("") + '</div>' : '<div class="empty">No spots for your teams.</div>'); });
+  }
+  return { head: wkHead(), body: body };
+};
+A.wkDay = function(d){ S.wkDay = d.v; render.same = true; render(); };
+A.wkToday = function(){ S.wkDay = TODAY; render(); };
+SHEETS.wkMonth = function(){ var sel = dt(wkSel()), t = dt(TODAY), out = [];
+  for (var i = -2; i <= 9; i++) { var d = new Date(Date.UTC(t.getUTCFullYear(), t.getUTCMonth() + i, 1)); out.push(d); }
+  return '<h4>Pick a month</h4><div class="grp">' + out.map(function(d){ var cur = d.getUTCMonth() === sel.getUTCMonth() && d.getUTCFullYear() === sel.getUTCFullYear(), iso = d.toISOString().slice(0, 10);
+    return '<div class="row tap" data-a="wkMonth" data-v="' + iso + '"><div class="m"><div class="t">' + MONTHS[d.getUTCMonth()] + ' ' + d.getUTCFullYear() + '</div></div>' + (cur ? '<span class="chip c-acc">Showing</span>' : '<span class="chev">›</span>') + '</div>'; }).join("") + '</div>'; };
+A.wkMonth = function(d){ var first = d.v, t = TODAY; S.wkDay = first.slice(0, 7) === t.slice(0, 7) ? t : first; S.sheet = null; render(); };
+
+/* admin Schedule uses the same month + week strip header as volunteers (Nov 16) */
+LOCAL.adminDay = 1;
+(function(){ var st = document.createElement("style"); st.textContent =
+  '.wkd i.on.dr{background:transparent;box-shadow:inset 0 0 0 1.5px var(--badge)}'
+  + '.wkpick{margin:0 0 4px}.wkpick button small{font:500 12px/16px var(--font);color:var(--badge);margin-left:6px}'
+  + '.hd .wkl{display:flex;align-items:center}';
+  document.head.appendChild(st); })();
+function svcsOn(iso){ return S.services.filter(function(sv){ return sv.date === iso; }); }
+function adminDaySel(){ var sv = svc(S.adminSid), a = S.adminDay;
+  if (a && (!sv || a.sid === S.adminSid)) return a.d; return sv ? sv.date : TODAY; }
+function adminPickDay(iso){ var l = svcsOn(iso); if (l.length) S.adminSid = l[0].id; S.adminDay = { d: iso, sid: S.adminSid }; }
+var baseWkSel13 = wkSel;
+wkSel = function(){ return S.view === "admin" ? adminDaySel() : baseWkSel13(); };
+var baseMyDates13 = myDates;
+myDates = function(){ if (S.view !== "admin") return baseMyDates13(); var o = {};
+  S.services.forEach(function(sv){ if (sv.published) o[sv.date] = 1; else if (!o[sv.date]) o[sv.date] = 2; }); return o; };
+var baseWkStrip13 = wkStrip;
+wkStrip = function(){ var h = baseWkStrip13(); if (S.view !== "admin") return h; var d = myDates();
+  return h.replace(/data-v="(\d{4}-\d{2}-\d{2})"([^>]*)><small>([\s\S]*?)<i class="on"><\/i>/g, function(m, iso, rest, mid){ return 'data-v="' + iso + '"' + rest.replace(', you serve', d[iso] === 2 ? ', draft service' : ', has services') + '><small>' + mid + '<i class="on' + (d[iso] === 2 ? ' dr' : '') + '"></i>'; }); };
+var baseWkDay13 = A.wkDay, baseWkToday13 = A.wkToday, baseWkMonth13 = A.wkMonth;
+A.wkDay = function(d){ if (S.view !== "admin") return baseWkDay13(d); adminPickDay(d.v); render.same = true; render(); };
+A.wkToday = function(){ if (S.view !== "admin") return baseWkToday13(); adminPickDay(TODAY); render(); };
+A.wkMonth = function(d){ if (S.view !== "admin") return baseWkMonth13(d); adminPickDay(d.v.slice(0, 7) === TODAY.slice(0, 7) ? TODAY : d.v); S.sheet = null; render(); };
+var baseSched13 = SCREENS["admin:sched"];
+SCREENS["admin:sched"] = function(){ if (!on("weekhead")) return baseSched13();
+  var day = adminDaySel(), list = svcsOn(day), sv = svc(S.adminSid), has = sv && sv.date === day;
+  var plus = '<button class="ic" data-a="sheet" data-s="newOneOff" aria-label="Add a service" style="font-size:30px">+</button>';
+  var hd = wkHead().replace('<div class="hd">', '<div class="hd"><span class="wkl">').replace('</button><h3>', '</button>' + plus + '</span><h3>');
+  var strip = wkStrip() + (list.length > 1 ? '<div class="pick wkpick">' + list.map(function(x){ return '<button data-a="openSvc" data-id="' + x.id + '" aria-pressed="' + (x.id === S.adminSid) + '">' + esc(SVC[x.svc] ? SVC[x.svc].name : x.svc) + (x.published ? '' : '<small>Draft</small>') + '</button>'; }).join("") + '</div>' : '');
+  if (!has) return { head: hd.replace('<span style="width:40px"></span></div>', '<span style="width:80px"></span></div>'), body: strip + '<div class="lbl">' + esc(dLong(day)) + '</div><div class="empty">No services on this day.</div><div class="btns"><button class="btn soft" data-a="sheet" data-s="newOneOff">Add a service</button></div>' };
+  var r = baseSched13(); if (!r) return r;
+  var pub = (r.head.match(/<button class="ic txt"[\s\S]*?<\/button>/) || [''])[0];
+  r.head = hd.replace('<span style="width:40px"></span></div>', (pub || '<span style="width:40px"></span>') + '</div>');
+  r.body = r.body.replace(/^<div class="strip">[\s\S]*?<\/div>/, strip);
+  return r; };
+var baseOpenSvc13 = A.openSvc;
+A.openSvc = function(d){ S.adminDay = null; return baseOpenSvc13(d); };
+
+/* Requests opened from a link (Dashboard, More) gets a back button to where you came from (Nov 16) */
+LOCAL.reqsBack = 1;
+var baseTab13 = A.tab;
+A.tab = function(d, el){
+  if (S.view === "admin" && d.v === "reqs" && S.tab.admin !== "reqs" && !(el && el.closest && el.closest("nav.tabs"))) { var from = S.tab.admin; baseTab13(d, el); S.reqsBack = from; render(); return; }
+  S.reqsBack = null; baseTab13(d, el); };
+var baseReqs13 = SCREENS["admin:reqs"];
+SCREENS["admin:reqs"] = function(o){ var r = baseReqs13(o);
+  if (r && r.head && S.reqsBack && !S.stack.length && r.head.indexOf('data-a="reqsBack"') < 0)
+    r.head = r.head.replace(/^<div class="hd">(<span style="width:40px"><\/span>)?/, '<div class="hd"><button class="ic" data-a="reqsBack" aria-label="Back">‹</button>');
+  return r; };
+A.reqsBack = function(){ var t = S.reqsBack || "dash"; S.reqsBack = null; A.tab({ v: t }); };
+
+/* templates can be edited: rename, change who fills each spot, delete (Nov 16) */
+var baseTpl13 = SHEETS.templates;
+SHEETS.templates = function(o){ var h = baseTpl13(o);
+  return h.replace(/<div class="row tap" data-a="useTemplate" data-id="(\d+)">([\s\S]*?)<span class="chev">›<\/span><\/div>/g, function(m, i, mid){
+    return '<div class="row tap" data-a="useTemplate" data-id="' + i + '">' + mid + '<button class="btn sm soft" data-a="sheet" data-s="tplEdit" data-id="' + i + '">Edit</button></div>'; })
+    .replace('It only fills empty spots.</p>', 'It only fills empty spots. Tap Edit to change one.</p>'); };
+function tplKeys(t){ var ks = [];
+  Object.keys(ROLES).forEach(function(team){ var seen = {}; ((ROLES[team] || {})[t.sv] || []).forEach(function(r){ if (seen[r]) return; seen[r] = 1; ks.push(team + "|" + r); }); });
+  Object.keys(t.lines).forEach(function(k){ if (ks.indexOf(k) < 0) ks.push(k); }); return ks; }
+SHEETS.tplEdit = function(o){ var t = S.templates[+o.id]; if (!t) return baseTpl13(o);
+  var ks = tplKeys(t), teams = [], out = '<h4>Edit template</h4><p class="s">' + esc(t.sv) + ' · saved by ' + esc(t.by) + '</p><label class="fl" for="tplEName">Name</label><input class="field" id="tplEName" value="' + esc(t.name) + '">';
+  ks.forEach(function(k){ var tm = k.split("|")[0]; if (teams.indexOf(tm) < 0) teams.push(tm); });
+  teams.forEach(function(tm){ out += '<div class="lbl">' + esc(tm) + '</div><div class="grp">' + ks.filter(function(k){ return k.split("|")[0] === tm; }).map(function(k){
+      var cur = t.lines[k] || "", ppl = (POOL[tm] || []).slice(); if (cur && ppl.indexOf(cur) < 0) ppl.unshift(cur);
+      return '<div class="row"><div class="m"><div class="t">' + esc(k.split("|").slice(1).join("|")) + '</div></div><select class="field tplsel" data-k="' + esc(k) + '" style="width:auto;max-width:58%;margin:0" aria-label="' + esc(k.split("|").slice(1).join("|")) + '"><option value="">Leave empty</option>' + ppl.map(function(p){ return '<option' + (p === cur ? ' selected' : '') + '>' + esc(p) + '</option>'; }).join("") + '</select></div>'; }).join("") + '</div>'; });
+  return out + '<div class="btns"><button class="btn" data-a="tplSave" data-id="' + o.id + '">Save changes</button><button class="btn sec" data-a="sheet" data-s="templates">Back to templates</button></div>'
+    + '<div class="btns"><button class="btn sm danger" style="width:100%" data-a="tplDel" data-id="' + o.id + '">Delete template</button></div>'; };
+A.tplSave = function(d){ var t = S.templates[+d.id]; if (!t) return; var nm = ((document.getElementById("tplEName") || {}).value || "").trim(), lines = {};
+  app.querySelectorAll(".tplsel").forEach(function(s){ if (s.value) lines[s.dataset.k] = s.value; });
+  if (nm) t.name = nm; t.lines = lines; S.sheet = { s: "templates" }; var nn = Object.keys(lines).length; toast("Saved \"" + t.name + "\" with " + nn + " spot" + (nn === 1 ? "" : "s") + "."); render.same = true; render(); };
+/* 15-minute time picker for checklist "Done by" (Nov 16) */
+function qtrTimes(sel){ var o = '<option value="">No time</option>';
+  for (var m = 6 * 60; m < 24 * 60; m += 15) { var h = Math.floor(m / 60), mm = m % 60, t = ((h + 11) % 12 + 1) + ':' + (mm < 10 ? '0' : '') + mm + ' ' + (h < 12 ? 'AM' : 'PM');
+    o += '<option' + (t === sel ? ' selected' : '') + '>' + t + '</option>'; } return o; }
+A.tplDel = function(d){ var t = S.templates[+d.id]; if (!t) return; S.templates.splice(+d.id, 1); S.sheet = { s: "templates" }; toast("Deleted \"" + t.name + "\"."); render.same = true; render(); };
+/* Templates from the More menu: list only (no drop-onto-service), Add template button, no "save this service" (Nov 16) */
+function tplFromMore(){ return S.view === "admin" && S.tab.admin === "more"; }
+var baseTpl14 = SHEETS.templates;
+SHEETS.templates = function(o){ var h = baseTpl14(o); if (!tplFromMore()) return h;
+  h = h.replace(/<div class="row tap" data-a="useTemplate" data-id="(\d+)">/g, '<div class="row">')
+    .replace(/<p class="s">Drop a saved line-up onto[\s\S]*?<\/p>/, '<p class="s">Your saved line-ups. Use one from Schedule › Templates.</p>');
+  var i = h.indexOf('<label class="fl" for="tplName">'); if (i >= 0) h = h.slice(0, i);
+  return h + '<div class="btns"><button class="btn" data-a="sheet" data-s="tplNew">Add template</button></div>'; };
+SHEETS.tplNew = function(){ var codes = Object.keys(SVC).filter(function(k){ return !SVC[k].oneoff; });
+  return '<h4>Add template</h4><p class="s">Pick the service, then choose who fills each position.</p><label class="fl" for="tplNName">Name</label><input class="field" id="tplNName" placeholder="Like: Sunday AM, Band C">'
+    + '<label class="fl" for="tplNSvc">Service</label><select class="field" id="tplNSvc">' + codes.map(function(k){ return '<option value="' + esc(k) + '">' + esc(SVC[k].name || k) + '</option>'; }).join("") + '</select>'
+    + '<div class="btns"><button class="btn" data-a="tplCreate">Next</button><button class="btn sec" data-a="sheet" data-s="templates">Back to templates</button></div>'; };
+A.tplCreate = function(){ var sv = (document.getElementById("tplNSvc") || {}).value, nm = ((document.getElementById("tplNName") || {}).value || "").trim();
+  if (!sv) { toast("Add a service first."); return; }
+  S.templates.push({ name: nm || ((SVC[sv] && SVC[sv].name) || sv) + " line-up", sv: sv, by: ADMIN, lines: {} });
+  S.sheet = { s: "tplEdit", id: String(S.templates.length - 1) }; render.same = true; render(); };
+/* My requests: + to start a request on one of your serves (Nov 16) */
+var baseMyReqs14 = SCREENS.myReqs;
+SCREENS.myReqs = function(o){ var r = baseMyReqs14(o); if (!r) return r;
+  r.head = r.head.replace(/<span style="width:40px"><\/span><\/div>$/, '<button class="ic" data-a="sheet" data-s="newReq" aria-label="New request" style="font-size:30px">+</button></div>');
+  r.body = r.body.replace('No requests yet.</div>', 'No requests yet.</div><p class="small" style="margin:8px 4px;text-align:center">Tap + to ask for a swap or for someone to cover a serve.</p>');
+  return r; };
+SHEETS.newReq = function(){ var m = mine().filter(function(x){ var sv = svc(x.sid); return sv && sv.published !== false; });
+  return '<h4>New request</h4><p class="s">Pick the serve you need help with.</p>' + (m.length ? '<div class="grp">' + m.map(function(x){ var sv = svc(x.sid);
+    return '<div class="row tap" data-a="sheet" data-s="cover" data-id="' + x.id + '"><div class="m"><div class="t">' + dShort(sv.date) + ' · ' + esc(SVC[sv.svc] ? SVC[sv.svc].name : sv.svc) + '</div><div class="s">' + esc(x.role) + ' · ' + esc(x.team) + '</div></div><span class="chev">›</span></div>'; }).join("") + '</div>' : '<div class="empty">You have no serves coming up.</div>'); };
+
+
+/* Calendar sync that works: a live feed to subscribe to, and one-tap Google links per serve (Nov 16) */
+function calLive(){ return /workers\.dev$/.test(location.hostname) || location.hostname === "localhost"; }
+function calFeed(){ return APP_URL + "api/cal?n=" + encodeURIComponent(ME || ""); }
+function calStamp(iso, hm, add){ var d = new Date(Date.UTC(+iso.slice(0,4), +iso.slice(5,7) - 1, +iso.slice(8,10), hm[0], hm[1]) - 330 * 60000 + (add || 0)); return d.toISOString().replace(/[-:]/g, "").slice(0,15) + "Z"; }
+function gcalFor(x){ var sv = svc(x.sid), c = SVC[sv.svc] || {}, hm = to24(c.call);
+  return "https://calendar.google.com/calendar/render?action=TEMPLATE&text=" + encodeURIComponent(x.role + " · " + (c.name || sv.svc)) + "&dates=" + calStamp(sv.date, hm) + "/" + calStamp(sv.date, hm, 2 * 3600000) + "&details=" + encodeURIComponent(x.team + ". Call time " + (c.call || "") + ", service " + (c.time || "")) + "&location=" + encodeURIComponent("HCC"); }
+SCREENS.calsync = function(){
+  var st = S.settings || {}, body = '<div class="grp"><label class="row tap"><div class="m"><div class="t">Calendar sync</div><div class="s">Your serves in your phone calendar</div></div><input type="checkbox" class="tog" data-a="setting" data-k="cal"' + (st.cal ? ' checked' : '') + '></label></div>';
+  if (!st.cal) return { head: header("Calendar sync"), body: body + '<p class="small" style="margin:8px 4px 0">Turn it on to put your serves in Google Calendar or your iPhone calendar.</p>' };
+  if (!ME) return { head: header("Calendar sync"), body: body + '<div class="empty">Pick who you are first.</div>' };
+  var feed = calFeed(), list = mine();
+  body += '<div class="lbl">Keep it updated</div><div class="card"><p class="small" style="margin:0 0 8px;color:var(--ink)">Subscribe once. New serves and changes show up on their own.</p>'
+    + '<input class="field" id="calFeed" readonly value="' + esc(feed) + '" aria-label="Your calendar link" style="margin-bottom:8px">'
+    + '<div class="two"><button class="btn sec" data-a="calCopy">Copy link</button><a class="btn soft" style="text-align:center;text-decoration:none" target="_blank" rel="noopener" href="https://calendar.google.com/calendar/r?cid=' + encodeURIComponent(feed.replace(/^https:/, "webcal:")) + '">Google Calendar</a></div>'
+    + '<p class="small" style="margin:8px 0 0">iPhone: Settings, Calendar, Accounts, Add Account, Other, Add Subscribed Calendar, then paste the link.</p></div>'
+    + '<div class="lbl">Add one serve</div>' + (list.length ? '<div class="grp">' + list.map(function(x){ var sv = svc(x.sid); return '<div class="row"><div class="m"><div class="t">' + dShort(sv.date) + ' · ' + esc((SVC[sv.svc] || {}).name || sv.svc) + '</div><div class="s">' + esc(x.role) + '</div></div><a class="chip c-ok" style="text-decoration:none" target="_blank" rel="noopener" href="' + esc(gcalFor(x)) + '">Add</a></div>'; }).join("") + '</div>' : '<div class="empty">Nothing coming up.</div>')
+    + (calLive() && list.length ? '<div class="btns"><button class="btn soft" data-a="icsFile">Download all (.ics file)</button></div>' : '');
+  return { head: header("Calendar sync"), body: body };
+};
+A.calCopy = function(){ var el = document.getElementById("calFeed"), url = calFeed();
+  function sel(){ if (el) { el.focus(); el.select(); } toast("Link selected. Copy it from the box."); }
+  try { navigator.clipboard.writeText(url).then(function(){ toast("Link copied."); }, sel); } catch (e) { sel(); } };
+var baseSetting12 = A.setting;
+A.setting = function(d, el){ baseSetting12(d, el); if (d.k === "cal") render(); };
+var baseIcs12 = A.ics;
+A.icsFile = function(d){ baseIcs12(d || {}); };
+A.ics = function(d){ if (calLive()) return baseIcs12(d);
+  if (!S.settings.cal) { S.settings.cal = true; saveSoon(); } push("calsync", {}); };
+/* Full roster uses the admin Schedule style (Nov 16, user comment "use admin style"):
+   service title with date and time, then each team with filled/total, rows with initials, role and status. */
+var baseVolSched14 = SCREENS["vol:sched"];
+SCREENS["vol:sched"] = function(){
+  var r = baseVolSched14(); if (!on("weekhead") || S.volSchedMode === "mine" || !r) return r;
+  var sel = wkSel(), all = !!S.rosterAll, mt = teamsOf(ME), svs = S.services.filter(function(sv){ return sv.date === sel && sv.published; });
+  var body = '<div class="seg"><button data-a="volMode" data-v="mine">My serves</button><button data-a="volMode" data-v="all" aria-current="true">Full roster</button></div>' + wkStrip();
+  if (!svs.length) body += '<div class="empty">No services on this day.</div>';
+  svs.forEach(function(sv, n){
+    var nm = SVC[sv.svc] ? SVC[sv.svc].name : sv.svc;
+    body += '<div style="display:flex;justify-content:space-between;align-items:flex-end;gap:10px;margin:' + (n ? '22px' : '14px') + ' 4px 8px"><div style="min-width:0"><div class="t" style="font:700 20px/26px var(--font)">' + esc(nm) + '</div><div class="small">' + esc(dLong(sv.date)) + ' · ' + esc(rangeTxt(sv.svc)) + '</div></div>'
+      + (n === 0 && mt.length ? '<a class="small" data-a="rosterAll" style="color:var(--accent);white-space:nowrap;cursor:pointer">' + (all ? 'My teams' : 'All teams') + '</a>' : '') + '</div>' + evBanner(sv.date);
+    var shown = 0;
+    Object.keys(ROLES).forEach(function(team){
+      if (!all && mt.length && mt.indexOf(team) < 0) return;
+      var sl = S.slots.filter(function(x){ return x.sid === sv.id && x.team === team; }); if (!sl.length) return; shown++;
+      body += '<div class="lbl">' + esc(team) + '<span class="small" style="text-transform:none;letter-spacing:0">' + sl.filter(function(x){ return x.person && x.status !== "declined"; }).length + '/' + sl.length + '</span></div><div class="grp">' + sl.map(function(x){
+        var has = x.person && x.status !== "declined";
+        return '<div class="row"><span class="av' + (has ? '' : ' g') + '">' + (x.person ? initials(x.person) : '+') + '</span><div class="m"><div class="t">' + esc(x.person ? x.person + (x.person === ME ? ' (you)' : '') : 'Open spot') + '</div><div class="s">' + esc(x.role) + '</div></div>' + statusChip(x) + '</div>'; }).join("") + '</div>';
+    });
+    if (!shown) body += '<div class="empty">No spots for your teams.</div>';
+  });
+  r.body = body; return r;
+};
+/* event banner also on My serves for the picked day (Nov 16) */
+var baseVolSched15 = SCREENS["vol:sched"];
+SCREENS["vol:sched"] = function(){ var r = baseVolSched15(); if (!r || !on("weekhead") || S.volSchedMode !== "mine") return r;
+  var sel = wkSel(), lb = '<div class="lbl">' + esc(dLong(sel)) + '</div>', ev = evBanner(sel);
+  if (ev && r.body.indexOf(lb) >= 0) r.body = r.body.replace(lb, lb + ev); return r; };
+
+/* To-dos: an empty list said "All done" and opened a blank page (Nov 16, user comment "nothing shows up") */
+var baseTodosVol14 = SCREENS.todosVol;
+SCREENS.todosVol = function(o){ var r = baseTodosVol14(o); if (todosFor(ME).length) return r;
+  r.body = '<div class="empty">No to-dos for you right now.</div><p class="small" style="margin:8px 4px">When a team leader adds one, like reading the team guidelines, it shows here with a Done button.</p>'; return r; };
+var baseVolMore14 = SCREENS["vol:more"];
+SCREENS["vol:more"] = function(o){ var r = baseVolMore14(o);
+  if (r && on("onboarding") && !todosFor(ME).length) r.body = r.body.replace(/(<div class="t">To-dos<\/div><div class="s">)All done(<\/div>)/, '$1None right now$2');
+  return r; };
+
+/* Checklists can go to everyone on a service, not one team only (Nov 16, user comment "checklist not showing from admin") */
+ckFor = function(team, sv){ return on("checklists") ? S.checklists.filter(function(k){ return (k.team === team || k.team === "Everyone") && k.svc === sv; }) : []; };
+var baseAddCk14 = SHEETS.addCk;
+SHEETS.addCk = function(o){ return baseAddCk14(o)
+  .replace('<select class="field" id="ckTeam">', '<select class="field" id="ckTeam"><option>Everyone</option>')
+  .replace('Volunteers on that team tick it off on their serve details.', 'It shows on the serve details of everyone on that team for that service. Pick Everyone to show it to every team.'); };
+var baseAddCk15 = SHEETS.addCk; /* team leaders: own teams only, no Everyone (Nov 16) */
+SHEETS.addCk = function(o){ var h = baseAddCk15(o); return scoped() ? h.replace('<select class="field" id="ckTeam"><option>Everyone</option>', '<select class="field" id="ckTeam">').replace(' Pick Everyone to show it to every team.', '') : h; };
+
+var baseLocal7 = localDefaults;
+localDefaults = function(){ var o = baseLocal7(); o.msgTab = "chats"; return o; };
+var baseRender7 = render;
+render = function(){ if (ME) ADMIN = ME; baseRender7(); };
 
 /* render: wait for the roster, then ask who you are or for the leader PIN */
 var baseRender = render;
