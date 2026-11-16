@@ -1,4 +1,4 @@
-<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<!doctype html><html><head><meta charset=utf8><link rel="manifest" href="/manifest.webmanifest"><link rel="apple-touch-icon" href="/apple-touch-icon.png"><link rel="icon" href="/icon-192.png"><meta name="theme-color" content="#FFFEFB"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-title" content="Roster"><meta name="apple-mobile-web-app-status-bar-style" content="default"><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
 <title>HCC Roster</title>
 <meta name="claude:viewport-fit-sides" content="cover">
 <style>
@@ -2807,6 +2807,58 @@ SCREENS.who = function(o){
   if (HUBME.role === "admin") r.body = r.body.replace('<div class="s">For team leaders, needs the leader PIN</div>', '<div class="s">Your HCC Hub sign-in opens it</div>');
   r.body += '<div class="lbl">HCC Hub</div><div class="grp">' + row("Signed in as " + HUBME.hubName, (HUBME.role === "admin" ? "Admin" : HUBME.role === "leader" ? "Team leader" : "Volunteer") + (hubName() ? " · Roster name " + hubName() : ""), "hubSignOut", "") + '</div><p class="small" style="margin:6px 4px 0">Tap to sign out.</p>';
   return r; }; });
+
+/* ---------- install on the phone (Nov 16): Home Screen app, offline copy, sign-in handed over from the browser ---------- */
+var STANDALONE = (window.matchMedia && matchMedia("(display-mode: standalone)").matches) || window.navigator.standalone === true;
+var INSTALL_EVT = null, HANDOFF_N = "", HANDOFF_T = null;
+var IOS = /iP(hone|ad|od)/.test(navigator.userAgent) || (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1);
+if ("serviceWorker" in navigator && location.protocol === "https:" && /workers\.dev$|hyderabadchristiancenter\.com$/.test(location.hostname)) {
+  window.addEventListener("load", function(){ navigator.serviceWorker.register("/sw.js").catch(function(){}); });
+}
+window.addEventListener("beforeinstallprompt", function(e){ e.preventDefault(); INSTALL_EVT = e; if (loaded) { render.same = true; render(); } });
+window.addEventListener("appinstalled", function(){ INSTALL_EVT = null; toast("Roster is on your Home Screen."); });
+A.installApp = function(){
+  if (INSTALL_EVT) { INSTALL_EVT.prompt(); INSTALL_EVT.userChoice.then(function(){ INSTALL_EVT = null; render.same = true; render(); }); return; }
+  INSTALL_OPEN = !INSTALL_OPEN; render.same = true; render(); };
+var INSTALL_OPEN = false;
+function installSteps(){ return IOS
+    ? '<p class="small" style="margin:10px 0 0;color:var(--ink)">In Safari: tap the Share button at the bottom (the square with an arrow), then <b>Add to Home Screen</b>, then <b>Add</b>. Using Chrome? Tap Share at the top right instead.</p>'
+    : '<p class="small" style="margin:10px 0 0;color:var(--ink)">In Chrome: tap the menu (three dots) at the top right, then <b>Install app</b> or <b>Add to Home screen</b>.</p>'; }
+function installCard(){ if (STANDALONE) return '';
+  return '<div class="card" style="margin-bottom:12px;display:flex;align-items:center;gap:12px"><img src="/icon-192.png" alt="" width="44" height="44" style="border-radius:10px;flex:none"><div style="flex:1;min-width:0"><div class="t" style="font:600 16px/21px var(--font)">Get the Roster app</div><div class="small">Add it to your Home Screen</div></div><button class="btn sm" style="width:auto" data-a="installApp">' + (INSTALL_OPEN && !INSTALL_EVT ? 'Hide' : 'Install') + '</button></div>' + (INSTALL_OPEN && !INSTALL_EVT ? '<div class="card" style="margin:-4px 0 12px">' + installSteps() + '<p class="small" style="margin:8px 0 0">Then open Roster from its icon and sign in once with HCC Hub.</p></div>' : ''); }
+/* in the installed app, sign-in happens in the phone's browser and comes back here by a one-time code */
+function hexNonce(){ var a = new Uint8Array(16); crypto.getRandomValues(a); return Array.prototype.map.call(a, function(b){ return ("0" + b.toString(16)).slice(-2); }).join(""); }
+function pollHandoff(){
+  if (!HANDOFF_N) return;
+  fetch("/api/handoff?n=" + HANDOFF_N, { cache: "no-store", credentials: "same-origin" }).then(function(r){ return r.json(); }).then(function(j){
+    if (j && j.ok) { HANDOFF_N = ""; clearInterval(HANDOFF_T); LS.set("roster.handoff", null); location.replace("/"); }
+  }, function(){});
+}
+document.addEventListener("visibilitychange", function(){ if (document.visibilityState === "visible") pollHandoff(); });
+var baseHubSignIn16 = A.hubSignIn;
+A.hubSignIn = function(d, el){
+  if (!STANDALONE) return baseHubSignIn16(d, el);
+  HANDOFF_N = hexNonce(); LS.set("roster.handoff", HANDOFF_N);
+  window.open("/auth/hub?n=" + HANDOFF_N, "_blank");
+  clearInterval(HANDOFF_T); HANDOFF_T = setInterval(pollHandoff, 2000); setTimeout(function(){ clearInterval(HANDOFF_T); }, 10 * 60000);
+  render(); };
+A.hubWaitCancel = function(){ HANDOFF_N = ""; clearInterval(HANDOFF_T); LS.set("roster.handoff", null); render(); };
+SCREENS.hubWait = function(){
+  return { head: plainHead("Signing in"), noTabs: true, body: '<div class="card"><div class="t" style="font:600 17px/22px var(--font)">Finish in your browser</div><p class="small" style="margin:6px 0 12px">Sign in to HCC Hub in the browser that just opened and tap Roster. Then come back here: Roster opens on its own.</p><button class="btn soft" data-a="hubSignIn">Open the browser again</button></div><div class="grp mt">' + row("Cancel", "", "hubWaitCancel", "") + '</div>' }; };
+/* the browser after a sign-in that came from the app */
+var HANDOFF_DONE = /[?&]handoff=1/.test(location.search) && !STANDALONE;
+SCREENS.handoffDone = function(){
+  return { head: plainHead("Signed in"), noTabs: true, body: '<div class="card" style="text-align:center"><img src="/icon-192.png" alt="" width="64" height="64" style="border-radius:14px"><div class="t" style="font:600 18px/24px var(--font);margin-top:10px">You\'re signed in</div><p class="small" style="margin:6px 0 14px">Go back to the Roster app on your Home Screen. It opens signed in.</p><button class="btn sec" data-a="handoffHere">Keep using Roster here</button></div>' }; };
+A.handoffHere = function(){ HANDOFF_DONE = false; history.replaceState(null, "", "/"); S.stack = []; render(); };
+/* the screens: install card on sign-in and More; the two sign-in hand-over screens */
+var baseRender16 = render;
+render = function(){
+  if (loaded && HANDOFF_DONE && (!S.stack[0] || S.stack[0].s !== "handoffDone")) { S.stack = [{ s: "handoffDone" }]; S.sheet = null; }
+  if (loaded && STANDALONE && !HANDOFF_N && LS.get("roster.handoff") && !HUBME) { HANDOFF_N = LS.get("roster.handoff"); clearInterval(HANDOFF_T); HANDOFF_T = setInterval(pollHandoff, 2000); pollHandoff(); }
+  baseRender16(); };
+var baseWhoScreen16 = SCREENS.who;
+SCREENS.who = function(o){ if (HANDOFF_DONE) return SCREENS.handoffDone(); if (HANDOFF_N && !HUBME) return SCREENS.hubWait(); var r = baseWhoScreen16(o); if (r && !HUBME) r.body = installCard() + r.body; return r; };
+["vol:more", "vol:home"].forEach(function(k){ var base = SCREENS[k]; if (!base) return; SCREENS[k] = function(o){ var r = base(o); if (r && k === "vol:more") r.body = installCard() + r.body; return r; }; });
 Promise.all([load(), loadMe()]).then(function(){ hubApply(); loaded = true; render(); }, function(){ loadErr = "Couldn't load the roster. Check your connection and refresh."; render(); });
 })();
 </script>

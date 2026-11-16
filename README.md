@@ -35,3 +35,15 @@ names are never changed. Their phone and email go to Roster's contacts, which Hu
 Someone new and active is added to the people list with no team; removed or deleted people are marked,
 not deleted. Answers `{ ok, action: linked | created | updated | deactivated | unchanged, name }`.
 `GET /hub/teams`: `{ teams }` A to Z, for the Hub's team-leader boxes. Leaders are set in HCC Hub.
+
+## Install on a phone
+
+Roster is an installable web app: `public/manifest.webmanifest`, icons (`icon-192.png`, `icon-512.png`,
+`icon-maskable-512.png`, `apple-touch-icon.png`) and `public/sw.js` (network first, so a deploy never strands
+a phone on an old copy; the last good copy opens offline; `/api`, `/auth`, `/hub` are never cached). The
+sign-in screen and More show "Get the Roster app" (Android's install prompt, or the Home Screen steps on
+iPhone). An installed app keeps its own cookies apart from the phone's browser, where HCC Hub signs people
+in, so in the app "Sign in with HCC Hub" opens `/auth/hub?n=<random>` in the browser: that browser keeps `n`
+in a cookie (`roster_nonce`, SameSite=None, 15 minutes) through the Hub round trip, the POST back saves the
+new session under `n` for 10 minutes and shows "You're signed in, go back to the app", and the app collects
+it once from `GET /api/handoff?n=`.

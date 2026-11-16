@@ -162,8 +162,41 @@ export async function rosterNameFor(sess, store) {
  * POST /auth/hub (form idToken, as the Hub's tile sends it): checks the token, sets the session
  * cookie and goes to the app. GET /auth/hub goes to the Hub to sign in.
  */
+export const NONCE_COOKIE = "roster_nonce";
+const NONCE_RE = /^[0-9a-f]{32,64}$/;
+const HANDOFF_MS = 10 * 60_000;
+/**
+ * The installed app (Home Screen) has its own cookies, apart from the phone's browser where the Hub signs
+ * people in. So the app opens /auth/hub?n=<random> in the browser; that browser keeps n in a cookie through
+ * the Hub round trip; the POST back saves the new session under n for 10 minutes; the app then collects it
+ * once from /api/handoff?n=<same>. Only the app that made n knows it.
+ */
+async function saveHandoff(store, nonce, value, now = Date.now()) {
+  const all = (await store.getItem("handoffs")) || {};
+  for (const k of Object.keys(all)) if (all[k].exp <= now) delete all[k];
+  all[nonce] = { v: value, exp: now + HANDOFF_MS };
+  await store.putItem("handoffs", all);
+}
+/** GET /api/handoff?n=: sets the session saved for n on this app, once. */
+export async function handleHandoff(request, store, now = Date.now()) {
+  if (request.method !== "GET") return new Response("Method not allowed", { status: 405 });
+  const n = new URL(request.url).searchParams.get("n") || "";
+  if (!NONCE_RE.test(n)) return new Response(JSON.stringify({ ok: false }), { status: 400, headers: { "content-type": "application/json", "cache-control": "no-store" } });
+  const all = (await store.getItem("handoffs")) || {}, h = all[n];
+  if (!h || h.exp <= now) return new Response(JSON.stringify({ ok: false, waiting: true }), { headers: { "content-type": "application/json", "cache-control": "no-store" } });
+  delete all[n];
+  await store.putItem("handoffs", all);
+  return new Response(JSON.stringify({ ok: true }), { headers: { "content-type": "application/json", "cache-control": "no-store", "set-cookie": sessionCookie(h.v, SESSION_DAYS * 86400) } });
+}
+
 export async function handleAuthHub(request, env, store, fetchFn = fetch) {
-  if (request.method === "GET") return Response.redirect(HUB_URL + "/#rota", 302);
+  if (request.method === "GET") {
+    const n = new URL(request.url).searchParams.get("n") || "";
+    const headers = { location: HUB_URL + "/#rota", "cache-control": "no-store" };
+    // SameSite=None: the Hub's POST back is a cross-site form post, which Lax cookies don't go with.
+    if (NONCE_RE.test(n)) headers["set-cookie"] = NONCE_COOKIE + "=" + n + "; Path=/auth/hub; HttpOnly; Secure; SameSite=None; Max-Age=900";
+    return new Response(null, { status: 302, headers });
+  }
   if (request.method !== "POST") return new Response("Method not allowed", { status: 405 });
   let token = "";
   try {
@@ -179,7 +212,15 @@ export async function handleAuthHub(request, env, store, fetchFn = fetch) {
       : page("That sign-in didn't work. Open Roster from HCC Hub again.", 401);
   }
   const value = await makeSession(await sessionSecret(env, store), r.claims);
-  return new Response(null, { status: 303, headers: { location: "/", "set-cookie": sessionCookie(value, SESSION_DAYS * 86400), "cache-control": "no-store" } });
+  const n = cookieOf(request, NONCE_COOKIE);
+  const headers = new Headers({ location: "/", "cache-control": "no-store" });
+  headers.append("set-cookie", sessionCookie(value, SESSION_DAYS * 86400));
+  if (NONCE_RE.test(n)) {
+    await saveHandoff(store, n, value);
+    headers.set("location", "/?handoff=1");
+    headers.append("set-cookie", NONCE_COOKIE + "=; Path=/auth/hub; HttpOnly; Secure; SameSite=None; Max-Age=0");
+  }
+  return new Response(null, { status: 303, headers });
 }
 
 /** POST /auth/signout: clears the session cookie. */

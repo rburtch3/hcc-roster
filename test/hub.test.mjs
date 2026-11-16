@@ -146,3 +146,18 @@ test("sign out clears the cookie", async () => {
   const r = hub.handleSignOut(new Request("https://x/auth/signout", { method: "POST" }));
   assert.match(r.headers.get("set-cookie"), /roster_session=;.*Max-Age=0/);
 });
+
+test("installed app: the browser's sign-in is handed to the app once, by its random code", async () => {
+  hub.resetHubKeys();
+  const s = mem(), n = "a".repeat(32);
+  const g = await hub.handleAuthHub(new Request("https://x/auth/hub?n=" + n), env, s);
+  assert.match(g.headers.get("set-cookie"), /roster_nonce=a{32};.*SameSite=None/);
+  const body = new URLSearchParams({ idToken: await token({ sub: "u-app", hub: { rota: "member" } }) });
+  const p = await hub.handleAuthHub(new Request("https://x/auth/hub", { method: "POST", body, headers: { cookie: "roster_nonce=" + n } }), env, s, fetchKeys);
+  assert.equal(p.headers.get("location"), "/?handoff=1");
+  const h = await hub.handleHandoff(new Request("https://x/api/handoff?n=" + n), s);
+  const c = /roster_session=([^;]*)/.exec(h.headers.get("set-cookie"))[1];
+  assert.equal((await hub.readSession("test-secret", c)).sub, "u-app");
+  assert.equal((await (await hub.handleHandoff(new Request("https://x/api/handoff?n=" + n), s)).json()).waiting, true);
+  assert.equal((await hub.handleHandoff(new Request("https://x/api/handoff?n=zz"), s)).status, 400);
+});
