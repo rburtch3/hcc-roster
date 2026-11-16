@@ -1236,7 +1236,7 @@ SHEETS.announce = function(){
   + '<div class="grp mt"><label class="row tap"><div class="m"><div class="t">Also share on WhatsApp</div><div class="s">Opens WhatsApp for you to send</div></div><input type="checkbox" class="tog"></label></div>'
   + '<div class="btns"><button class="btn" data-a="postAnn">Post</button></div>'; };
 SHEETS.shout = function(o){ return '<h4>Shout-out for ' + esc(o.id) + '</h4><p class="s">Shows on ' + esc(teamsOf(o.id)[0] || "their team") + '\'s Messages, and ' + esc(o.id) + ' gets a notification.</p><div class="pick" id="shBadge">' + ["Faithful servant","Team player","Above and beyond","Early bird"].map(function(b, i){ return '<button data-a="pickReason" aria-pressed="' + (i === 0) + '">' + b + '</button>'; }).join("") + '</div><label class="fl" for="shText">Message (optional)</label><textarea class="field" id="shText" placeholder="What they did"></textarea><div class="btns"><button class="btn" data-a="sendShout" data-id="' + esc(o.id) + '">Send shout-out</button></div>'; };
-SHEETS.addEvent = function(){ var sv = svc(S.adminSid); return '<h4>Add an event</h4><p class="s">Shows as a banner on that day for leaders and volunteers.</p><label class="fl" for="evDate">Day</label><select class="field" id="evDate">' + upc().filter(function(s, i, a){ return a.findIndex(function(t){ return t.date === s.date; }) === i; }).map(function(s){ return '<option value="' + s.date + '"' + (s.date === sv.date ? ' selected' : '') + '>' + dShort(s.date) + '</option>'; }).join("") + '</select><label class="fl" for="evTitle">Title</label><input class="field" id="evTitle" placeholder="Like: Baptism Sunday"><label class="fl" for="evNote">Note (optional)</label><input class="field" id="evNote" placeholder="What people should know"><div class="btns"><button class="btn" data-a="saveEvent">Add event</button></div>'; };
+SHEETS.addEvent = function(){ var sv = svc(S.adminSid); return '<h4>Add an event</h4><p class="s">Shows as a banner on that day for leaders and volunteers.</p><label class="fl" for="evDate">Day</label><input class="field" id="evDate" type="date" min="' + TODAY + '" value="' + (function(){ var d = typeof adminDaySel === "function" ? adminDaySel() : (sv ? sv.date : TODAY); return d < TODAY ? TODAY : d; })() + '"><label class="fl" for="evTitle">Title</label><input class="field" id="evTitle" placeholder="Like: Baptism Sunday"><label class="fl" for="evNote">Note (optional)</label><input class="field" id="evNote" placeholder="What people should know"><div class="btns"><button class="btn" data-a="saveEvent">Add event</button></div>'; };
 SHEETS.addTodo = function(){ return '<h4>Add a to-do</h4><p class="s">New volunteers on these teams see it on Home until they confirm.</p><label class="fl" for="tdTitle">Title</label><input class="field" id="tdTitle" placeholder="Like: Child-safety policy"><label class="fl" for="tdText">What to do</label><input class="field" id="tdText" placeholder="Like: Read the policy and confirm"><label class="fl">Teams</label><div class="pick" id="tdTeams">' + Object.keys(POOL).map(function(t){ return '<button data-a="toggleBtn" aria-pressed="false">' + esc(t) + '</button>'; }).join("") + '</div><div class="btns"><button class="btn" data-a="saveTodo">Add to-do</button></div>'; };
 
 /* ---------- actions ---------- */
@@ -1260,7 +1260,7 @@ A.publish = function(){ var sv = svc(S.adminSid); sv.published = true; var ch = 
   S.slots.forEach(function(x){ if (x.sid === sv.id) x.dirty = false; }); S.sheet = null; toast("Published. " + n + " volunteer" + (n === 1 ? "" : "s") + " told."); render.same = true; render(); };
 A.postAnn = function(){ var to = document.querySelector("#anTo [aria-pressed=true]"); S.announcements.unshift({ id: "a" + Date.now(), who: ADMIN, to: to ? to.textContent : "Everyone", aud: to && to.dataset.sid, when: "Just now", title: document.getElementById("anTitle").value || "Announcement", text: document.getElementById("anText").value }); S.notifs.unshift({ t: "New announcement", s: document.getElementById("anTitle").value, when: "Now" }); S.sheet = null; S.msgTab = "ann"; toast(to && to.dataset.sid ? "Posted to the people serving then." : "Posted. Volunteers see it in Messages."); render(); };
 A.sendShout = function(d){ var b = document.querySelector("#shBadge [aria-pressed=true]"); S.shouts.unshift({ to: d.id, from: S.view === "admin" ? ADMIN : ME, badge: b ? b.textContent : "Thank you", text: (document.getElementById("shText").value || "").trim(), when: "Just now", team: teamsOf(d.id)[0] || "" }); S.sheet = null; toast("Shout-out sent to " + d.id + "."); render.same = true; render(); };
-A.saveEvent = function(){ var t = (document.getElementById("evTitle").value || "").trim(); if (!t) return; S.events.push({ id: "e" + Date.now(), date: document.getElementById("evDate").value, title: t, note: document.getElementById("evNote").value }); S.sheet = null; toast("Event added. It shows on that day for everyone."); render.same = true; render(); };
+A.saveEvent = function(){ var t = (document.getElementById("evTitle").value || "").trim(); if (!t) return; if (!/^\d{4}-\d{2}-\d{2}$/.test(document.getElementById("evDate").value || "")) { toast("Pick a day for the event."); return; } S.events.push({ id: "e" + Date.now(), date: document.getElementById("evDate").value, title: t, note: document.getElementById("evNote").value }); S.sheet = null; toast("Event added. It shows on that day for everyone."); render.same = true; render(); };
 A.toggleBtn = function(d, el){ el.setAttribute("aria-pressed", String(el.getAttribute("aria-pressed") !== "true")); };
 A.saveTodo = function(){ var teams = [].map.call(document.querySelectorAll("#tdTeams [aria-pressed=true]"), function(b){ return b.textContent; }); S.todos.push({ id: "t" + Date.now(), title: document.getElementById("tdTitle").value || "To-do", text: document.getElementById("tdText").value, teams: teams }); S.sheet = null; toast("To-do added."); render.same = true; render(); };
 app.addEventListener("submit", function(e){ var f = e.target; if (f.dataset.a !== "addItem") return; e.stopImmediatePropagation(); e.preventDefault(); var v = f.querySelector("input").value.trim(); if (!v) return; S.checklists.filter(function(k){ return k.id === f.dataset.id; })[0].items.push(v); render.same = true; render(); }, true);
@@ -2530,6 +2530,45 @@ SHEETS.wkMonth = function(){ var sel = dt(wkSel()), t = dt(TODAY), out = [];
   return '<h4>Pick a month</h4><div class="grp">' + out.map(function(d){ var cur = d.getUTCMonth() === sel.getUTCMonth() && d.getUTCFullYear() === sel.getUTCFullYear(), iso = d.toISOString().slice(0, 10);
     return '<div class="row tap" data-a="wkMonth" data-v="' + iso + '"><div class="m"><div class="t">' + MONTHS[d.getUTCMonth()] + ' ' + d.getUTCFullYear() + '</div></div>' + (cur ? '<span class="chip c-acc">Showing</span>' : '<span class="chev">›</span>') + '</div>'; }).join("") + '</div>'; };
 A.wkMonth = function(d){ var first = d.v, t = TODAY; S.wkDay = first.slice(0, 7) === t.slice(0, 7) ? t : first; S.sheet = null; render(); };
+
+/* admin Schedule uses the same month + week strip header as volunteers (Nov 16) */
+LOCAL.adminDay = 1;
+(function(){ var st = document.createElement("style"); st.textContent =
+  '.wkd i.on.dr{background:transparent;box-shadow:inset 0 0 0 1.5px var(--badge)}'
+  + '.wkpick{margin:0 0 4px}.wkpick button small{font:500 12px/16px var(--font);color:var(--badge);margin-left:6px}'
+  + '.hd .wkl{display:flex;align-items:center}';
+  document.head.appendChild(st); })();
+function svcsOn(iso){ return S.services.filter(function(sv){ return sv.date === iso; }); }
+function adminDaySel(){ var sv = svc(S.adminSid), a = S.adminDay;
+  if (a && (!sv || a.sid === S.adminSid)) return a.d; return sv ? sv.date : TODAY; }
+function adminPickDay(iso){ var l = svcsOn(iso); if (l.length) S.adminSid = l[0].id; S.adminDay = { d: iso, sid: S.adminSid }; }
+var baseWkSel13 = wkSel;
+wkSel = function(){ return S.view === "admin" ? adminDaySel() : baseWkSel13(); };
+var baseMyDates13 = myDates;
+myDates = function(){ if (S.view !== "admin") return baseMyDates13(); var o = {};
+  S.services.forEach(function(sv){ if (sv.published) o[sv.date] = 1; else if (!o[sv.date]) o[sv.date] = 2; }); return o; };
+var baseWkStrip13 = wkStrip;
+wkStrip = function(){ var h = baseWkStrip13(); if (S.view !== "admin") return h; var d = myDates();
+  return h.replace(/data-v="(\d{4}-\d{2}-\d{2})"([^>]*)><small>([\s\S]*?)<i class="on"><\/i>/g, function(m, iso, rest, mid){ return 'data-v="' + iso + '"' + rest.replace(', you serve', d[iso] === 2 ? ', draft service' : ', has services') + '><small>' + mid + '<i class="on' + (d[iso] === 2 ? ' dr' : '') + '"></i>'; }); };
+var baseWkDay13 = A.wkDay, baseWkToday13 = A.wkToday, baseWkMonth13 = A.wkMonth;
+A.wkDay = function(d){ if (S.view !== "admin") return baseWkDay13(d); adminPickDay(d.v); render.same = true; render(); };
+A.wkToday = function(){ if (S.view !== "admin") return baseWkToday13(); adminPickDay(TODAY); render(); };
+A.wkMonth = function(d){ if (S.view !== "admin") return baseWkMonth13(d); adminPickDay(d.v.slice(0, 7) === TODAY.slice(0, 7) ? TODAY : d.v); S.sheet = null; render(); };
+var baseSched13 = SCREENS["admin:sched"];
+SCREENS["admin:sched"] = function(){ if (!on("weekhead")) return baseSched13();
+  var day = adminDaySel(), list = svcsOn(day), sv = svc(S.adminSid), has = sv && sv.date === day;
+  var plus = '<button class="ic" data-a="sheet" data-s="newOneOff" aria-label="Add a service" style="font-size:30px">+</button>';
+  var hd = wkHead().replace('<div class="hd">', '<div class="hd"><span class="wkl">').replace('</button><h3>', '</button>' + plus + '</span><h3>');
+  var strip = wkStrip() + (list.length > 1 ? '<div class="pick wkpick">' + list.map(function(x){ return '<button data-a="openSvc" data-id="' + x.id + '" aria-pressed="' + (x.id === S.adminSid) + '">' + esc(SVC[x.svc] ? SVC[x.svc].name : x.svc) + (x.published ? '' : '<small>Draft</small>') + '</button>'; }).join("") + '</div>' : '');
+  if (!has) return { head: hd.replace('<span style="width:40px"></span></div>', '<span style="width:80px"></span></div>'), body: strip + '<div class="lbl">' + esc(dLong(day)) + '</div><div class="empty">No services on this day.</div><div class="btns"><button class="btn soft" data-a="sheet" data-s="newOneOff">Add a service</button></div>' };
+  var r = baseSched13(); if (!r) return r;
+  var pub = (r.head.match(/<button class="ic txt"[\s\S]*?<\/button>/) || [''])[0];
+  r.head = hd.replace('<span style="width:40px"></span></div>', (pub || '<span style="width:40px"></span>') + '</div>');
+  r.body = r.body.replace(/^<div class="strip">[\s\S]*?<\/div>/, strip);
+  return r; };
+var baseOpenSvc13 = A.openSvc;
+A.openSvc = function(d){ S.adminDay = null; return baseOpenSvc13(d); };
+
 
 
 /* Calendar sync that works: a live feed to subscribe to, and one-tap Google links per serve (Nov 16) */
