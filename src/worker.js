@@ -3,6 +3,7 @@
 import { DurableObject } from "cloudflare:workers";
 import { rowsForWeek, syncRows, publishTest, publishWeek, TEST_ROWS } from "./sevenshifts.js";
 import { handleAuthHub, handleSignOut, handleMe, sessionOf, rosterNameFor } from "./hub.js";
+import { handleHubPeople, handleHubTeams } from "./hubpeople.js";
 
 const MAX = 1_000_000;
 const MAX_CONTACTS = 200_000;
@@ -281,6 +282,8 @@ export default {
     if (url.pathname === "/auth/hub") return handleAuthHub(request, env, store());
     if (url.pathname === "/auth/signout") return handleSignOut(request);
     if (url.pathname === "/api/me") return handleMe(request, env, store());
+    if (url.pathname === "/hub/people") return handleHubPeople(request, env, store());
+    if (url.pathname === "/hub/teams") return handleHubTeams(request, store());
     const routes = { "/api/state": handleState, "/api/contacts": handleContacts, "/api/emergency": handleEmergency, "/api/cal": handleCal };
     if (url.pathname === "/api/unlock") return handleUnlock(request, store());
     if (url.pathname === "/api/vpin") return handleVolPin(request, store(), Date.now(), env);

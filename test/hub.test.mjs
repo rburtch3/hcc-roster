@@ -6,7 +6,8 @@ const hub = await import("../src/hub.js");
 const src = readFileSync(new URL("../src/worker.js", import.meta.url), "utf8")
   .replace('import { DurableObject } from "cloudflare:workers";', "class DurableObject {}")
   .replace('"./sevenshifts.js"', JSON.stringify(new URL("../src/sevenshifts.js", import.meta.url).href))
-  .replace('"./hub.js"', JSON.stringify(new URL("../src/hub.js", import.meta.url).href));
+  .replace('"./hub.js"', JSON.stringify(new URL("../src/hub.js", import.meta.url).href))
+  .replace('"./hubpeople.js"', JSON.stringify(new URL("../src/hubpeople.js", import.meta.url).href));
 const mod = await import("data:text/javascript," + encodeURIComponent(src));
 
 const PID = "hcc-follow-up-72300";

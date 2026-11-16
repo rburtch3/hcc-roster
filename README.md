@@ -24,3 +24,14 @@ kept in the Durable Object).
   an admin, like a volunteer PIN.
 - **Teams and positions stay in Roster** (who is on which team, which positions they fill).
 - `GET /api/me`, `POST /auth/signout`. The leader PIN and name list still work during the switch.
+
+## People from HCC Hub
+
+`POST /hub/people` (Bearer Google ID token from the Hub's functions account
+`575810669504-compute@developer.gserviceaccount.com`, audience `hcc-roster-people`; `src/hubpeople.js`).
+Body `{ hubId, name, whatsapp, phone, email, role, teams, status: active | removed | deleted }`. The person
+is found by Hub ID (`hubPeople` in the store), else phone (last 10 digits), else email, else exact name;
+names are never changed. Their phone and email go to Roster's contacts, which Hub sign-in matches on.
+Someone new and active is added to the people list with no team; removed or deleted people are marked,
+not deleted. Answers `{ ok, action: linked | created | updated | deactivated | unchanged, name }`.
+`GET /hub/teams`: `{ teams }` A to Z, for the Hub's team-leader boxes. Leaders are set in HCC Hub.
