@@ -2599,6 +2599,31 @@ var baseIcs12 = A.ics;
 A.icsFile = function(d){ baseIcs12(d || {}); };
 A.ics = function(d){ if (calLive()) return baseIcs12(d);
   if (!S.settings.cal) { S.settings.cal = true; saveSoon(); } push("calsync", {}); };
+/* Full roster uses the admin Schedule style (Nov 16, user comment "use admin style"):
+   service title with date and time, then each team with filled/total, rows with initials, role and status. */
+var baseVolSched14 = SCREENS["vol:sched"];
+SCREENS["vol:sched"] = function(){
+  var r = baseVolSched14(); if (!on("weekhead") || S.volSchedMode === "mine" || !r) return r;
+  var sel = wkSel(), all = !!S.rosterAll, mt = teamsOf(ME), svs = S.services.filter(function(sv){ return sv.date === sel && sv.published; });
+  var body = '<div class="seg"><button data-a="volMode" data-v="mine">My serves</button><button data-a="volMode" data-v="all" aria-current="true">Full roster</button></div>' + wkStrip();
+  if (!svs.length) body += '<div class="empty">No services on this day.</div>';
+  svs.forEach(function(sv, n){
+    var nm = SVC[sv.svc] ? SVC[sv.svc].name : sv.svc;
+    body += '<div style="display:flex;justify-content:space-between;align-items:flex-end;gap:10px;margin:' + (n ? '22px' : '14px') + ' 4px 8px"><div style="min-width:0"><div class="t" style="font:700 20px/26px var(--font)">' + esc(nm) + '</div><div class="small">' + esc(dLong(sv.date)) + ' · ' + esc(rangeTxt(sv.svc)) + '</div></div>'
+      + (n === 0 && mt.length ? '<a class="small" data-a="rosterAll" style="color:var(--accent);white-space:nowrap;cursor:pointer">' + (all ? 'My teams' : 'All teams') + '</a>' : '') + '</div>' + evBanner(sv.date);
+    var shown = 0;
+    Object.keys(ROLES).forEach(function(team){
+      if (!all && mt.length && mt.indexOf(team) < 0) return;
+      var sl = S.slots.filter(function(x){ return x.sid === sv.id && x.team === team; }); if (!sl.length) return; shown++;
+      body += '<div class="lbl">' + esc(team) + '<span class="small" style="text-transform:none;letter-spacing:0">' + sl.filter(function(x){ return x.person && x.status !== "declined"; }).length + '/' + sl.length + '</span></div><div class="grp">' + sl.map(function(x){
+        var has = x.person && x.status !== "declined";
+        return '<div class="row"><span class="av' + (has ? '' : ' g') + '">' + (x.person ? initials(x.person) : '+') + '</span><div class="m"><div class="t">' + esc(x.person ? x.person + (x.person === ME ? ' (you)' : '') : 'Open spot') + '</div><div class="s">' + esc(x.role) + '</div></div>' + statusChip(x) + '</div>'; }).join("") + '</div>';
+    });
+    if (!shown) body += '<div class="empty">No spots for your teams.</div>';
+  });
+  r.body = body; return r;
+};
+
 var baseLocal7 = localDefaults;
 localDefaults = function(){ var o = baseLocal7(); o.msgTab = "chats"; return o; };
 var baseRender7 = render;
