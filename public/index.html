@@ -1138,7 +1138,7 @@ SCREENS["admin:sched"] = function(){
   var body = '<div class="strip">' + upc().map(function(s){ var d = dt(s.date); return '<button data-a="openSvc" data-id="' + s.id + '"' + (s.id === sv.id ? ' aria-current="true"' : '') + '><small>' + DOW[d.getUTCDay()] + ' ' + (s.svc.split(" ")[1] || s.svc) + '</small>' + d.getUTCDate() + (s.published ? '' : '<small>Draft</small>') + '</button>'; }).join("") + '</div>';
   body += '<div style="display:flex;justify-content:space-between;align-items:center;margin:14px 4px 8px"><div><div class="t" style="font:700 20px/26px var(--font)">' + SVC[sv.svc].name + '</div><div class="small">' + dLong(sv.date) + ' · ' + SVC[sv.svc].time + (sv.published ? '' : ' · <b style="color:var(--warn)">Draft, volunteers can\'t see it</b>') + '</div></div></div>';
   body += evBanner(sv.date);
-  body += '<div class="pick mt"><button data-a="sheet" data-s="copy">Copy last week</button>' + (on("templates") ? '<button data-a="sheet" data-s="templates">Templates</button>' : '') + '<button data-a="autofill">Auto-fill open</button>' + (on("events") ? '<button data-a="sheet" data-s="addEvent">Add event</button>' : '') + '</div>';
+  body += '<div class="pick mt"><button data-a="sheet" data-s="copy">Copy last week</button>' + (on("templates") ? '<button data-a="sheet" data-s="templates">Templates</button>' : '') + '<button data-a="autofill">Auto-fill open</button>' + (on("events") ? '<button data-a="sheet" data-s="addEvent">Add event banner</button>' : '') + '</div>';
   Object.keys(ROLES).forEach(function(team){
     var sl = S.slots.filter(function(x){ return x.sid === sv.id && x.team === team; }); if (!sl.length) return;
     var ks = ckFor(team, sv.svc);
@@ -1237,7 +1237,7 @@ SHEETS.announce = function(){
   + '<div class="grp mt"><label class="row tap"><div class="m"><div class="t">Also share on WhatsApp</div><div class="s">Opens WhatsApp for you to send</div></div><input type="checkbox" class="tog"></label></div>'
   + '<div class="btns"><button class="btn" data-a="postAnn">Post</button></div>'; };
 SHEETS.shout = function(o){ return '<h4>Shout-out for ' + esc(o.id) + '</h4><p class="s">Shows on ' + esc(teamsOf(o.id)[0] || "their team") + '\'s Messages, and ' + esc(o.id) + ' gets a notification.</p><div class="pick" id="shBadge">' + ["Faithful servant","Team player","Above and beyond","Early bird"].map(function(b, i){ return '<button data-a="pickReason" aria-pressed="' + (i === 0) + '">' + b + '</button>'; }).join("") + '</div><label class="fl" for="shText">Message (optional)</label><textarea class="field" id="shText" placeholder="What they did"></textarea><div class="btns"><button class="btn" data-a="sendShout" data-id="' + esc(o.id) + '">Send shout-out</button></div>'; };
-SHEETS.addEvent = function(){ var sv = svc(S.adminSid); return '<h4>Add an event</h4><p class="s">Shows as a banner on that day for leaders and volunteers.</p><label class="fl" for="evDate">Day</label><input class="field" id="evDate" type="date" min="' + TODAY + '" value="' + (function(){ var d = typeof adminDaySel === "function" ? adminDaySel() : (sv ? sv.date : TODAY); return d < TODAY ? TODAY : d; })() + '"><label class="fl" for="evTitle">Title</label><input class="field" id="evTitle" placeholder="Like: Baptism Sunday"><label class="fl" for="evNote">Note (optional)</label><input class="field" id="evNote" placeholder="What people should know"><div class="btns"><button class="btn" data-a="saveEvent">Add event</button></div>'; };
+SHEETS.addEvent = function(){ var sv = svc(S.adminSid); return '<h4>Add event banner</h4><p class="s">Shows as a banner on that day for leaders and volunteers.</p><label class="fl" for="evDate">Day</label><input class="field" id="evDate" type="date" min="' + TODAY + '" value="' + (function(){ var d = typeof adminDaySel === "function" ? adminDaySel() : (sv ? sv.date : TODAY); return d < TODAY ? TODAY : d; })() + '"><label class="fl" for="evTitle">Title</label><input class="field" id="evTitle" placeholder="Like: Baptism Sunday"><label class="fl" for="evNote">Note (optional)</label><input class="field" id="evNote" placeholder="What people should know"><div class="btns"><button class="btn" data-a="saveEvent">Add banner</button></div>'; };
 SHEETS.addTodo = function(){ return '<h4>Add a to-do</h4><p class="s">New volunteers on these teams see it on Home until they confirm.</p><label class="fl" for="tdTitle">Title</label><input class="field" id="tdTitle" placeholder="Like: Child-safety policy"><label class="fl" for="tdText">What to do</label><input class="field" id="tdText" placeholder="Like: Read the policy and confirm"><label class="fl">Teams</label><div class="pick" id="tdTeams">' + Object.keys(POOL).map(function(t){ return '<button data-a="toggleBtn" aria-pressed="false">' + esc(t) + '</button>'; }).join("") + '</div><div class="btns"><button class="btn" data-a="saveTodo">Add to-do</button></div>'; };
 
 /* ---------- actions ---------- */
@@ -2632,6 +2632,15 @@ A.tplCreate = function(){ var sv = (document.getElementById("tplNSvc") || {}).va
   if (!sv) { toast("Add a service first."); return; }
   S.templates.push({ name: nm || ((SVC[sv] && SVC[sv].name) || sv) + " line-up", sv: sv, by: ADMIN, lines: {} });
   S.sheet = { s: "tplEdit", id: String(S.templates.length - 1) }; render.same = true; render(); };
+/* My requests: + to start a request on one of your serves (Nov 16) */
+var baseMyReqs14 = SCREENS.myReqs;
+SCREENS.myReqs = function(o){ var r = baseMyReqs14(o); if (!r) return r;
+  r.head = r.head.replace(/<span style="width:40px"><\/span><\/div>$/, '<button class="ic" data-a="sheet" data-s="newReq" aria-label="New request" style="font-size:30px">+</button></div>');
+  r.body = r.body.replace('No requests yet.</div>', 'No requests yet.</div><p class="small" style="margin:8px 4px;text-align:center">Tap + to ask for a swap or for someone to cover a serve.</p>');
+  return r; };
+SHEETS.newReq = function(){ var m = mine().filter(function(x){ var sv = svc(x.sid); return sv && sv.published !== false; });
+  return '<h4>New request</h4><p class="s">Pick the serve you need help with.</p>' + (m.length ? '<div class="grp">' + m.map(function(x){ var sv = svc(x.sid);
+    return '<div class="row tap" data-a="sheet" data-s="cover" data-id="' + x.id + '"><div class="m"><div class="t">' + dShort(sv.date) + ' · ' + esc(SVC[sv.svc] ? SVC[sv.svc].name : sv.svc) + '</div><div class="s">' + esc(x.role) + ' · ' + esc(x.team) + '</div></div><span class="chev">›</span></div>'; }).join("") + '</div>' : '<div class="empty">You have no serves coming up.</div>'); };
 
 
 /* Calendar sync that works: a live feed to subscribe to, and one-tap Google links per serve (Nov 16) */
@@ -2702,21 +2711,6 @@ var baseAddCk14 = SHEETS.addCk;
 SHEETS.addCk = function(o){ return baseAddCk14(o)
   .replace('<select class="field" id="ckTeam">', '<select class="field" id="ckTeam"><option>Everyone</option>')
   .replace('Volunteers on that team tick it off on their serve details.', 'It shows on the serve details of everyone on that team for that service. Pick Everyone to show it to every team.'); };
-
-/* My requests: a + button to start a new request from one of your serves (Nov 16, user comment "add a plus button here") */
-var baseMyReqs14 = SCREENS.myReqs;
-SCREENS.myReqs = function(o){ var r = baseMyReqs14(o); if (!r) return r;
-  var plus = '<button class="ic" data-a="sheet" data-s="newReq" aria-label="New request" style="font-size:30px">+</button>';
-  r.head = r.head.replace(/<span style="width:40px"><\/span><\/div>\s*$/, plus + '</div>');
-  if (r.head.indexOf('data-s="newReq"') < 0) r.head = r.head.replace(/<\/div>\s*$/, plus + '</div>');
-  r.body = r.body.replace('No requests yet.', 'No requests yet. Tap + to swap or give away one of your serves.');
-  return r; };
-SHEETS.newReq = function(){
-  var mine = S.slots.filter(function(x){ var sv = svc(x.sid); return x.person === ME && x.status !== "declined" && sv && sv.published !== false && sv.date >= TODAY; })
-    .sort(function(a, b){ var p = svc(a.sid).date, q = svc(b.sid).date; return p < q ? -1 : p > q ? 1 : 0; });
-  return '<h4>New request</h4><p class="s">Pick the serve you need covered.</p>' + (mine.length ? '<div class="grp">' + mine.map(function(x){ var sv = svc(x.sid), nm = SVC[sv.svc] ? SVC[sv.svc].name : sv.svc;
-    return '<div class="row tap" data-a="sheet" data-s="cover" data-id="' + x.id + '"><div class="m"><div class="t">' + esc(dShort(sv.date)) + ' · ' + esc(nm) + '</div><div class="s">' + esc(x.role) + ' | ' + esc(x.team) + '</div></div><span class="chev">›</span></div>'; }).join("") + '</div>'
-    : '<div class="empty">You have no upcoming serves.</div>'); };
 
 var baseLocal7 = localDefaults;
 localDefaults = function(){ var o = baseLocal7(); o.msgTab = "chats"; return o; };
