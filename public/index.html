@@ -2570,7 +2570,6 @@ var baseOpenSvc13 = A.openSvc;
 A.openSvc = function(d){ S.adminDay = null; return baseOpenSvc13(d); };
 
 
-
 /* Calendar sync that works: a live feed to subscribe to, and one-tap Google links per serve (Nov 16) */
 function calLive(){ return /workers\.dev$/.test(location.hostname) || location.hostname === "localhost"; }
 function calFeed(){ return APP_URL + "api/cal?n=" + encodeURIComponent(ME || ""); }
