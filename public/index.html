@@ -3120,7 +3120,11 @@ function fixView(){
   else if (r === "lead") { S.view = "admin"; if (was !== "admin") S.tab.admin = "sched"; }
   else S.view = "vol";
   if (was !== S.view) { S.stack = []; S.sheet = null; }
+  /* who is an admin, sign-in requests and sign-in links are for admins: anyone else who gets there (a typed address,
+     an old link) is put back on the screen before it */
+  if (r !== "admin") for (var i = 0; i < (S.stack || []).length; i++) if (S.stack[i] && ADMIN_ONLY[S.stack[i].s]) { S.stack = S.stack.slice(0, i); S.sheet = null; break; }
 }
+var ADMIN_ONLY = { admins: 1, accessReqs: 1, linkMe: 1, hubLinks: 1 };
 var baseApplyRoute20 = applyRoute;
 applyRoute = function(w){ var ok = baseApplyRoute20(w); fixView(); return ok; };
 var baseRender20 = render;
