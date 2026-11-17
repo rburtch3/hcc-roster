@@ -3262,6 +3262,13 @@ SCREENS.person = function(o){ var r = basePerson20(o); if (!r) return r;
   return r; };
 /* ---------- Nov 17: admins open on the admin page right after signing in; admins change names and info ---------- */
 var JUST_SIGNED_IN = /[?&]signedin=1(&|$)/.test(location.search);
+/* A link to a screen (say /admin/more/admins) opened while signed out: remember it when they tap Sign in, and open it after.
+   Kept on this phone for 30 minutes; only Roster's own /vol/ and /admin/ pages; the role check still decides what they see. */
+var LANDED = !JUST_SIGNED_IN && /^\/(vol|admin)\/./.test(location.pathname) ? curPath() : "";
+function takeNext(){ try { var j = JSON.parse(LS.get("roster.next") || "null"); LS.set("roster.next", null);
+  return j && typeof j.p === "string" && /^\/(vol|admin)\/./.test(j.p) && Date.now() - j.t < 30 * 60000 ? j.p : ""; } catch (e) { return ""; } }
+var baseSignIn23 = A.hubSignIn;
+A.hubSignIn = function(d, el){ LS.set("roster.next", LANDED && LANDED !== "/vol/home" ? JSON.stringify({ p: LANDED, t: Date.now() }) : null); return baseSignIn23(d, el); };
 function renamePerson(from, to, contact){
   return fetch("/api/rename", { method: "POST", credentials: "same-origin", headers: { "content-type": "application/json" }, body: JSON.stringify({ from: from, to: to, contact: contact || undefined }) })
     .then(function(r){ return r.json().catch(function(){ return {}; }).then(function(j){ if (!r.ok || !j.ok) throw new Error(j.error || "Couldn't change the name. Try again."); return j; }); });
@@ -3309,7 +3316,7 @@ meSection = function(){ var s = baseMeSection21();
   return s.replace('<div class="lbl">Admins</div><div class="grp">', '<div class="lbl">Admins</div><div class="grp">' + row("Your profile", "Your name, phone, email and photo", "push", "profile")); };
 
 Promise.all([load(), loadMe()]).then(function(){ hubApply(); loaded = true;
-  if (JUST_SIGNED_IN) { history.replaceState(null, "", location.pathname); if (isAdmin()) { S.view = "admin"; S.tab.admin = "dash"; S.stack = []; S.sheet = null; } }
+  if (JUST_SIGNED_IN) { var nx = takeNext(); history.replaceState(null, "", nx || location.pathname); if (!nx && isAdmin()) { S.view = "admin"; S.tab.admin = "dash"; S.stack = []; S.sheet = null; } }
   render(); }, function(){ loadErr = "Couldn't load the roster. Check your connection and refresh."; render(); });
 })();
 </script>
