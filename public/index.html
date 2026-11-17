@@ -2025,18 +2025,6 @@ A.rmRole = function(d){
 /* Leader PIN checked by the server; phone, email and invites for leaders (Nov 16) */
 var APP_URL = location.origin + "/"; /* whatever address Roster is opened at, so links follow a move to the church domain */
 adminOk = function(){ var k = LS.get("roster.admin"); return !!S.pinHash && !!k && (S.pinHash === "set" || k === S.pinHash); };
-A.pinGo = function(){
-  var p1 = (document.getElementById("pin1").value || "").trim(), e2 = document.getElementById("pin2"), first = !S.pinHash;
-  if (!/^\d{4,8}$/.test(p1)) { toast("Use 4 to 8 digits."); render(); return; }
-  if (first && e2.value.trim() !== p1) { toast("The two PINs don't match."); render(); return; }
-  function open(k, msg){ LS.set("roster.admin", k); CONTACTS = null; toast(msg); S.stack = []; render(); }
-  if (first) { hashPin(p1).then(function(h){ S.pinHash = h; open(h, "PIN saved. Admin is open on this phone."); clearTimeout(saveTimer); saveNow(); }); return; }
-  fetch("/api/unlock", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ pin: p1 }) })
-    .then(function(r){ return r.json().then(function(j){ return { st: r.status, j: j }; }); })
-    .then(function(x){ if (x.j && x.j.ok) open(x.j.key, "Admin is open on this phone.");
-      else { toast(x.st === 429 ? "Too many wrong tries. Wait 15 minutes and try again." : "That PIN isn't right."); render(); } })
-    .catch(function(){ toast("Couldn't check the PIN. Check your connection and try again."); render(); });
-};
 var baseLock8 = A.lockAdmin; A.lockAdmin = function(d, el){ CONTACTS = null; baseLock8(d, el); };
 var CONTACTS = null, contactsBusy = false;
 function contactsKey(){ return LS.get("roster.admin") || ""; }
@@ -2360,10 +2348,7 @@ A.setting = function(d, el){ baseSetting10(d, el); if (/_ph$/.test(d.k)) S.setti
 FEATS.push(["volpin","Volunteer sign-in","Each volunteer signs in with their own PIN. Only they can change their availability and their emergency contact."]);
 FEATS.push(["teamlead","Team leader view","Team leaders and assistants get a leader view for their own team only. Admins see everything."]);
 FEATS.push(["teamthanks","Team thank-you chats","Each team gets a Thanks chat in Messaging. Shout-outs post there too."]);
-var VPINS = null, vpinBusy = false, EMERG_ME, emBusy = false, EMERG_ALL = null, emAllBusy = false;
-function loadVpins(force){ if ((VPINS && !force) || vpinBusy) return; vpinBusy = true;
-  fetch("/api/vpin", { cache: "no-store" }).then(function(r){ return r.ok ? r.json() : { names: [] }; })
-    .then(function(j){ VPINS = (j && j.names) || []; vpinBusy = false; render.same = true; render(); }, function(){ VPINS = []; vpinBusy = false; }); }
+var EMERG_ME, emBusy = false, EMERG_ALL = null, emAllBusy = false;
 function vk(){ var v = null; try { v = JSON.parse(LS.get("roster.vkey") || "null"); } catch (e) {} return v && v.name === ME && v.key ? v.key : ""; }
 function volHeaders(h){ h = h || {}; var k = vk(); if (k) { h["x-vol-name"] = encodeURIComponent(ME); h["x-vol-key"] = k; } return h; }
 function authHeaders(){ var h = { "content-type": "application/json" }, a = LS.get("roster.admin"); if (a && a !== "set") h["x-roster-key"] = a; return volHeaders(h); }
@@ -2380,26 +2365,6 @@ adminOk = function(){ return baseAdminOk11() || !!scopeTeams(); };
 function scopeBanner(sc){ return ''; } /* banner replaced by the admin-style Volunteer view switch in More (Nov 16) */
 
 /* the sign-in screen after picking a name */
-SCREENS.vpin = function(){ loadVpins(); var has = VPINS && VPINS.indexOf(ME) >= 0;
-  return { head: plainHead(has ? "Hi, " + ME : "Pick your own PIN"), noTabs: true, body: '<div class="card"><p class="small" style="margin:0 0 10px">'
-    + (VPINS === null ? "Checking…" : has ? "Type your own PIN to open your roster on this phone." : (HUBME && hubName() === ME) ? "Pick a 4 to 8 digit PIN just for you. Then only you can change your availability and your emergency contact." : "You don't have a PIN yet. Sign in with HCC Hub, or ask a leader to set your first PIN.") + '</p>'
-    + '<label class="fl" for="vp1">' + (has ? "Your PIN" : "New PIN") + '</label><input class="field" id="vp1" type="password" inputmode="numeric" autocomplete="off" maxlength="8">'
-    + (has ? '' : '<label class="fl" for="vp2">Type it again</label><input class="field" id="vp2" type="password" inputmode="numeric" autocomplete="off" maxlength="8">')
-    + '<div class="btns"><button class="btn" data-a="vpinGo">' + (has ? "Sign in" : "Save my PIN") + '</button><button class="btn sec" data-a="whoami">Not ' + esc(ME) + '?</button></div>'
-    + (has ? '<p class="small mt" style="margin-bottom:0">Forgot it? Ask a leader to reset your PIN.</p>' : '') + '</div>' };
-};
-A.vpinGo = function(){
-  var p1 = (document.getElementById("vp1").value || "").trim(), e2 = document.getElementById("vp2");
-  if (!/^\d{4,8}$/.test(p1)) { toast("Use 4 to 8 digits."); render(); return; }
-  if (e2 && e2.value.trim() !== p1) { toast("The two PINs don't match."); render(); return; }
-  var who = ME;
-  fetch("/api/vpin", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ name: who, pin: p1 }) })
-    .then(function(r){ return r.json().then(function(j){ return { st: r.status, j: j }; }, function(){ return { st: r.status, j: {} }; }); })
-    .then(function(x){
-      if (x.j && x.j.ok && who === ME) { LS.set("roster.vkey", JSON.stringify({ name: who, key: x.j.key })); if (VPINS && VPINS.indexOf(who) < 0) VPINS.push(who); EMERG_ME = undefined; S.stack = []; toast(x.j.first ? "PIN saved. Only you can change your availability now." : "Signed in."); render(); }
-      else { toast(x.st === 429 ? "Too many wrong tries. Wait 15 minutes and try again." : x.j && x.j.reason === "ask" ? "Only a leader can set your first PIN, or sign in with HCC Hub." : "That PIN isn't right."); render(); } })
-    .catch(function(){ toast("Couldn't check the PIN. Check your connection and try again."); render(); });
-};
 var baseSetMe11 = A.setMe; A.setMe = function(d, el){ EMERG_ME = undefined; baseSetMe11(d, el); };
 var baseWho11 = A.whoami; A.whoami = function(d, el){ LS.set("roster.vkey", null); LS.set("roster.scope", null); EMERG_ME = undefined; baseWho11(d, el); };
 A.toTeamLead = function(){ LS.set("roster.scope", ME); S.view = "admin"; S.tab.admin = "sched"; S.stack = []; S.sheet = null; toast("Team leader view for " + leadTeams(ME).join(", ") + "."); render(); };
@@ -2473,19 +2438,11 @@ function loadEmergAll(){ if (EMERG_ALL || emAllBusy || !baseAdminOk11()) return;
     .then(function(j){ EMERG_ALL = (j && j.contacts) || {}; emAllBusy = false; render.same = true; render(); }, function(){ EMERG_ALL = {}; emAllBusy = false; }); }
 var basePerson11 = SCREENS.person;
 SCREENS.person = function(o){ var r = basePerson11(o), p = o.id; if (!r || S.view !== "admin" || !on("volpin") || !baseAdminOk11()) return r;
-  loadVpins(); loadEmergAll(); var e = EMERG_ALL && EMERG_ALL[p], has = VPINS && VPINS.indexOf(p) >= 0;
+  loadEmergAll(); var e = EMERG_ALL && EMERG_ALL[p];
   r.body += '<div class="card mt"><div class="lbl sm">Emergency contact</div>'
     + (EMERG_ALL === null ? '<div class="small">Loading…</div>' : e ? '<div class="cline"><span>Name</span>' + esc(e.name + (e.relation ? ", " + e.relation : "")) + '</div><div class="cline"><span>Phone</span>' + esc(e.phone) + '</div>' : '<div class="small">Not added yet.</div>')
-    + '<p class="small" style="margin:6px 0 0">Only ' + esc(p) + ' can change this, after signing in.</p>'
-    + '<div class="lbl sm">Sign-in</div><div class="small">' + (VPINS === null ? 'Loading…' : has ? 'Signs in with their own PIN.' : 'Hasn\'t picked a PIN yet.') + '</div>'
-    + '<div class="btns"><button class="btn sec" data-a="sheet" data-s="setVpin" data-id="' + esc(p) + '">' + (has ? 'Set a new PIN' : 'Set their first PIN') + '</button></div></div>';
+    + '<p class="small" style="margin:6px 0 0">Only ' + esc(p) + ' can change this, after signing in.</p>' + '</div>';
   return r; };
-SHEETS.resetVpin = function(o){ return '<h4>Reset ' + esc(o.id) + '\'s PIN?</h4><p class="s">They pick a new PIN the next time they open the app. Until then, anyone who picks their name can set it.</p><div class="btns"><button class="btn danger" data-a="resetVpin" data-id="' + esc(o.id) + '">Reset PIN</button><button class="btn sec" data-a="closeSheet">Keep it</button></div>'; };
-A.resetVpin = function(d){
-  fetch("/api/vpin", { method: "POST", headers: { "content-type": "application/json", "x-roster-key": LS.get("roster.admin") || "" }, body: JSON.stringify({ name: d.id, reset: true }) })
-    .then(function(r){ if (!r.ok) throw new Error(r.status); if (VPINS) VPINS = VPINS.filter(function(n){ return n !== d.id; }); S.sheet = null; toast(d.id + "'s PIN is reset."); render(); })
-    .catch(function(){ S.sheet = null; toast("Couldn't reset it. Lock and reopen Admin, then try again."); render(); });
-};
 
 /* a Thanks chat per team, built on the team channels */
 CH_COLOR.thanks = "#E8A317"; CH_ICON.thanks = CH_ICON.shouts;
@@ -2980,33 +2937,6 @@ var baseWhoScreen16 = SCREENS.who;
 SCREENS.who = function(o){ if (HANDOFF_DONE) return SCREENS.handoffDone(); if (HANDOFF_N && !HUBME) return SCREENS.hubWait(); var r = baseWhoScreen16(o); if (r && !HUBME) r.body = installCard() + r.body; return r; };
 ["vol:more", "vol:home"].forEach(function(k){ var base = SCREENS[k]; if (!base) return; SCREENS[k] = function(o){ var r = base(o); if (r && k === "vol:more") r.body = installCard() + r.body; return r; }; });
 
-/* ---------- PINs: only the person or a leader sets one (Nov 17, user: "Anyone can change anyone else's pin") ---------- */
-SHEETS.setVpin = function(o){ var has = VPINS && VPINS.indexOf(o.id) >= 0;
-  return '<h4>' + (has ? 'Set a new PIN for ' : 'Set a first PIN for ') + esc(o.id) + '</h4><p class="s">Tell ' + esc(o.id) + ' the PIN in person. They can change it after signing in.</p>'
-    + '<label class="fl" for="sv1">New PIN</label><input class="field" id="sv1" type="password" inputmode="numeric" autocomplete="off" maxlength="8">'
-    + '<label class="fl" for="sv2">Type it again</label><input class="field" id="sv2" type="password" inputmode="numeric" autocomplete="off" maxlength="8">'
-    + '<div class="btns"><button class="btn" data-a="setVpin" data-id="' + esc(o.id) + '">Save PIN</button><button class="btn sec" data-a="closeSheet">Cancel</button></div>'; };
-function pinPair(a, b){ var p1 = (document.getElementById(a).value || "").trim(), p2 = (document.getElementById(b).value || "").trim();
-  if (!/^\d{4,8}$/.test(p1)) { toast("Use 4 to 8 digits."); render.same = true; render(); return ""; }
-  if (p1 !== p2) { toast("The two PINs don't match."); render.same = true; render(); return ""; } return p1; }
-A.setVpin = function(d){ var p1 = pinPair("sv1", "sv2"); if (!p1) return;
-  fetch("/api/vpin", { method: "POST", headers: authHeaders(), credentials: "same-origin", body: JSON.stringify({ name: d.id, pin: p1, change: true }) })
-    .then(function(r){ if (!r.ok) throw new Error(r.status); if (VPINS && VPINS.indexOf(d.id) < 0) VPINS.push(d.id); S.sheet = null; toast(d.id + "'s PIN is set. Tell them in person."); render(); })
-    .catch(function(){ toast("Couldn't set it. Lock and reopen Admin, then try again."); render.same = true; render(); }); };
-SHEETS.myPin = function(){ return '<h4>Change your PIN</h4>'
-    + '<label class="fl" for="mp1">New PIN</label><input class="field" id="mp1" type="password" inputmode="numeric" autocomplete="off" maxlength="8">'
-    + '<label class="fl" for="mp2">Type it again</label><input class="field" id="mp2" type="password" inputmode="numeric" autocomplete="off" maxlength="8">'
-    + '<div class="btns"><button class="btn" data-a="myPin">Save PIN</button><button class="btn sec" data-a="closeSheet">Cancel</button></div>'; };
-A.myPin = function(){ var p1 = pinPair("mp1", "mp2"); if (!p1) return; var who = ME;
-  fetch("/api/vpin", { method: "POST", headers: volHeaders({ "content-type": "application/json" }), credentials: "same-origin", body: JSON.stringify({ name: who, pin: p1, change: true }) })
-    .then(function(r){ return r.json().then(function(j){ if (!r.ok || !j.ok) throw new Error(r.status); return j; }); })
-    .then(function(j){ if (j.key && who === ME) LS.set("roster.vkey", JSON.stringify({ name: who, key: j.key })); if (VPINS && VPINS.indexOf(who) < 0) VPINS.push(who); S.sheet = null; toast("Your PIN is changed."); render(); })
-    .catch(function(){ toast("Couldn't change it. Sign in again and try once more."); render.same = true; render(); }); };
-var baseVolMore17b = SCREENS["vol:more"];
-SCREENS["vol:more"] = function(o){ var r = baseVolMore17b(o); if (!r || !ME || !on("volpin") || !(vk() || (HUBME && hubName() === ME))) return r;
-  var pinRow = row(VPINS && VPINS.indexOf(ME) >= 0 ? "Change my PIN" : "Set my PIN", "Your own PIN for this app", "sheet", "myPin");
-  var i = r.body.lastIndexOf('<div class="grp">'); if (i < 0) r.body += '<div class="grp">' + pinRow + '</div>'; else r.body = r.body.slice(0, i) + '<div class="grp">' + pinRow + r.body.slice(i + 17);
-  return r; };
 
 /* ---------- Pages have their own address (Nov 17, user: "using proper route paths", "back and forth navigation") ----------
    Each screen has a path like /vol/sched or /admin/sched/service:ID. The phone's back and forward, refresh and shared
