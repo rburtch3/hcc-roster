@@ -3136,8 +3136,11 @@ function tidyMore(body){
   body = body.replace(NOSWITCH, '');
   return body.replace(/<div class="lbl">[^<]*<\/div><div class="grp"><\/div>/g, '');
 }
+/* signing out asks first: one tap on the account row used to sign people out with no way back */
+SHEETS.signOut = function(){ return '<h4>Sign out?</h4><p class="s">You\'re signed in as ' + esc((HUBME && HUBME.signedInAs) || "") + '. You\'ll need to sign in again to see your serves.</p>'
+  + '<div class="btns"><button class="btn danger" data-a="hubSignOut">Sign out</button><button class="btn sec" data-a="closeSheet">Stay signed in</button></div>'; };
 function meSection(){
-  var s = '<div class="lbl">Signed in</div><div class="grp">' + row(HUBME.signedInAs, roleLabel() + (hubName() ? " · " + hubName() : ""), "hubSignOut", "") + '</div><p class="small" style="margin:6px 4px 0">Tap to sign out.</p>';
+  var s = '<div class="lbl">Signed in</div><div class="grp">' + row(HUBME.signedInAs, roleLabel() + (hubName() ? " · " + hubName() : ""), "sheet", "signOut") + '</div><p class="small" style="margin:6px 4px 0">Tap to sign out.</p>';
   if (isAdmin()) {
     var n = ACC ? ACC.requests.length : 0;
     s += '<div class="lbl">This phone</div><div class="grp">' + (S.view === "admin" ? (hubName() ? row("Volunteer view", "See the roster as " + hubName(), "toVol", "") : '') : row("Admin view", "Manage the whole roster", "toAdmin", "")) + '</div>'
