@@ -107,8 +107,10 @@ export async function guardAvailability(request, store, pin, data, env) {
 }
 /**
  * Serves and set-up are guarded too (Nov 17). A leader (leader PIN or Hub admin) can change anything.
- * Anyone else may change only their own serve (say yes or can't do it); a team leader may also change,
- * add or remove their own team's serves and lists. Switches, levels, who leads a team and service
+ * Volunteers don't accept or decline serves (Nov 17, user: like a restaurant shift, the leader rosters
+ * them). A volunteer changes no serve; they can only ask for cover on their own serve, offer for an open
+ * spot, or answer a swap asked of them. A team leader may change, add or remove their own team's serves,
+ * lists and requests. Switches, levels, who leads a team and service
  * times stay as a leader set them. Anything else is put back before saving. Returns how many serves
  * were put back (set-up is put back quietly, since phones fill in empty set-up on their own).
  */
@@ -147,11 +149,34 @@ export async function guardRoster(request, store, pin, data, env) {
     if (same(o, x) || myTeams.has(o.team)) { out.push(x); continue; }
     const where = o.sid === x.sid && o.team === x.team && o.role === x.role && o.person === x.person;
     const tidy = where && o.status === "pending" && x.status === "confirmed" && same({ ...o, status: 0 }, { ...x, status: 0 });
-    if (where && (tidy || (me && o.person === me))) out.push(x); else { out.push(o); held++; }
+    if (tidy) out.push(x); else { out.push(o); held++; }
   }
   const at = new Map((old.slots || []).map((x, i) => [x.id, i]));
   for (const o of before.values()) { if (!myTeams.has(o.team)) { out.splice(Math.min(at.get(o.id), out.length), 0, o); held++; } } // removed serves come back in place
   data.slots = out;
+  // requests: a volunteer only asks for cover on their own serve, offers for an open spot,
+  // or answers a swap someone asked them for. The leader approves.
+  const slotOf = new Map((old.slots || []).map((x) => [x.id, x]));
+  const teamOf = (r) => (slotOf.get(r && r.slot) || {}).team;
+  const was = new Map((old.requests || []).map((r) => [r.id, r]));
+  const reqs = []; const nr = Array.isArray(data.requests) ? data.requests : [];
+  for (const r of nr) {
+    const o = r && was.get(r.id);
+    if (!o) {
+      const x = slotOf.get(r && r.slot);
+      const ok = myTeams.has(teamOf(r)) || (me && x && r.from === me && r.state === "pending" &&
+        (r.kind === "pickup" ? !x.person || x.status === "open" || x.status === "declined" : ["cant", "swap", "giveaway"].includes(r.kind) && x.person === me));
+      if (ok) reqs.push(r); else held++;
+      continue;
+    }
+    was.delete(o.id);
+    if (same(o, r) || myTeams.has(teamOf(o))) { reqs.push(r); continue; }
+    const answer = me && o.kind === "swap" && o.to === me && o.state === "pending" &&
+      same({ ...o, stage: 0, state: 0 }, { ...r, stage: 0, state: 0 }) && ((r.stage === 2 && r.state === "pending") || (r.stage === o.stage && r.state === "declined"));
+    if (answer) reqs.push(r); else { reqs.push(o); held++; }
+  }
+  for (const o of was.values()) { if (!myTeams.has(teamOf(o))) { reqs.push(o); held++; } }
+  if (Array.isArray(old.requests) || nr.length) data.requests = reqs;
   return held;
 }
 /** Volunteer sign-in switched off in the saved roster: anyone may save, as before. */

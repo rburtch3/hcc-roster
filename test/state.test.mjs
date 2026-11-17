@@ -209,34 +209,45 @@ test("app page paths (/vol/..., /admin/...) serve the one page", async () => {
   assert.deepEqual(seen, ["/", "/", "/icon-192.png"]);
 });
 
-test("serves: a volunteer changes only their own; a team leader their team; a leader anything", async () => {
+test("serves: volunteers change none, only ask for cover on their own; team leaders their team; leaders anything", async () => {
   const s = mem2(), lead = await mod.hashPin("1111");
   const sl = (id, team, person, status) => ({ id, sid: "a", team, role: "R" + id, person, status });
   const base = { pinHash: lead, services: [{ id: "a", date: "2099-01-04", svc: "Sun AM" }],
-    cfg: { leaders: { Media: "Cy" }, pool: { Media: ["Ana", "Cy"], Worship: ["Ben"] } }, feat: {},
+    cfg: { leaders: { Media: "Cy" }, pool: { Media: ["Ana", "Cy"], Worship: ["Ben"] } }, feat: {}, requests: [],
     slots: [sl("1", "Media", "Ana", "confirmed"), sl("2", "Worship", "Ben", "confirmed"), sl("3", "Media", null, "open"), sl("4", "Worship", "Dee", "pending")] };
   await put(s, 0, base);
   const sign = async (n, p) => { await mod.handleVolPin(vreq("/api/vpin", "POST", { name: n, pin: p }, { "x-roster-key": lead }), s); return { "x-vol-name": n, "x-vol-key": (await (await mod.handleVolPin(vreq("/api/vpin", "POST", { name: n, pin: p }), s)).json()).key }; };
-  const ana = await sign("Ana", "4321"), cy = await sign("Cy", "2468");
+  const ana = await sign("Ana", "4321"), ben = await sign("Ben", "5555"), cy = await sign("Cy", "2468");
   const now = async () => (await (await handleState(req("GET"), s)).json()).data;
-  // Ana: can't do her own serve (ok); tries to take Ben's, fill the open spot, drop a serve, add one, change switches
-  let d = await now(); d.slots[0].status = "declined"; d.slots[1].person = "Ana"; d.slots[2].person = "Ana"; d.slots[2].status = "confirmed";
-  d.slots[3].status = "confirmed"; d.slots.push(sl("5", "Worship", "Ana", "confirmed")); d.feat = { volpin: false }; d.cfg.leaders.Media = "Ana"; d.services[0].date = "2099-02-01";
-  let r = await (await vput(s, 1, d, ana)).json();
-  assert.equal(r.held, 3);
-  let got = await now();
-  assert.deepEqual(got.slots.map((x) => [x.id, x.person, x.status]), [["1", "Ana", "declined"], ["2", "Ben", "confirmed"], ["3", null, "open"], ["4", "Dee", "confirmed"]]);
-  assert.deepEqual(got.feat, {}); assert.equal(got.cfg.leaders.Media, "Cy"); assert.equal(got.services[0].date, "2099-01-04");
-  // removing someone else's serve: it comes back
-  d = await now(); d.slots = d.slots.filter((x) => x.id !== "2");
-  r = await (await vput(s, 2, d, ana)).json(); assert.equal(r.held, 1); assert.equal((await now()).slots.length, 4);
-  // Cy leads Media: fills Media's open spot, but can't move Worship
   const by = (o, id) => o.slots.find((x) => x.id === id);
-  d = await now(); by(d, "3").person = "Cy"; by(d, "3").status = "confirmed"; by(d, "2").person = "Cy";
-  r = await (await vput(s, 3, d, cy)).json(); assert.equal(r.held, 1);
-  got = await now(); assert.equal(by(got, "3").person, "Cy"); assert.equal(by(got, "2").person, "Ben");
+  // Ana tries: decline her own serve, take Ben's, fill the open spot, add a serve, change switches, team leader, times
+  let d = await now(); by(d, "1").status = "declined"; by(d, "2").person = "Ana"; by(d, "3").person = "Ana"; by(d, "3").status = "confirmed";
+  by(d, "4").status = "confirmed"; d.slots.push(sl("5", "Worship", "Ana", "confirmed")); d.feat = { volpin: false }; d.cfg.leaders.Media = "Ana"; d.services[0].date = "2099-02-01";
+  let r = await (await vput(s, 1, d, ana)).json();
+  assert.equal(r.held, 4);
+  let got = await now();
+  assert.deepEqual(got.slots.map((x) => [x.id, x.person, x.status]), [["1", "Ana", "confirmed"], ["2", "Ben", "confirmed"], ["3", null, "open"], ["4", "Dee", "confirmed"]]);
+  assert.deepEqual(got.feat, {}); assert.equal(got.cfg.leaders.Media, "Cy"); assert.equal(got.services[0].date, "2099-01-04");
+  // removing someone else's serve: it comes back in place
+  d = await now(); d.slots = d.slots.filter((x) => x.id !== "2");
+  r = await (await vput(s, 2, d, ana)).json(); assert.equal(r.held, 1); assert.deepEqual((await now()).slots.map((x) => x.id), ["1", "2", "3", "4"]);
+  // requests: Ana asks cover on her own serve and offers for the open spot (ok); asks cover on Ben's, or in Ben's name (put back)
+  d = await now();
+  d.requests = [{ id: "q1", kind: "cant", slot: "1", from: "Ana", state: "pending" }, { id: "q2", kind: "pickup", slot: "3", from: "Ana", state: "pending" },
+    { id: "q3", kind: "cant", slot: "2", from: "Ana", state: "pending" }, { id: "q4", kind: "cant", slot: "2", from: "Ben", state: "pending" },
+    { id: "q5", kind: "swap", slot: "1", from: "Ana", to: "Ben", stage: 1, state: "pending" }];
+  r = await (await vput(s, 3, d, ana)).json(); assert.equal(r.held, 2);
+  got = await now(); assert.deepEqual(got.requests.map((q) => q.id), ["q1", "q2", "q5"]); assert.equal(by(got, "1").status, "confirmed");
+  // Ana can't approve her own request; Ben answers the swap asked of him, but can't approve it
+  d = await now(); d.requests[0].state = "approved"; r = await (await vput(s, 4, d, ana)).json(); assert.equal(r.held, 1);
+  d = await now(); d.requests[2].stage = 2; r = await (await vput(s, 5, d, ben)).json(); assert.equal(r.held, undefined);
+  d = await now(); d.requests[2].state = "approved"; r = await (await vput(s, 6, d, ben)).json(); assert.equal(r.held, 1);
+  // Cy leads Media: approves Ana's cover, fills Media's open spot, but can't move Worship
+  d = await now(); d.requests[0].state = "approved"; by(d, "1").person = null; by(d, "1").status = "open"; by(d, "3").person = "Cy"; by(d, "3").status = "confirmed"; by(d, "2").person = "Cy";
+  r = await (await vput(s, 7, d, cy)).json(); assert.equal(r.held, 1);
+  got = await now(); assert.equal(by(got, "3").person, "Cy"); assert.equal(by(got, "1").person, null); assert.equal(by(got, "2").person, "Ben"); assert.equal(got.requests[0].state, "approved");
   // a leader changes anything
-  d = await now(); by(d, "2").person = "Ana"; d.feat = { levels: false };
-  r = await (await vput(s, 4, d, { "x-roster-key": lead })).json(); assert.equal(r.held, undefined);
-  got = await now(); assert.equal(by(got, "2").person, "Ana"); assert.deepEqual(got.feat, { levels: false });
+  d = await now(); by(d, "2").person = "Ana"; d.feat = { levels: false }; d.requests = [];
+  r = await (await vput(s, 8, d, { "x-roster-key": lead })).json(); assert.equal(r.held, undefined);
+  got = await now(); assert.equal(by(got, "2").person, "Ana"); assert.deepEqual(got.feat, { levels: false }); assert.deepEqual(got.requests, []);
 });

@@ -478,7 +478,7 @@ function seed(){
       { id: "c2", name: "Media team", msgs: [ { who: "Rajesh", t: "Who has the spare HDMI cable?" }, { who: "Navya", t: "In the booth drawer." } ] }
     ],
     notifs: [
-      { t: "You're scheduled for Sun 15 Nov", s: "ProPresenter · Sunday Morning. Please confirm.", when: "2h" },
+      { t: "You're scheduled for Sun 15 Nov", s: "ProPresenter · Sunday Morning.", when: "2h" },
       { t: "New announcement", s: "Thanksgiving Sunday on 22 Nov", when: "4h" },
       { t: "Swap approved", s: "Vijay and Angel swapped Greeter, Sun 15 Nov", when: "Yesterday" }
     ],
@@ -506,8 +506,7 @@ function mine(){ return S.slots.filter(function(x){ return x.person === ME && x.
 function statusChip(x){
   if (x.status === "open" || !x.person) return '<span class="chip c-warn">Open</span>';
   if (x.status === "declined") return '<span class="chip c-late">Can\'t serve</span>';
-  if (x.status === "pending") return '<span class="chip c-mut">Not confirmed</span>';
-  return '<span class="chip c-ok">Confirmed</span>';
+  return '<span class="chip c-ok">Rostered</span>';
 }
 function pendingReqs(){ return S.requests.filter(function(r){ return r.state === "pending"; }); }
 function openFor(person){ var t = teamsOf(person); return S.slots.filter(function(x){ return x.status === "open" && t.indexOf(x.team) >= 0 && svc(x.sid).published !== false && svc(x.sid).date >= TODAY; }); }
@@ -601,10 +600,10 @@ SCREENS["vol:home"] = function(){
   var team = next ? S.slots.filter(function(x){ return x.sid === next.sid && x.team === next.team && x.person && x.person !== ME; }) : [];
   var body = '<p class="small" style="margin:0 4px">' + todayLong() + '</p><h2 class="big">' + greet() + ', ' + esc(ME) + '.</h2>';
   if (next) {
-    body += '<div class="hero"><div class="k">' + (next.status === "confirmed" ? "You're serving" : "Please confirm") + '</div>'
+    body += '<div class="hero"><div class="k">' + (next.status !== "declined" ? "You're serving" : "Please confirm") + '</div>'
       + '<div class="w">' + esc(when(nsv)) + ', ' + SVC[nsv.svc].call + '</div>'
       + '<div class="r">' + esc(next.role) + ' · ' + esc(next.team) + ' · ' + SVC[nsv.svc].name + ' at ' + SVC[nsv.svc].time + '</div>'
-      + (next.status === "confirmed"
+      + (next.status !== "declined"
         ? '<div class="btns two" style="margin-top:14px"><button class="btn" data-a="detail" data-id="' + next.id + '">Details</button><button class="btn ghost" data-a="sheet" data-s="change" data-id="' + next.id + '">Swap or give away</button></div>'
         : '<div class="btns two" style="margin-top:14px"><button class="btn" data-a="confirm" data-id="' + next.id + '">Confirm</button><button class="btn ghost" data-a="sheet" data-s="cant" data-id="' + next.id + '">Can\'t make it</button></div>')
       + '</div>';
@@ -717,7 +716,7 @@ SCREENS["admin:dash"] = function(){
   var body = '<p class="small" style="margin:0 4px">' + todayLong() + '</p><h2 class="big">' + dashTitle(sv) + '</h2>'
     + '<div class="card"><div class="small" style="font-weight:600;letter-spacing:.05em;text-transform:uppercase;margin-bottom:6px">Who\'s serving</div><div style="display:flex;justify-content:space-between;align-items:baseline"><div class="t" style="font:600 16px/21px var(--font)">' + esc(SVC[sv.svc].name) + ' · ' + dm(sv.date) + '</div><span class="small">' + sl.length + ' spots</span></div>'
     + '<div class="bar" style="margin:10px 0 12px"><i style="width:' + (c.confirmed/tot*100) + '%;background:var(--ok)"></i><i style="width:' + (c.pending/tot*100) + '%;background:var(--chevron)"></i><i style="width:' + (c.open/tot*100) + '%;background:var(--warn)"></i><i style="width:' + (c.declined/tot*100) + '%;background:var(--late)"></i></div>'
-    + '<div class="stats"><button class="stat ok" data-a="sheet" data-s="statList" data-id="confirmed"><b>' + c.confirmed + '</b><span>Confirmed</span></button><button class="stat warn" data-a="sheet" data-s="statList" data-id="open"><b>' + c.open + '</b><span>Open</span></button><button class="stat late" data-a="sheet" data-s="statList" data-id="declined"><b>' + c.declined + '</b><span>Can\'t</span></button></div>'
+    + '<div class="stats"><button class="stat ok" data-a="sheet" data-s="statList" data-id="confirmed"><b>' + c.confirmed + '</b><span>Filled</span></button><button class="stat warn" data-a="sheet" data-s="statList" data-id="open"><b>' + c.open + '</b><span>Open</span></button><button class="stat late" data-a="sheet" data-s="statList" data-id="declined"><b>' + c.declined + '</b><span>Can\'t</span></button></div>'
     + '<div class="btns"><button class="btn sm soft" style="width:100%" data-a="openSvc" data-id="' + sv.id + '">Open schedule</button></div></div>';
   var pr = pendingReqs();
   body += '<div class="lbl">Needs you<a data-a="tab" data-v="reqs">' + pr.length + ' requests</a></div><div class="grp">' + pr.slice(0,3).map(reqRowShort).join("") + (pr.length ? '' : '<div class="empty">All caught up.</div>') + '</div>';
@@ -782,10 +781,10 @@ SCREENS.notes = function(){
 /* ---------------- sheets ---------------- */
 var SHEETS = {};
 SHEETS.cant = function(o){ var x = slot(o.id), sv = svc(x.sid);
-  return '<h4>Can\'t make it?</h4><p class="s">' + esc(x.role) + ', ' + dShort(sv.date) + ' ' + sv.svc + '. Your leader is told right away and the spot opens for your team.</p>'
-    + '<div class="pick">' + ["Travelling","Unwell","Work","Family"].map(function(r,i){ return '<button data-a="pickReason" aria-pressed="' + (i===0) + '">' + r + '</button>'; }).join("") + '</div>'
+  return '<h4>Ask for cover</h4><p class="s">' + esc(x.role) + ', ' + dShort(sv.date) + ' ' + sv.svc + '. Your leader is told right away. You\'re still on until they approve.</p>'
+    + '<div class="pick">' + ["Emergency","Unwell","Travelling","Family"].map(function(r,i){ return '<button data-a="pickReason" aria-pressed="' + (i===0) + '">' + r + '</button>'; }).join("") + '</div>'
     + '<label class="fl" for="cantNote">Note to your leader (optional)</label><textarea class="field" id="cantNote" placeholder="Anything they should know"></textarea>'
-    + '<div class="btns"><button class="btn danger" data-a="cantDo" data-id="' + x.id + '">Tell my leader</button><button class="btn sec" data-a="closeSheet">Never mind</button></div>'; };
+    + '<div class="btns"><button class="btn danger" data-a="cantDo" data-id="' + x.id + '">Ask my leader</button><button class="btn sec" data-a="closeSheet">Never mind</button></div>'; };
 SHEETS.change = function(o){ var x = slot(o.id), sv = svc(x.sid);
   return '<h4>Swap or give away</h4><p class="s">' + esc(x.role) + ', ' + dShort(sv.date) + ' ' + sv.svc + '</p><div class="grp">'
     + '<div class="row tap" data-a="sheet" data-s="swap" data-id="' + x.id + '"><div class="m"><div class="t">Swap with someone</div><div class="s">They take this, you take one of theirs</div></div><span class="chev">›</span></div>'
@@ -1003,12 +1002,12 @@ SCREENS["vol:home"] = function(){
   if (on("onboarding")) todosFor(ME).filter(function(t){ return !(S.todoDone[t.id] || {})[ME]; }).slice(0,1).forEach(function(t){
     body += '<div class="card" style="margin-bottom:12px"><div class="small" style="text-transform:uppercase;letter-spacing:.06em;font-weight:600">To do</div><div class="t" style="font:600 16px/21px var(--font);margin-top:2px">' + esc(t.title) + '</div><p style="margin:4px 0 0;font-size:15px">' + esc(t.text) + '</p><div class="btns"><button class="btn sm" style="width:100%" data-a="doneTodo" data-id="' + t.id + '">I\'ve done this</button></div></div>'; });
   if (next) {
-    body += '<div class="hero"><div class="k">' + (next.status === "confirmed" ? "You're serving" : "Please confirm") + '</div>'
+    body += '<div class="hero"><div class="k">' + (next.status !== "declined" ? "You're serving" : "Please confirm") + '</div>'
       + '<div class="w">' + esc(when(nsv)) + ', ' + SVC[nsv.svc].call + '</div>'
       + '<div class="r">' + esc(next.role) + ' · ' + esc(next.team) + ' · ' + SVC[nsv.svc].name + ' at ' + SVC[nsv.svc].time + '</div>'
       + evOn(nsv.date).map(function(e){ return '<div class="hnote"><b>' + esc(e.title) + '</b></div>'; }).join("")
       + (on("notes") && next.note ? '<div class="hnote">Note: ' + esc(next.note) + '</div>' : '')
-      + (next.status === "confirmed"
+      + (next.status !== "declined"
         ? '<div class="btns two" style="margin-top:14px"><button class="btn" data-a="detail" data-id="' + next.id + '">Details</button><button class="btn ghost" data-a="sheet" data-s="change" data-id="' + next.id + '">Swap or give away</button></div>'
         : '<div class="btns two" style="margin-top:14px"><button class="btn" data-a="confirm" data-id="' + next.id + '">Confirm</button><button class="btn ghost" data-a="sheet" data-s="cant" data-id="' + next.id + '">Can\'t make it</button></div>')
       + '</div>';
@@ -1389,7 +1388,7 @@ function merge3(b, m, t){
   return t;
 }
 function saveSoon(){ if (!loaded) return; clearTimeout(saveTimer); saveTimer = setTimeout(saveNow, 400); }
-function heldBack(n){ toast("Only that person or a leader can change someone else's serve, so " + (n > 1 ? n + " changes were" : "that change was") + " put back."); fetch("/api/state", { cache: "no-store" }).then(function(r){ return r.ok ? r.json() : null; }).then(function(j){ if (j && j.data) { adopt(j); render.same = true; render(); } }, function(){}); }
+function heldBack(n){ toast("Only a leader can change the roster, so " + (n > 1 ? n + " changes were" : "that change was") + " put back."); fetch("/api/state", { cache: "no-store" }).then(function(r){ return r.ok ? r.json() : null; }).then(function(j){ if (j && j.data) { adopt(j); render.same = true; render(); } }, function(){}); }
 function saveNow(){
   if (!loaded) return;
   if (inflight) { again = true; return; }
@@ -1484,7 +1483,7 @@ A.cover = function(d){ var r = req(d.id); if (!r) return; var x = slot(r.slot); 
   S.pendingMine[x.id] = 1; S.requests.unshift({ id: "r" + Date.now(), kind: "pickup", slot: x.id, from: ME, state: "pending" });
   toast("You offered to cover " + r.from + "'s spot. Your leader confirms."); render.same = true; render(); };
 A.waNudge = function(){ var sv = dashSvc(); if (sv) waText(nudgeText(sv)); };
-A.remindApp = function(){ var sv = dashSvc(); if (!sv) return; S.notifs.unshift({ t: "Please confirm your serve", s: SVC[sv.svc].name + " · " + dShort(sv.date), when: "Now" }); S.sheet = null; toast("Reminder posted in the app."); render.same = true; render(); };
+A.remindApp = function(){ var sv = dashSvc(); if (!sv) return; S.notifs.unshift({ t: "Reminder: you're serving", s: SVC[sv.svc].name + " · " + dShort(sv.date), when: "Now" }); S.sheet = null; toast("Reminder posted in the app."); render.same = true; render(); };
 A.leaderMsg = function(){ var v = (document.getElementById("ml").value || "").trim(); if (!v) return; var l = leaderOf(teamsOf(ME)[0]), name = ME + " and " + l;
   var c = S.chats.filter(function(c){ return c.name === name; })[0]; if (!c) { c = { id: "c" + Date.now(), name: name, msgs: [] }; S.chats.push(c); }
   c.msgs.push({ who: ME, t: v }); S.sheet = null; toast("Sent to " + l + "."); render.same = true; render(); };
@@ -1860,7 +1859,7 @@ app.addEventListener("input", function(e){
 
 /* dashboard counts open their list (Nov 15) */
 SHEETS.statList = function(o){
-  var sv = dashSvc(), st = o.id, T = { confirmed: "Confirmed", open: "Open spots", declined: "Can't make it" };
+  var sv = dashSvc(), st = o.id, T = { confirmed: "Filled", open: "Open spots", declined: "Can't make it" };
   var list = S.slots.filter(function(x){ return x.sid === sv.id && (st === "open" ? !x.person || x.status === "open" : x.person && x.status === st); })
     .sort(function(a, b){ return (a.team + a.role).localeCompare(b.team + b.role); });
   return '<h4>' + T[st] + '</h4><p class="s">' + esc(SVC[sv.svc].name) + ' · ' + dShort(sv.date) + '</p>'
@@ -3076,6 +3075,19 @@ document.addEventListener("touchstart", function(e){ var t = e.touches[0]; EDGE 
 document.addEventListener("touchend", function(e){ if (!EDGE) return; var t = e.changedTouches[0], dx = t.clientX - EDGE.x, dy = Math.abs(t.clientY - EDGE.y); EDGE = null;
   if (dx > 70 && dy < 50 && (canBack() || S.stack.length)) A.back({}); }, { passive: true });
 
+/* Nov 17 (user): volunteers don't accept or decline serves. Like a shift, the leader rosters them;
+   the only thing a volunteer does on a serve is Request Coverage, and nothing changes until a leader approves. */
+function coverAsked(x){ return x && S.requests.some(function(r){ return r.slot === x.id && r.from === ME && r.state === "pending" && (r.kind === "cant" || r.kind === "swap"); }); }
+A.confirm = function(){ render.same = true; render(); };
+A.cantDo = function(d){ var x = slot(d.id); if (!x || x.person !== ME) return; S.sheet = null;
+  if (!coverAsked(x)) { var why = document.querySelector('.pick [aria-pressed="true"]'), note = (document.getElementById("cantNote") || {}).value; S.requests.unshift({ id: "r" + Date.now(), kind: "cant", slot: x.id, from: ME, state: "pending", note: note || (why ? why.textContent : "Emergency") }); }
+  toast("Asked " + leaderOf(x.team) + " to find cover. You're still on until they approve."); render.same = true; render(); };
+var baseChip19 = statusChip;
+statusChip = function(x){ return x && x.person === ME && x.status !== "declined" && coverAsked(x) ? '<span class="chip c-warn">Cover asked</span>' : baseChip19(x); };
+var baseDetail19 = SCREENS.detail;
+SCREENS.detail = function(o){ var r = baseDetail19(o), x = slot(o.id);
+  if (r && r.foot && coverAsked(x)) { r.foot = '<div class="foot7"><p class="small" style="margin:0;text-align:center">Cover asked. You\'re still on until your leader approves.</p></div>'; }
+  return r; };
 Promise.all([load(), loadMe()]).then(function(){ hubApply(); loaded = true; render(); }, function(){ loadErr = "Couldn't load the roster. Check your connection and refresh."; render(); });
 })();
 </script>
