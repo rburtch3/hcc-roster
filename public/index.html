@@ -3283,6 +3283,34 @@ meSection = function(){ var s = baseMeSection21();
   if (!isAdmin() || !hubName()) return s;
   return s.replace('<div class="lbl">Admins</div><div class="grp">', '<div class="lbl">Admins</div><div class="grp">' + row("Your profile", "Your name, phone, email and photo", "push", "profile")); };
 
+/* ---------- Your own picture and your own things in the admin and team leader views (Nov 18) ----------
+   User: "add my profile picture in top left when logged in as admin w/ similar options as volunteer page".
+   The Dashboard shows your picture top left; it opens More, which starts with your card (your profile) and a You
+   group: availability, emergency contact and calendar sync, the same screens a volunteer has. Team leaders get
+   them too: they never see the volunteer view, so until now they could not reach their own. */
+var youCss = document.createElement("style");
+youCss.textContent = '.btop .me + .org{margin:0 auto 0 12px}.btop .bnav + .me{margin-left:2px}';
+document.head.appendChild(youCss);
+var baseAdminDash24 = SCREENS["admin:dash"];
+SCREENS["admin:dash"] = function(o){ var r = baseAdminDash24(o); if (!r || !r.body || !HUBME) return r;
+  var n = hubName(), pic = n ? (PHOTOS[n] ? ava(n, 48) : '<span class="av" style="width:48px;height:48px;font-size:16px">' + esc(initials(n)) + '</span>') : ava("", 48);
+  r.body = r.body.replace('<div class="btop">', '<div class="btop"><button class="me" data-a="tab" data-v="more" aria-label="Your profile and settings">' + pic + '</button>');
+  return r; };
+function youCard(){ var n = hubName();
+  if (!n) return isAdmin() ? '<div class="card tap" data-a="push" data-s="linkMe" role="button" style="display:flex;gap:12px;align-items:center;cursor:pointer;margin-bottom:12px">' + ava("", 52)
+    + '<div class="m"><div class="t" style="font:600 17px/22px var(--font)">' + esc(HUBME.signedInAs || "Admin") + '</div><div class="small">Admin · Pick your Roster name to add your picture</div></div><span class="chev" style="margin-left:auto">›</span></div>' : '';
+  var teams = teamsOf(n);
+  return '<div class="card tap" data-a="push" data-s="profile" role="button" aria-label="Edit your profile" style="display:flex;gap:12px;align-items:center;cursor:pointer;margin-bottom:12px">'
+    + (PHOTOS[n] ? ava(n, 52) : '<span class="av" style="width:52px;height:52px;font-size:17px">' + esc(initials(n)) + '</span>')
+    + '<div class="m"><div class="t" style="font:600 17px/22px var(--font)">' + esc(n) + '</div><div class="small">' + esc(roleLabel() + (teams.length ? " · " + teams.join(" · ") : "")) + '</div></div><span class="chev" style="margin-left:auto">›</span></div>'
+    + '<div class="lbl">You</div><div class="grp">' + row("Availability", "Dates you can't serve", "push", "avail")
+    + row("Emergency contact", "Only you can change it", "push", "emerg") + row("Calendar sync", S.settings && S.settings.cal ? "On, your phone calendar" : "Off", "push", "calsync") + '</div>'; }
+var baseAdminMore24 = SCREENS["admin:more"];
+SCREENS["admin:more"] = function(o){ var r = baseAdminMore24(o); if (!r || !r.body || !HUBME) return r;
+  /* the profile row used to sit under Admins: it is in the You group now */
+  r.body = youCard() + r.body.split(row("Your profile", "Your name, phone, email and photo", "push", "profile")).join("");
+  return r; };
+
 Promise.all([load(), loadMe()]).then(function(){ hubApply(); loaded = true;
   if (JUST_SIGNED_IN) { var nx = takeNext(); history.replaceState(null, "", nx || location.pathname); if (!nx && isAdmin()) { S.view = "admin"; S.tab.admin = "dash"; S.stack = []; S.sheet = null; } }
   render(); }, function(){ loadErr = "Couldn't load the roster. Check your connection and refresh."; render(); });
