@@ -2361,6 +2361,12 @@ function leadTeams(p){ var t = leadsOf(p).slice(), l = objOf("levels")[p]; if (o
 var baseAdminOk11 = adminOk;
 function scopeTeams(){ if (!on("teamlead") || baseAdminOk11() || !ME || LS.get("roster.scope") !== ME || (on("volpin") && !vk())) return null; var t = leadTeams(ME); return t.length ? t : null; }
 function scoped(){ return S.view === "admin" ? scopeTeams() : null; }
+/* a team leader's More counts only their own team's blockouts, not everyone's */
+var baseBlockSummary23 = blockSummary;
+blockSummary = function(){ var t = scoped(); if (!t) return baseBlockSummary23();
+  var mine = {}, pool = (S.cfg && S.cfg.pool) || {}; t.forEach(function(tm){ (pool[tm] || []).forEach(function(p){ mine[p] = 1; }); });
+  var n = Object.keys(S.blockouts).reduce(function(a, k){ return a + (mine[k] ? (S.blockouts[k] || []).filter(function(b){ return !b.toIso || b.toIso >= TODAY; }).length : 0); }, 0);
+  return n ? n + " blockout" + (n > 1 ? "s" : "") + " coming up" : "No blockouts coming up"; };
 adminOk = function(){ return baseAdminOk11() || !!scopeTeams(); };
 function scopeBanner(sc){ return ''; } /* banner replaced by the admin-style Volunteer view switch in More (Nov 16) */
 
