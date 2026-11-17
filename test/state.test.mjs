@@ -238,3 +238,18 @@ test("leader-only content and other people's own settings: a volunteer's changes
   d = await now(); d.announcements = []; d.settingsBy.Ben = { sched: false };
   await put(s, 3, d); got = await now(); assert.deepEqual(got.announcements, []); assert.deepEqual(got.settingsBy.Ben, { sched: false });
 });
+
+test("an admin saving one person's contact leaves everyone else's as it is now", async () => {
+  const s = mem();
+  await s.putItem("contacts", { Ana: { phone: "1" }, Ben: { phone: "2", whatsapp: "22" } });
+  const r = async (body, c = ADMIN) => mod.handleContacts(new Request("https://x/api/contacts", { method: "PUT", body: JSON.stringify(body), headers: ck(c) }), s, env);
+  // Ben changes his own number after the admin's phone loaded the list
+  await s.putItem("contacts", { Ana: { phone: "1" }, Ben: { phone: "999", whatsapp: "22" } });
+  assert.equal((await r({ name: "Ana", contact: { phone: "11", email: "a@x.com" } })).status, 200);
+  assert.deepEqual(await s.getItem("contacts"), { Ana: { phone: "11", email: "a@x.com" }, Ben: { phone: "999", whatsapp: "22" } });
+  assert.equal((await r({ name: "Ana", contact: null })).status, 200);
+  assert.deepEqual(await s.getItem("contacts"), { Ben: { phone: "999", whatsapp: "22" } });
+  assert.equal((await r({ name: "", contact: {} })).status, 400);
+  assert.equal((await r({ name: "Ana", contact: "x" })).status, 400);
+  assert.equal((await r({ name: "Ana", contact: { phone: "1" } }, await sess("u-vol"))).status, 403);
+});

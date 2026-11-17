@@ -2034,11 +2034,11 @@ function loadContacts(){
     .then(function(j){ CONTACTS = (j && j.contacts) || {}; contactsBusy = false; render.same = true; render(); })
     .catch(function(){ CONTACTS = {}; contactsBusy = false; });
 }
-function saveContacts(tries){
+function saveContacts(tries, name){ /* name: the one person changed; only they are sent, so nobody else's number is overwritten */
   tries = tries || 0;
-  return fetch("/api/contacts", { method: "PUT", headers: { "content-type": "application/json", "x-roster-key": contactsKey() }, body: JSON.stringify({ contacts: CONTACTS || {} }) })
+  return fetch("/api/contacts", { method: "PUT", headers: { "content-type": "application/json", "x-roster-key": contactsKey() }, body: JSON.stringify(name ? { name: name, contact: (CONTACTS && CONTACTS[name]) || null } : { contacts: CONTACTS || {} }) })
     .then(function(r){ if (!r.ok) throw new Error(r.status); })
-    .catch(function(){ if (tries < 2) { clearTimeout(saveTimer); saveNow(); setTimeout(function(){ saveContacts(tries + 1); }, 1500); return; }
+    .catch(function(){ if (tries < 2) { clearTimeout(saveTimer); saveNow(); setTimeout(function(){ saveContacts(tries + 1, name); }, 1500); return; }
       toast("Phone and email didn't save. Lock and reopen Admin, then try again."); render(); });
 }
 function ct(p){ return (CONTACTS && CONTACTS[p]) || {}; }
@@ -2065,7 +2065,7 @@ A.addPerson = function(d, el){
   var had = everyone().length;
   baseAddPerson8(d, el);
   if (everyone().length === had) return;
-  if (em || ph) { if (!CONTACTS) CONTACTS = {}; CONTACTS[name] = { phone: ph, email: em }; saveContacts(); }
+  if (em || ph) { if (!CONTACTS) CONTACTS = {}; CONTACTS[name] = { phone: ph, email: em }; saveContacts(0, name); }
   if (inv) { S.stack.push({ s: "person", id: name }); S.sheet = { s: "invite", id: name }; render.same = true; render(); }
 };
 SHEETS.invite = function(o){
@@ -2080,7 +2080,7 @@ SHEETS.invite = function(o){
 };
 app.addEventListener("click", function(e){
   var a = e.target.closest && e.target.closest("a[data-inv]"); if (!a) return;
-  var p = a.getAttribute("data-inv"); if (!CONTACTS) CONTACTS = {}; CONTACTS[p] = Object.assign({}, ct(p), { invited: TODAY }); saveContacts();
+  var p = a.getAttribute("data-inv"); if (!CONTACTS) CONTACTS = {}; CONTACTS[p] = Object.assign({}, ct(p), { invited: TODAY }); saveContacts(0, p);
 });
 SHEETS.editContact = function(o){
   var p = o.id, c = ct(p);
@@ -2093,7 +2093,7 @@ A.saveContact = function(d){
   var em = (document.getElementById("ecEmail").value || "").trim(), ph = (document.getElementById("ecPhone").value || "").trim();
   if (em && !okEmail(em)) { toast("That email doesn't look right."); render(); return; }
   if (ph && digits(ph).length < 10) { toast("That phone number looks too short."); render(); return; }
-  if (!CONTACTS) CONTACTS = {}; CONTACTS[d.id] = Object.assign({}, ct(d.id), { phone: ph, email: em }); saveContacts();
+  if (!CONTACTS) CONTACTS = {}; CONTACTS[d.id] = Object.assign({}, ct(d.id), { phone: ph, email: em }); saveContacts(0, d.id);
   S.sheet = null; toast(d.id + "'s details saved."); render.same = true; render();
 };
 
@@ -3035,7 +3035,7 @@ adminOk = function(){ return isAdmin() || !!scopeTeams(); };
 /* phone and email are for admins only (the server refuses anyone else), so a team leader never asks for them */
 var baseLoadContacts22 = loadContacts, baseSaveContacts22 = saveContacts;
 loadContacts = function(){ if (!isAdmin()) { if (!CONTACTS) CONTACTS = {}; return; } baseLoadContacts22(); };
-saveContacts = function(tries){ if (!isAdmin()) { toast("Only an admin can save phone and email."); return Promise.resolve(); } return baseSaveContacts22(tries); };
+saveContacts = function(tries, name){ if (!isAdmin()) { toast("Only an admin can save phone and email."); return Promise.resolve(); } return baseSaveContacts22(tries, name); };
 vk = function(){ return hubName() && hubName() === ME ? "signin" : ""; };
 hubApply = function(){
   var n = HUBME ? hubName() : "";

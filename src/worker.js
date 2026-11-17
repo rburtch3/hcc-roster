@@ -24,6 +24,8 @@ export class RosterStore extends DurableObject {
   }
   async getItem(k) { return (await this.ctx.storage.get(k)) ?? null; }
   async putItem(k, v) { await this.ctx.storage.put(k, v); }
+  /** Sets (or, with null, removes) one entry of the object kept at k, in one step so two saves can't undo each other. */
+  async patchItem(k, name, v) { const all = (await this.ctx.storage.get(k)) || {}; if (v === null) delete all[name]; else all[name] = v; await this.ctx.storage.put(k, all); }
 }
 
 const json = (body, status = 200) =>
@@ -242,15 +244,24 @@ export async function handlePhotos(request, store) {
   return json({ photos: (await store.getItem("photos")) || {} });
 }
 
-/** Phone numbers and emails, kept apart from the roster and only for admins. */
+/** Phone numbers and emails, kept apart from the roster and only for admins. PUT { name, contact } saves one person; { contacts } replaces the list. */
 export async function handleContacts(request, store, env) {
   if (!(await whoIs(request, store, env)).lead) return new Response("Admins only", { status: 403 });
   if (request.method === "GET") return json({ contacts: (await store.getItem("contacts")) || {} });
   if (request.method === "PUT") {
     const text = await request.text();
     if (text.length > MAX_CONTACTS) return new Response("Too large", { status: 413 });
-    let c;
-    try { c = JSON.parse(text).contacts; } catch { return new Response("Bad JSON", { status: 400 }); }
+    let c, body;
+    try { body = JSON.parse(text); c = body.contacts; } catch { return new Response("Bad JSON", { status: 400 }); }
+    // { name, contact }: one person, saved onto the list as it is now (contact null removes them). The app sends this,
+    // so an admin's older copy of the list never undoes a number someone else just changed.
+    if (body && "name" in body) {
+      const name = typeof body.name === "string" ? body.name.trim().slice(0, 80) : "", one = body.contact;
+      if (!name || (one !== null && (typeof one !== "object" || Array.isArray(one)))) return new Response("Not a contact", { status: 400 });
+      if (typeof store.patchItem === "function") await store.patchItem("contacts", name, one);
+      else { const all = (await store.getItem("contacts")) || {}; if (one === null) delete all[name]; else all[name] = one; await store.putItem("contacts", all); }
+      return json({ ok: true });
+    }
     if (!c || typeof c !== "object" || Array.isArray(c)) return new Response("Not contacts", { status: 400 });
     await store.putItem("contacts", c);
     return json({ ok: true });
