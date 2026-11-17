@@ -8,7 +8,8 @@ const src = readFileSync(new URL("../src/worker.js", import.meta.url), "utf8")
   .replace('"./sevenshifts.js"', JSON.stringify(new URL("../src/sevenshifts.js", import.meta.url).href))
   .replace('"./hub.js"', JSON.stringify(new URL("../src/hub.js", import.meta.url).href))
   .replace('"./hubpeople.js"', JSON.stringify(new URL("../src/hubpeople.js", import.meta.url).href))
-  .replace('"./auth.js"', JSON.stringify(new URL("../src/auth.js", import.meta.url).href));
+  .replace('"./auth.js"', JSON.stringify(new URL("../src/auth.js", import.meta.url).href))
+  .replace('"./rename.js"', JSON.stringify(new URL("../src/rename.js", import.meta.url).href));
 const { makeSession } = await import("../src/hub.js");
 const { handleState: rawState } = await import("data:text/javascript," + encodeURIComponent(src));
 

@@ -2951,7 +2951,7 @@ function hexNonce(){ var a = new Uint8Array(16); crypto.getRandomValues(a); retu
 function pollHandoff(){
   if (!HANDOFF_N) return;
   fetch("/api/handoff?n=" + HANDOFF_N, { cache: "no-store", credentials: "same-origin" }).then(function(r){ return r.json(); }).then(function(j){
-    if (j && j.ok) { HANDOFF_N = ""; clearInterval(HANDOFF_T); LS.set("roster.handoff", null); location.replace("/"); }
+    if (j && j.ok) { HANDOFF_N = ""; clearInterval(HANDOFF_T); LS.set("roster.handoff", null); location.replace("/?signedin=1"); }
   }, function(){});
 }
 document.addEventListener("visibilitychange", function(){ if (document.visibilityState === "visible") pollHandoff(); });
@@ -3256,7 +3256,57 @@ SCREENS.person = function(o){ var r = basePerson20(o); if (!r) return r;
   r.body = r.body.replace(/<div class="lbl sm">Sign-in<\/div>[\s\S]*?<\/button><\/div><\/div>/, function(){ if (!isAdmin()) return '</div>'; loadAcc(); var on2 = ACC && ACC.linked.indexOf(o.id) >= 0;
     return '<div class="lbl sm">Sign-in</div><div class="small">' + (ACC === null ? 'Loading…' : on2 ? 'Signed in to Roster.' : 'Hasn\'t signed in yet. Saving their phone or email lets them sign in without asking.') + '</div>' + (on2 ? '<div class="btns"><button class="btn sec" data-a="sheet" data-s="accUnlink" data-id="' + esc(o.id) + '">Free this name</button></div>' : '') + '</div>'; });
   return r; };
-Promise.all([load(), loadMe()]).then(function(){ hubApply(); loaded = true; render(); }, function(){ loadErr = "Couldn't load the roster. Check your connection and refresh."; render(); });
+/* ---------- Nov 17: admins open on the admin page right after signing in; admins change names and info ---------- */
+var JUST_SIGNED_IN = /[?&]signedin=1(&|$)/.test(location.search);
+function renamePerson(from, to, contact){
+  return fetch("/api/rename", { method: "POST", credentials: "same-origin", headers: { "content-type": "application/json" }, body: JSON.stringify({ from: from, to: to, contact: contact || undefined }) })
+    .then(function(r){ return r.json().catch(function(){ return {}; }).then(function(j){ if (!r.ok || !j.ok) throw new Error(j.error || "Couldn't change the name. Try again."); return j; }); });
+}
+/* a new name reaches every saved copy, so this phone reloads to pick it up */
+function renamed(msg){ toast(msg); render.same = true; render(); setTimeout(function(){ location.reload(); }, 800); }
+var baseEditContact21 = SHEETS.editContact;
+SHEETS.editContact = function(o){ var h = baseEditContact21(o); if (!isAdmin()) return h;
+  return h.replace('<label class="fl" for="ecEmail">', '<label class="fl" for="ecName">Name</label><input class="field" id="ecName" autocomplete="off" maxlength="40" value="' + esc(o.id) + '"><label class="fl" for="ecEmail">'); };
+var baseSaveContact21 = A.saveContact;
+A.saveContact = function(d){
+  var n = document.getElementById("ecName"), to = n ? (n.value || "").trim().replace(/\s+/g, " ") : d.id;
+  if (n && !to) { toast("Type a name."); render.same = true; render(); return; }
+  if (!isAdmin() || to === d.id) return baseSaveContact21(d);
+  var em = (document.getElementById("ecEmail").value || "").trim(), ph = (document.getElementById("ecPhone").value || "").trim();
+  if (em && !okEmail(em)) { toast("That email doesn't look right."); render.same = true; render(); return; }
+  if (ph && digits(ph).length < 10) { toast("That phone number looks too short."); render.same = true; render(); return; }
+  renamePerson(d.id, to, { phone: ph, email: em }).then(function(){ S.sheet = null; renamed(d.id + " is now " + to + "."); },
+    function(e){ toast(e.message); render.same = true; render(); });
+};
+var baseProfile21 = SCREENS.profile;
+SCREENS.profile = function(o){ var r = baseProfile21(o); if (!r || !isAdmin() || !PROF || PROF.error) return r;
+  r.body = r.body.replace('<label class="fl" for="prPh">', '<label class="fl" for="prNm">Name</label><input class="field" id="prNm" autocomplete="name" maxlength="40" value="' + esc(ME) + '"><label class="fl" for="prPh">')
+    .replace(' To change your name, ask a leader.', '');
+  return r; };
+var baseProfSave21 = A.profSave;
+A.profSave = function(){ var n = document.getElementById("prNm"), to = n ? (n.value || "").trim().replace(/\s+/g, " ") : ME;
+  if (n && !to) { toast("Type your name."); render.same = true; render(); return; }
+  if (!isAdmin() || to === ME) return baseProfSave21();
+  var g = function(id){ return (document.getElementById(id).value || "").trim(); }, b = { phone: g("prPh"), whatsapp: g("prWa"), email: g("prEm") }, from = ME;
+  if (b.email && !/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(b.email)) { toast("That email doesn't look right."); render.same = true; render(); return; }
+  fetch("/api/profile", { method: "PUT", credentials: "same-origin", headers: volHeaders({ "content-type": "application/json" }), body: JSON.stringify(b) })
+    .then(function(r){ if (!r.ok) throw new Error("Couldn't save it. Sign in again and try once more."); return renamePerson(from, to); })
+    .then(function(){ renamed("You're now " + to + "."); }, function(e){ toast(e.message); render.same = true; render(); });
+};
+/* HCC Hub is no longer part of Roster: its rows leave More */
+["vol:more", "admin:more"].forEach(function(k){ var base = SCREENS[k]; SCREENS[k] = function(o){ var r = base(o); if (!r) return r;
+  r.body = r.body.replace(/<div class="row tap" data-a="hub" [^>]*>[\s\S]*?<span class="chev">›<\/span><\/div>/g, '')
+    .replace(/<div class="row tap" data-a="push" data-s="hubLinks" [^>]*>[\s\S]*?<span class="chev">›<\/span><\/div>/g, '')
+    .replace(/<div class="lbl">[^<]*<\/div><div class="grp"><\/div>/g, '');
+  return r; }; });
+var baseMeSection21 = meSection;
+meSection = function(){ var s = baseMeSection21();
+  if (!isAdmin() || !hubName()) return s;
+  return s.replace('<div class="lbl">Admins</div><div class="grp">', '<div class="lbl">Admins</div><div class="grp">' + row("Your profile", "Your name, phone, email and photo", "push", "profile")); };
+
+Promise.all([load(), loadMe()]).then(function(){ hubApply(); loaded = true;
+  if (JUST_SIGNED_IN) { history.replaceState(null, "", location.pathname); if (isAdmin()) { S.view = "admin"; S.tab.admin = "dash"; S.stack = []; S.sheet = null; } }
+  render(); }, function(){ loadErr = "Couldn't load the roster. Check your connection and refresh."; render(); });
 })();
 </script>
 

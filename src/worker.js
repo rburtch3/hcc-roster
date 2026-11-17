@@ -3,6 +3,7 @@
 import { DurableObject } from "cloudflare:workers";
 import { rowsForWeek, syncRows, publishTest, publishWeek, TEST_ROWS } from "./sevenshifts.js";
 import { handleSignOut, handleHandoff } from "./hub.js";
+import { handleRename } from "./rename.js";
 import { whoIs, handleSignIn, handleConfig, handleMe, handleAccess, handleAdmins, handleAuthProxy, leadTeamsOf } from "./auth.js";
 import { handleHubPeople, handleHubTeams } from "./hubpeople.js";
 
@@ -333,6 +334,7 @@ export default {
     if (url.pathname === "/api/hublinks") { const st = store(); return handleAccess(new Request(request.url, { method: request.method, body: request.method === "POST" ? await request.text() : undefined }), st, (await whoIs(request, st, env)).lead); }
     if (url.pathname === "/api/admins") { const st = store(); return handleAdmins(request, st, await whoIs(request, st, env)); }
     const routes = { "/api/state": handleState, "/api/contacts": handleContacts, "/api/emergency": handleEmergency, "/api/cal": handleCal };
+    if (url.pathname === "/api/rename") return handleRename(request, store(), env);
     if (url.pathname === "/api/profile") return handleProfile(request, store(), env);
     if (url.pathname === "/api/photos") return handlePhotos(request, store());
     const h = routes[url.pathname];

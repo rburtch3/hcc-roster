@@ -102,7 +102,7 @@ async function finish(cred) {
   await signOut(auth).catch(() => {});
   if (!r.ok) throw Object.assign(new Error("roster"), { code: "roster/" + r.status });
   if (nonce) { $("start").hidden = true; $("codeCard").hidden = true; $("doneCard").hidden = false; return; }
-  location.replace("/");
+  location.replace("/?signedin=1");
 }
 const fail = (el, e, fallback) => {
   const c = (e && e.code) || "";
