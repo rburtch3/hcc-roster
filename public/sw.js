@@ -10,7 +10,7 @@ self.addEventListener("activate", (e) => {
 self.addEventListener("fetch", (e) => {
   const req = e.request, url = new URL(req.url);
   if (req.method !== "GET" || url.origin !== location.origin) return;
-  if (url.pathname.startsWith("/api/") || url.pathname.startsWith("/auth/") || url.pathname.startsWith("/hub/")) return;
+  if (url.pathname.startsWith("/api/") || url.pathname.startsWith("/auth/") || url.pathname.startsWith("/hub/") || url.pathname.startsWith("/__/")) return;
   if (req.mode === "navigate") {
     e.respondWith(fetch(req).then((r) => { if (r.ok && !url.pathname.startsWith("/signin")) { const copy = r.clone(); caches.open(CACHE).then((c) => c.put("/", copy)); } return r; })
       .catch(() => caches.match("/").then((r) => r || new Response("You're offline. Open Roster again when you're connected.", { headers: { "content-type": "text/plain" } }))));

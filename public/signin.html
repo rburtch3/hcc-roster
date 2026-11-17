@@ -72,7 +72,7 @@ input{flex:1;width:100%}
 </main>
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/12.19.0/firebase-app.js";
-import { getAuth, GoogleAuthProvider, RecaptchaVerifier, signInWithPopup, signInWithPhoneNumber, signOut } from "https://www.gstatic.com/firebasejs/12.19.0/firebase-auth.js";
+import { getAuth, GoogleAuthProvider, RecaptchaVerifier, signInWithRedirect, getRedirectResult, signInWithPhoneNumber, signOut } from "https://www.gstatic.com/firebasejs/12.19.0/firebase-auth.js";
 
 const $ = (id) => document.getElementById(id);
 const n = (new URLSearchParams(location.search).get("n") || "").toLowerCase();
@@ -89,7 +89,11 @@ async function setUp() {
   auth.useDeviceLanguage();
   return auth;
 }
-setUp().catch(() => say("m1", "Sign-in isn't ready. Check your connection and refresh."));
+// Google sign-in leaves this page and comes back to it (same address, so ?n= survives); finish it here.
+busy(true);
+setUp().then((a) => getRedirectResult(a)).then((cred) => cred ? finish(cred) : null)
+  .catch((e) => { if (e && e.message === "config") say("m1", "Sign-in isn't ready. Check your connection and refresh."); else fail("m1", e, "Couldn't sign in with Google. Try again."); })
+  .finally(() => busy(false));
 
 /** Hands the Firebase sign-in to Roster, which keeps its own session. */
 async function finish(cred) {
@@ -119,11 +123,8 @@ $("g").onclick = async () => {
   try {
     await setUp();
     const p = new GoogleAuthProvider(); p.setCustomParameters({ prompt: "select_account" });
-    await finish(await signInWithPopup(auth, p));
-  } catch (e) {
-    if (e && (e.code === "auth/popup-closed-by-user" || e.code === "auth/cancelled-popup-request")) say("m1", "");
-    else fail("m1", e, "Couldn't sign in with Google. Try again.");
-  } finally { busy(false); }
+    await signInWithRedirect(auth, p); // the page goes to Google; nothing runs after this
+  } catch (e) { fail("m1", e, "Couldn't sign in with Google. Try again."); busy(false); }
 };
 
 /** The typed number as +91 or +1 and digits, or "". */

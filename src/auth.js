@@ -55,6 +55,7 @@ export async function whoIs(request, store, env) {
 /** GET /auth/config: the Firebase web settings for the sign-in page (public values), read from the project's Hosting. */
 let configCache = null;
 export async function handleConfig(request, env, fetchFn = fetch) {
+  const host = new URL(request.url).host;
   const id = env.HUB_PROJECT_ID || "";
   if (!id) return json({ error: "not set up" }, 503);
   if (!configCache) {
@@ -64,9 +65,11 @@ export async function handleConfig(request, env, fetchFn = fetch) {
       try { const r = await fetchFn(u); if (r.ok) { const j = await r.json(); if (j && j.apiKey && (!j.projectId || j.projectId === id)) { c = j; break; } } } catch {}
     }
     if (!c) return json({ error: "config" }, 502);
-    configCache = { apiKey: c.apiKey, authDomain: id + ".firebaseapp.com", projectId: c.projectId || id, appId: c.appId };
+    configCache = { apiKey: c.apiKey, projectId: c.projectId || id, appId: c.appId };
   }
-  return json(configCache, 200, { "cache-control": "public, max-age=3600" });
+  // authDomain is Roster's own address: /__/auth/* is passed through to Firebase (see handleAuthProxy), so
+  // Google sign-in stays on one site. iPhone Safari and in-app browsers lose the sign-in otherwise.
+  return json({ ...configCache, authDomain: host }, 200, { "cache-control": "no-cache" });
 }
 
 /**
@@ -148,4 +151,22 @@ export async function handleAdmins(request, store, who) {
   if (!isAdminSess(who.sess, list)) return json({ ok: false, error: "keep yourself" }, 409);
   await store.putItem("admins", list);
   return json({ ok: true, admins: list });
+}
+
+/**
+ * /__/auth/* and /__/firebase/*: Firebase's sign-in helper pages, fetched from the project's own
+ * firebaseapp.com address and served from Roster's address (Firebase's advice for browsers that partition storage).
+ */
+export async function handleAuthProxy(request, env, fetchFn = fetch) {
+  const id = env.HUB_PROJECT_ID || "";
+  if (!id) return new Response("Not set up", { status: 503 });
+  const url = new URL(request.url);
+  const target = "https://" + id + ".firebaseapp.com" + url.pathname + url.search;
+  const headers = new Headers(request.headers);
+  for (const h of ["host", "cookie", "cf-connecting-ip", "x-forwarded-for", "x-real-ip"]) headers.delete(h);
+  const hasBody = !["GET", "HEAD"].includes(request.method);
+  const r = await fetchFn(target, { method: request.method, headers, body: hasBody ? await request.arrayBuffer() : undefined, redirect: "manual" });
+  const out = new Headers(r.headers);
+  out.delete("set-cookie");
+  return new Response(r.body, { status: r.status, statusText: r.statusText, headers: out });
 }

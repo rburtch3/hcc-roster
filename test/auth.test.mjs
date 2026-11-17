@@ -249,6 +249,17 @@ test("sign-in page settings come from the project's Hosting, with the Hub's addr
   const seen = [];
   const f = async (u) => { seen.push(u); return u.includes("web.app") ? new Response("no", { status: 404 }) : new Response(JSON.stringify({ apiKey: "k", projectId: PID, appId: "a" })); };
   const r = await (await auth.handleConfig(new Request("https://x/auth/config"), env, f)).json();
-  assert.deepEqual(r, { apiKey: "k", authDomain: PID + ".firebaseapp.com", projectId: PID, appId: "a" });
+  assert.deepEqual(r, { apiKey: "k", authDomain: "x", projectId: PID, appId: "a" });
   assert.equal(seen.length, 2);
+});
+
+test("/__/auth/* is passed to the project's firebaseapp.com address without cookies", async () => {
+  const seen = [];
+  const f = async (u, init) => { seen.push([u, init]); return new Response("<html>handler</html>", { status: 200, headers: { "content-type": "text/html", "set-cookie": "x=1" } }); };
+  const req = new Request("https://hcc-roster.example/__/auth/handler?apiKey=k&mode=x", { headers: { cookie: "roster_session=secret" } });
+  const r = await auth.handleAuthProxy(req, env, f);
+  assert.equal(seen[0][0], "https://" + PID + ".firebaseapp.com/__/auth/handler?apiKey=k&mode=x");
+  assert.equal(seen[0][1].headers.get("cookie"), null);
+  assert.equal(r.headers.get("set-cookie"), null);
+  assert.equal(await r.text(), "<html>handler</html>");
 });

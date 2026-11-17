@@ -3,7 +3,7 @@
 import { DurableObject } from "cloudflare:workers";
 import { rowsForWeek, syncRows, publishTest, publishWeek, TEST_ROWS } from "./sevenshifts.js";
 import { handleSignOut, handleHandoff } from "./hub.js";
-import { whoIs, handleSignIn, handleConfig, handleMe, handleAccess, handleAdmins, leadTeamsOf } from "./auth.js";
+import { whoIs, handleSignIn, handleConfig, handleMe, handleAccess, handleAdmins, handleAuthProxy, leadTeamsOf } from "./auth.js";
 import { handleHubPeople, handleHubTeams } from "./hubpeople.js";
 
 const MAX = 1_000_000;
@@ -319,6 +319,7 @@ export default {
       const loadRoster = async () => (await env.ASSETS.fetch(new URL("/sheet-shifts.json", url))).json();
       return handleSevenShifts(request, env, loadRoster);
     }
+    if (url.pathname.startsWith("/__/auth/") || url.pathname.startsWith("/__/firebase/")) return handleAuthProxy(request, env);
     if (url.pathname === "/auth/config") return handleConfig(request, env);
     if (url.pathname === "/auth/signin") return handleSignIn(request, env, store());
     if (url.pathname === "/auth/hub") return new Response(null, { status: 302, headers: { location: "/signin", "cache-control": "no-store" } });
