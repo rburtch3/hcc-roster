@@ -1389,6 +1389,7 @@ function merge3(b, m, t){
   return t;
 }
 function saveSoon(){ if (!loaded) return; clearTimeout(saveTimer); saveTimer = setTimeout(saveNow, 400); }
+function heldBack(n){ toast("Only that person or a leader can change someone else's serve, so " + (n > 1 ? n + " changes were" : "that change was") + " put back."); fetch("/api/state", { cache: "no-store" }).then(function(r){ return r.ok ? r.json() : null; }).then(function(j){ if (j && j.data) { adopt(j); render.same = true; render(); } }, function(){}); }
 function saveNow(){
   if (!loaded) return;
   if (inflight) { again = true; return; }
@@ -1398,7 +1399,7 @@ function saveNow(){
     .then(function(r){ return r.json().then(function(j){ return { s: r.status, j: j }; }, function(){ return { s: r.status }; }); })
     .then(function(x){
       inflight = false;
-      if (x.s === 200) { rev = x.j.rev; lastSaved = body; failed = false; if (x.j.kept && x.j.kept.length) keptBack(x.j.kept); }
+      if (x.s === 200) { rev = x.j.rev; lastSaved = body; failed = false; if (x.j.kept && x.j.kept.length) keptBack(x.j.kept); if (x.j.held) heldBack(x.j.held); }
       else if (x.s === 409 && x.j && x.j.data) {
         var base = lastSaved ? JSON.parse(lastSaved) : null;
         if (!base) { adopt(x.j); toast("The roster was just set up on another phone, so this phone now shows that copy."); render.same = true; render(); }

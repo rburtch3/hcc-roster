@@ -66,11 +66,13 @@ export async function handleState(request, store, env) {
       if (!who.lead && !who.me && !who.sess) return json({ ok: false, reason: "signin" }, 401);
     }
     const kept = await guardAvailability(request, store, pin, data, env);
+    const held = pin && !(await savesOpen(store)) ? await guardRoster(request, store, pin, data, env) : 0;
     if (pin) data.pinHash = pin;
     else if ("pinHash" in data && !/^[0-9a-f]{64}$|^d[0-9a-f]+$/.test(String(data.pinHash))) data.pinHash = "";
     const r = await store.put(body.rev, JSON.stringify(data));
     if (!r.ok) return json({ rev: r.rev, data: r.data ? hide(JSON.parse(r.data)) : null }, 409);
-    return json(kept.length ? { rev: r.rev, kept } : { rev: r.rev });
+    const out = { rev: r.rev }; if (kept.length) out.kept = kept; if (held) out.held = held;
+    return json(out);
   }
   return new Response("Method not allowed", { status: 405 });
 }
@@ -102,6 +104,55 @@ export async function guardAvailability(request, store, pin, data, env) {
     }
   }
   return kept;
+}
+/**
+ * Serves and set-up are guarded too (Nov 17). A leader (leader PIN or Hub admin) can change anything.
+ * Anyone else may change only their own serve (say yes or can't do it); a team leader may also change,
+ * add or remove their own team's serves and lists. Switches, levels, who leads a team and service
+ * times stay as a leader set them. Anything else is put back before saving. Returns how many serves
+ * were put back (set-up is put back quietly, since phones fill in empty set-up on their own).
+ */
+export async function guardRoster(request, store, pin, data, env) {
+  const { data: oldText } = await store.get(); if (!oldText) return 0;
+  let old; try { old = JSON.parse(oldText); } catch { return 0; }
+  const { lead, me } = await whoIs(request, store, env, pin, (await store.getItem("vpins")) || {});
+  if (lead) return 0;
+  const cfg = old.cfg || {}, leaders = cfg.leaders || {}, pool = cfg.pool || {}, levels = old.levels || {};
+  const levelsOn = !(old.feat && old.feat.levels === false);
+  const myTeams = new Set(Object.keys(leaders).filter((t) => me && leaders[t] === me));
+  if (me && levelsOn && (levels[me] === "assistant" || levels[me] === "leader")) Object.keys(pool).forEach((t) => { if ((pool[t] || []).includes(me)) myTeams.add(t); });
+  const same = (a, b) => JSON.stringify(a) === JSON.stringify(b);
+  const empty = (v) => v === undefined || (v && typeof v === "object" && !Array.isArray(v) && !Object.keys(v).length);
+  const putBack = (to, k, from) => { if (empty(from[k]) && empty(to[k])) return; if (k in from) to[k] = from[k]; else delete to[k]; };
+  // leader-only set-up, put back quietly
+  for (const k of ["feat", "levels"]) if (!same(old[k], data[k])) putBack(data, k, old);
+  const nc = data.cfg && typeof data.cfg === "object" ? data.cfg : (data.cfg = {});
+  for (const k of new Set([...Object.keys(cfg), ...Object.keys(nc)])) {
+    if (same(cfg[k], nc[k])) continue;
+    if ((k === "pool" || k === "roles") && myTeams.size && nc[k] && typeof nc[k] === "object") {
+      const a = cfg[k] || {}, b = nc[k]; // a team leader changes only their own teams' lists
+      for (const t of new Set([...Object.keys(a), ...Object.keys(b)])) if (!myTeams.has(t) && !same(a[t], b[t])) putBack(b, t, a);
+      continue;
+    }
+    putBack(nc, k, cfg);
+  }
+  if (!myTeams.size && !same(old.services, data.services)) data.services = old.services;
+  // serves
+  const before = new Map((old.slots || []).map((x) => [x.id, x]));
+  const out = []; let held = 0;
+  for (const x of data.slots) {
+    const o = x && before.get(x.id);
+    if (!o) { if (x && myTeams.has(x.team)) out.push(x); else held++; continue; }
+    before.delete(o.id);
+    if (same(o, x) || myTeams.has(o.team)) { out.push(x); continue; }
+    const where = o.sid === x.sid && o.team === x.team && o.role === x.role && o.person === x.person;
+    const tidy = where && o.status === "pending" && x.status === "confirmed" && same({ ...o, status: 0 }, { ...x, status: 0 });
+    if (where && (tidy || (me && o.person === me))) out.push(x); else { out.push(o); held++; }
+  }
+  const at = new Map((old.slots || []).map((x, i) => [x.id, i]));
+  for (const o of before.values()) { if (!myTeams.has(o.team)) { out.splice(Math.min(at.get(o.id), out.length), 0, o); held++; } } // removed serves come back in place
+  data.slots = out;
+  return held;
 }
 /** Volunteer sign-in switched off in the saved roster: anyone may save, as before. */
 async function savesOpen(store) {
