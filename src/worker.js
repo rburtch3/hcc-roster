@@ -59,6 +59,12 @@ export async function handleState(request, store, env) {
     }
     // Once a PIN is set, a save can't change it; before that, the first real hash wins.
     const pin = await storedPin(store);
+    // Once a leader PIN is set (and volunteer sign-in is on), only someone signed in can save:
+    // a leader, a volunteer with their own PIN, or an HCC Hub session. Strangers can still read.
+    if (pin && !(await savesOpen(store)) && typeof store.getItem === "function") {
+      const who = await whoIs(request, store, env, pin, (await store.getItem("vpins")) || {});
+      if (!who.lead && !who.me && !who.sess) return json({ ok: false, reason: "signin" }, 401);
+    }
     const kept = await guardAvailability(request, store, pin, data, env);
     if (pin) data.pinHash = pin;
     else if ("pinHash" in data && !/^[0-9a-f]{64}$|^d[0-9a-f]+$/.test(String(data.pinHash))) data.pinHash = "";
@@ -97,6 +103,11 @@ export async function guardAvailability(request, store, pin, data, env) {
   }
   return kept;
 }
+/** Volunteer sign-in switched off in the saved roster: anyone may save, as before. */
+async function savesOpen(store) {
+  const { data } = await store.get(); if (!data) return true;
+  try { const d = JSON.parse(data); return !!(d.feat && d.feat.volpin === false); } catch { return true; }
+}
 const vHash = (name, pin) => hashPin("v|" + name + "|" + pin);
 /** The volunteer this request signs in as (x-vol-name is URI-encoded), or "". */
 function volMe(request, vp) {
@@ -118,8 +129,10 @@ export async function whoIs(request, store, env, pin, vp) {
 
 /**
  * /api/vpin  GET: { names } of volunteers who have their own PIN.
- * POST { name, pin }: sets it the first time, else checks it (10 wrong tries lock it for 15 minutes); 200 { ok, key }.
- * POST { name, reset: true } with x-roster-key: a leader clears it.
+ * POST { name, pin }: checks their PIN (10 wrong tries lock it for 15 minutes); 200 { ok, key }.
+ *   A first PIN is set only by that person signed in with HCC Hub, or by a leader; anyone else gets 403 "ask".
+ * POST { name, pin, change: true }: a new PIN, only by that person (their own PIN key or Hub sign-in) or a leader.
+ * POST { name, reset: true }: a leader clears it.
  */
 export async function handleVolPin(request, store, now = Date.now(), env) {
   const vp = (await store.getItem("vpins")) || {};
@@ -128,16 +141,24 @@ export async function handleVolPin(request, store, now = Date.now(), env) {
   let b; try { b = await request.json(); } catch { return new Response("Bad JSON", { status: 400 }); }
   const name = String((b && b.name) || "").slice(0, 80), pin = String((b && b.pin) || "");
   if (!name) return json({ ok: false, reason: "name" }, 400);
+  const { lead, me } = await whoIs(request, store, env, await storedPin(store), vp);
   if (b.reset) {
-    if (!(await whoIs(request, store, env, await storedPin(store), vp)).lead) return new Response("Leaders only", { status: 403 });
+    if (!lead) return new Response("Leaders only", { status: 403 });
     delete vp[name]; await store.putItem("vpins", vp); return json({ ok: true });
   }
   if (!/^\d{4,8}$/.test(pin)) return json({ ok: false, reason: "pin" }, 400);
+  if (b.change || !vp[name]) {
+    // Setting or changing a PIN: only the person themselves, or a leader.
+    if (!lead && me !== name) return json({ ok: false, reason: vp[name] ? "notyou" : "ask" }, 403);
+    const h = await vHash(name, pin), first = !vp[name];
+    vp[name] = h; await store.putItem("vpins", vp);
+    const fails = (await store.getItem("vfails")) || {}; if (fails[name]) { delete fails[name]; await store.putItem("vfails", fails); }
+    return json(me === name ? { ok: true, key: h, first: first || undefined } : { ok: true, first: first || undefined });
+  }
   const fails = (await store.getItem("vfails")) || {}, f = fails[name] || { n: 0, since: now };
   if (now - f.since > 15 * 60_000) { f.n = 0; f.since = now; }
   if (f.n >= 10) return json({ ok: false, reason: "locked" }, 429);
   const h = await vHash(name, pin);
-  if (!vp[name]) { vp[name] = h; await store.putItem("vpins", vp); return json({ ok: true, key: h, first: true }); }
   if (vp[name] === h) { fails[name] = { n: 0, since: now }; await store.putItem("vfails", fails); return json({ ok: true, key: h }); }
   f.n += 1; fails[name] = f; await store.putItem("vfails", fails);
   return json({ ok: false, reason: "wrong" }, 403);
@@ -327,6 +348,8 @@ export default {
     if (url.pathname === "/api/vpin") return handleVolPin(request, store(), Date.now(), env);
     const h = routes[url.pathname];
     if (h) return h(request, store(), env);
+    // App pages (/vol/..., /admin/...) are all the one page; it reads the path and opens that screen.
+    if (request.method === "GET" && /^\/(vol|admin)(\/|$)/.test(url.pathname)) return env.ASSETS.fetch(new Request(new URL("/", url), request));
     return env.ASSETS.fetch(request);
   },
 };

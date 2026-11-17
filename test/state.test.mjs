@@ -115,25 +115,44 @@ const vput = (s, rev, data, headers) => handleState(new Request("https://x/api/s
 test("volunteer PIN: set once, then checked, locks after 10 wrong tries, leader can reset", async () => {
   const s = mem2(), lead = await mod.hashPin("1111");
   await put(s, 0, { slots: [], pinHash: lead });
+  // a stranger can't set Ana's first PIN; a leader can
+  const stranger = await mod.handleVolPin(vreq("/api/vpin", "POST", { name: "Ana", pin: "9999" }), s, 1000);
+  assert.equal(stranger.status, 403); assert.equal((await stranger.json()).reason, "ask");
+  const set = await (await mod.handleVolPin(vreq("/api/vpin", "POST", { name: "Ana", pin: "4321" }, { "x-roster-key": lead }), s, 1000)).json();
+  assert.equal(set.ok, true); assert.equal(set.first, true); assert.equal(set.key, undefined);
   const first = await (await mod.handleVolPin(vreq("/api/vpin", "POST", { name: "Ana", pin: "4321" }), s, 1000)).json();
-  assert.equal(first.ok, true); assert.equal(first.first, true);
+  assert.equal(first.ok, true);
   assert.deepEqual(await (await mod.handleVolPin(vreq("/api/vpin", "GET"), s)).json(), { names: ["Ana"] });
   const again = await (await mod.handleVolPin(vreq("/api/vpin", "POST", { name: "Ana", pin: "4321" }), s, 1000)).json();
   assert.equal(again.key, first.key); assert.equal(again.first, undefined);
+  // nobody else can change Ana's PIN; Ana (with her key) or a leader can
+  assert.equal((await mod.handleVolPin(vreq("/api/vpin", "POST", { name: "Ana", pin: "8888", change: true }), s, 1000)).status, 403);
+  const ben = await (await mod.handleVolPin(vreq("/api/vpin", "POST", { name: "Ben", pin: "5555" }, { "x-roster-key": lead }), s, 1000)).json();
+  const benKey = (await (await mod.handleVolPin(vreq("/api/vpin", "POST", { name: "Ben", pin: "5555" }), s, 1000)).json()).key;
+  assert.equal(ben.ok, true);
+  assert.equal((await mod.handleVolPin(vreq("/api/vpin", "POST", { name: "Ana", pin: "8888", change: true }, { "x-vol-name": "Ben", "x-vol-key": benKey }), s, 1000)).status, 403);
+  const ch = await (await mod.handleVolPin(vreq("/api/vpin", "POST", { name: "Ana", pin: "7777", change: true }, { "x-vol-name": "Ana", "x-vol-key": first.key }), s, 1000)).json();
+  assert.equal(ch.ok, true); assert.notEqual(ch.key, first.key);
+  assert.equal((await mod.handleVolPin(vreq("/api/vpin", "POST", { name: "Ana", pin: "4321", change: true }, { "x-roster-key": lead }), s, 1000)).status, 200);
   for (let i = 0; i < 10; i++) assert.equal((await mod.handleVolPin(vreq("/api/vpin", "POST", { name: "Ana", pin: "0000" }), s, 2000)).status, 403);
   assert.equal((await mod.handleVolPin(vreq("/api/vpin", "POST", { name: "Ana", pin: "4321" }), s, 3000)).status, 429);
   assert.equal((await mod.handleVolPin(vreq("/api/vpin", "POST", { name: "Ana", reset: true }), s)).status, 403);
   assert.equal((await mod.handleVolPin(vreq("/api/vpin", "POST", { name: "Ana", reset: true }, { "x-roster-key": lead }), s)).status, 200);
-  assert.deepEqual(await (await mod.handleVolPin(vreq("/api/vpin", "GET"), s)).json(), { names: [] });
+  assert.deepEqual(await (await mod.handleVolPin(vreq("/api/vpin", "GET"), s)).json(), { names: ["Ben"] });
   assert.equal(JSON.stringify(await (await handleState(req("GET"), s)).json()).includes(first.key), false);
 });
 
 test("only the volunteer (or a leader) can change their own availability", async () => {
   const s = mem2(), lead = await mod.hashPin("1111");
   await put(s, 0, { slots: [], pinHash: lead, blockouts: { Ana: ["2030-01-06"] }, regularBy: {} });
+  await mod.handleVolPin(vreq("/api/vpin", "POST", { name: "Ana", pin: "4321" }, { "x-roster-key": lead }), s);
   const key = (await (await mod.handleVolPin(vreq("/api/vpin", "POST", { name: "Ana", pin: "4321" }), s)).json()).key;
+  await mod.handleVolPin(vreq("/api/vpin", "POST", { name: "Ben", pin: "5555" }, { "x-roster-key": lead }), s);
+  const ben = { "x-vol-name": "Ben", "x-vol-key": (await (await mod.handleVolPin(vreq("/api/vpin", "POST", { name: "Ben", pin: "5555" }), s)).json()).key };
+  // a stranger, signed in as nobody, can't save at all
+  assert.equal((await vput(s, 1, { slots: [], blockouts: {} })).status, 401);
   // someone else's device: Ana's change is put back, Ben's goes through
-  let r = await (await vput(s, 1, { slots: [], blockouts: { Ana: [], Ben: ["2030-01-13"] }, regularBy: { Ana: { "Sun AM": true } } })).json();
+  let r = await (await vput(s, 1, { slots: [], blockouts: { Ana: [], Ben: ["2030-01-13"] }, regularBy: { Ana: { "Sun AM": true } } }, ben)).json();
   assert.deepEqual(r.kept, ["Ana"]);
   let got = (await (await handleState(req("GET"), s)).json()).data;
   assert.deepEqual(got.blockouts, { Ana: ["2030-01-06"], Ben: ["2030-01-13"] });
@@ -153,6 +172,7 @@ test("only the volunteer (or a leader) can change their own availability", async
 test("emergency contact: only that volunteer changes it, leaders can read, never in public state", async () => {
   const s = mem2(), lead = await mod.hashPin("1111");
   await put(s, 0, { slots: [], pinHash: lead });
+  await mod.handleVolPin(vreq("/api/vpin", "POST", { name: "Ana", pin: "4321" }, { "x-roster-key": lead }), s);
   const key = (await (await mod.handleVolPin(vreq("/api/vpin", "POST", { name: "Ana", pin: "4321" }), s)).json()).key;
   const me = { "x-vol-name": "Ana", "x-vol-key": key };
   const body = { contact: { name: "Sam", phone: "555 0100", relation: "Brother" } };
@@ -178,4 +198,13 @@ test("calendar feed lists only that person's published serves", async () => {
   assert.equal((t.match(/BEGIN:VEVENT/g) || []).length, 1);
   assert.match(t, /SUMMARY:Singer · Sunday Morning/);
   assert.match(t, /DTSTART:20990104T040000Z/);
+});
+
+test("app page paths (/vol/..., /admin/...) serve the one page", async () => {
+  const seen = [];
+  const env = { ASSETS: { fetch: async (r) => { seen.push(new URL(r.url).pathname); return new Response("page"); } }, ROSTER: { idFromName: () => 1, get: () => mem2() } };
+  await mod.default.fetch(new Request("https://x/vol/sched"), env);
+  await mod.default.fetch(new Request("https://x/admin/more/person:Paul"), env);
+  await mod.default.fetch(new Request("https://x/icon-192.png"), env);
+  assert.deepEqual(seen, ["/", "/", "/icon-192.png"]);
 });

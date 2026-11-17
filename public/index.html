@@ -1410,6 +1410,7 @@ function saveNow(){
           render.same = true; render(); saveSoon();
         }
       }
+      else if (x.s === 401) { failed = true; toast("Sign in to save changes. Your change wasn't saved."); fetch("/api/state", { cache: "no-store" }).then(function(r){ return r.ok ? r.json() : null; }).then(function(j){ if (j && j.data) { adopt(j); render.same = true; render(); } }, function(){}); }
       else if (!failed) { failed = true; toast("Couldn't save just now. Please try again."); render.same = true; render(); }
       if (again) { again = false; saveSoon(); }
     }, function(){ inflight = false; if (!failed) { failed = true; toast("Couldn't save. You look offline."); render.same = true; render(); } });
@@ -2381,7 +2382,7 @@ function scopeBanner(sc){ return ''; } /* banner replaced by the admin-style Vol
 /* the sign-in screen after picking a name */
 SCREENS.vpin = function(){ loadVpins(); var has = VPINS && VPINS.indexOf(ME) >= 0;
   return { head: plainHead(has ? "Hi, " + ME : "Pick your own PIN"), noTabs: true, body: '<div class="card"><p class="small" style="margin:0 0 10px">'
-    + (VPINS === null ? "Checking…" : has ? "Type your own PIN to open your roster on this phone." : "Pick a 4 to 8 digit PIN just for you. Then only you can change your availability and your emergency contact.") + '</p>'
+    + (VPINS === null ? "Checking…" : has ? "Type your own PIN to open your roster on this phone." : (HUBME && hubName() === ME) ? "Pick a 4 to 8 digit PIN just for you. Then only you can change your availability and your emergency contact." : "You don't have a PIN yet. Sign in with HCC Hub, or ask a leader to set your first PIN.") + '</p>'
     + '<label class="fl" for="vp1">' + (has ? "Your PIN" : "New PIN") + '</label><input class="field" id="vp1" type="password" inputmode="numeric" autocomplete="off" maxlength="8">'
     + (has ? '' : '<label class="fl" for="vp2">Type it again</label><input class="field" id="vp2" type="password" inputmode="numeric" autocomplete="off" maxlength="8">')
     + '<div class="btns"><button class="btn" data-a="vpinGo">' + (has ? "Sign in" : "Save my PIN") + '</button><button class="btn sec" data-a="whoami">Not ' + esc(ME) + '?</button></div>'
@@ -2396,7 +2397,7 @@ A.vpinGo = function(){
     .then(function(r){ return r.json().then(function(j){ return { st: r.status, j: j }; }, function(){ return { st: r.status, j: {} }; }); })
     .then(function(x){
       if (x.j && x.j.ok && who === ME) { LS.set("roster.vkey", JSON.stringify({ name: who, key: x.j.key })); if (VPINS && VPINS.indexOf(who) < 0) VPINS.push(who); EMERG_ME = undefined; S.stack = []; toast(x.j.first ? "PIN saved. Only you can change your availability now." : "Signed in."); render(); }
-      else { toast(x.st === 429 ? "Too many wrong tries. Wait 15 minutes and try again." : "That PIN isn't right."); render(); } })
+      else { toast(x.st === 429 ? "Too many wrong tries. Wait 15 minutes and try again." : x.j && x.j.reason === "ask" ? "Only a leader can set your first PIN, or sign in with HCC Hub." : "That PIN isn't right."); render(); } })
     .catch(function(){ toast("Couldn't check the PIN. Check your connection and try again."); render(); });
 };
 var baseSetMe11 = A.setMe; A.setMe = function(d, el){ EMERG_ME = undefined; baseSetMe11(d, el); };
@@ -2477,7 +2478,7 @@ SCREENS.person = function(o){ var r = basePerson11(o), p = o.id; if (!r || S.vie
     + (EMERG_ALL === null ? '<div class="small">Loading…</div>' : e ? '<div class="cline"><span>Name</span>' + esc(e.name + (e.relation ? ", " + e.relation : "")) + '</div><div class="cline"><span>Phone</span>' + esc(e.phone) + '</div>' : '<div class="small">Not added yet.</div>')
     + '<p class="small" style="margin:6px 0 0">Only ' + esc(p) + ' can change this, after signing in.</p>'
     + '<div class="lbl sm">Sign-in</div><div class="small">' + (VPINS === null ? 'Loading…' : has ? 'Signs in with their own PIN.' : 'Hasn\'t picked a PIN yet.') + '</div>'
-    + (has ? '<div class="btns"><button class="btn sec" data-a="sheet" data-s="resetVpin" data-id="' + esc(p) + '">Reset their PIN</button></div>' : '') + '</div>';
+    + '<div class="btns"><button class="btn sec" data-a="sheet" data-s="setVpin" data-id="' + esc(p) + '">' + (has ? 'Set a new PIN' : 'Set their first PIN') + '</button></div></div>';
   return r; };
 SHEETS.resetVpin = function(o){ return '<h4>Reset ' + esc(o.id) + '\'s PIN?</h4><p class="s">They pick a new PIN the next time they open the app. Until then, anyone who picks their name can set it.</p><div class="btns"><button class="btn danger" data-a="resetVpin" data-id="' + esc(o.id) + '">Reset PIN</button><button class="btn sec" data-a="closeSheet">Keep it</button></div>'; };
 A.resetVpin = function(d){
@@ -2978,6 +2979,102 @@ render = function(){
 var baseWhoScreen16 = SCREENS.who;
 SCREENS.who = function(o){ if (HANDOFF_DONE) return SCREENS.handoffDone(); if (HANDOFF_N && !HUBME) return SCREENS.hubWait(); var r = baseWhoScreen16(o); if (r && !HUBME) r.body = installCard() + r.body; return r; };
 ["vol:more", "vol:home"].forEach(function(k){ var base = SCREENS[k]; if (!base) return; SCREENS[k] = function(o){ var r = base(o); if (r && k === "vol:more") r.body = installCard() + r.body; return r; }; });
+
+/* ---------- PINs: only the person or a leader sets one (Nov 17, user: "Anyone can change anyone else's pin") ---------- */
+SHEETS.setVpin = function(o){ var has = VPINS && VPINS.indexOf(o.id) >= 0;
+  return '<h4>' + (has ? 'Set a new PIN for ' : 'Set a first PIN for ') + esc(o.id) + '</h4><p class="s">Tell ' + esc(o.id) + ' the PIN in person. They can change it after signing in.</p>'
+    + '<label class="fl" for="sv1">New PIN</label><input class="field" id="sv1" type="password" inputmode="numeric" autocomplete="off" maxlength="8">'
+    + '<label class="fl" for="sv2">Type it again</label><input class="field" id="sv2" type="password" inputmode="numeric" autocomplete="off" maxlength="8">'
+    + '<div class="btns"><button class="btn" data-a="setVpin" data-id="' + esc(o.id) + '">Save PIN</button><button class="btn sec" data-a="closeSheet">Cancel</button></div>'; };
+function pinPair(a, b){ var p1 = (document.getElementById(a).value || "").trim(), p2 = (document.getElementById(b).value || "").trim();
+  if (!/^\d{4,8}$/.test(p1)) { toast("Use 4 to 8 digits."); render.same = true; render(); return ""; }
+  if (p1 !== p2) { toast("The two PINs don't match."); render.same = true; render(); return ""; } return p1; }
+A.setVpin = function(d){ var p1 = pinPair("sv1", "sv2"); if (!p1) return;
+  fetch("/api/vpin", { method: "POST", headers: authHeaders(), credentials: "same-origin", body: JSON.stringify({ name: d.id, pin: p1, change: true }) })
+    .then(function(r){ if (!r.ok) throw new Error(r.status); if (VPINS && VPINS.indexOf(d.id) < 0) VPINS.push(d.id); S.sheet = null; toast(d.id + "'s PIN is set. Tell them in person."); render(); })
+    .catch(function(){ toast("Couldn't set it. Lock and reopen Admin, then try again."); render.same = true; render(); }); };
+SHEETS.myPin = function(){ return '<h4>Change your PIN</h4>'
+    + '<label class="fl" for="mp1">New PIN</label><input class="field" id="mp1" type="password" inputmode="numeric" autocomplete="off" maxlength="8">'
+    + '<label class="fl" for="mp2">Type it again</label><input class="field" id="mp2" type="password" inputmode="numeric" autocomplete="off" maxlength="8">'
+    + '<div class="btns"><button class="btn" data-a="myPin">Save PIN</button><button class="btn sec" data-a="closeSheet">Cancel</button></div>'; };
+A.myPin = function(){ var p1 = pinPair("mp1", "mp2"); if (!p1) return; var who = ME;
+  fetch("/api/vpin", { method: "POST", headers: volHeaders({ "content-type": "application/json" }), credentials: "same-origin", body: JSON.stringify({ name: who, pin: p1, change: true }) })
+    .then(function(r){ return r.json().then(function(j){ if (!r.ok || !j.ok) throw new Error(r.status); return j; }); })
+    .then(function(j){ if (j.key && who === ME) LS.set("roster.vkey", JSON.stringify({ name: who, key: j.key })); if (VPINS && VPINS.indexOf(who) < 0) VPINS.push(who); S.sheet = null; toast("Your PIN is changed."); render(); })
+    .catch(function(){ toast("Couldn't change it. Sign in again and try once more."); render.same = true; render(); }); };
+var baseVolMore17b = SCREENS["vol:more"];
+SCREENS["vol:more"] = function(o){ var r = baseVolMore17b(o); if (!r || !ME || !on("volpin") || !(vk() || (HUBME && hubName() === ME))) return r;
+  var pinRow = row(VPINS && VPINS.indexOf(ME) >= 0 ? "Change my PIN" : "Set my PIN", "Your own PIN for this app", "sheet", "myPin");
+  var i = r.body.lastIndexOf('<div class="grp">'); if (i < 0) r.body += '<div class="grp">' + pinRow + '</div>'; else r.body = r.body.slice(0, i) + '<div class="grp">' + pinRow + r.body.slice(i + 17);
+  return r; };
+
+/* ---------- Pages have their own address (Nov 17, user: "using proper route paths", "back and forth navigation") ----------
+   Each screen has a path like /vol/sched or /admin/sched/service:ID. The phone's back and forward, refresh and shared
+   links keep your place, and each page keeps its scroll spot. ‹ goes back and › goes forward in the header. */
+var NOROUTE = { who: 1, pin: 1, vpin: 1, handoffDone: 1 };
+var HIST = [], HSHEET = [], HSCROLL = [], HIDX = 0, POPPING = false, SKIPPOP = 0, ROUTE_INIT = false;
+try { var hs = JSON.parse(sessionStorage.getItem("roster.hist") || "null"); if (hs && hs.h) { HIST = hs.h; HSCROLL = hs.y || []; } } catch (e) {}
+HIDX = (history.state && typeof history.state.i === "number") ? history.state.i : 0;
+function saveHist(){ try { sessionStorage.setItem("roster.hist", JSON.stringify({ h: HIST.slice(0, 60), y: HSCROLL.slice(0, 60) })); } catch (e) {} }
+function routeOf(){ var v = S.view === "admin" ? "admin" : "vol", path = "/" + v + "/" + encodeURIComponent(S.tab[v] || "");
+  (S.stack || []).forEach(function(e){ if (!e || NOROUTE[e.s]) return; path += "/" + encodeURIComponent(e.s) + (e.id != null && e.id !== "" ? ":" + encodeURIComponent(e.id) : ""); });
+  var q = [];
+  if (S.tab[v] === "sched" && !(S.stack || []).filter(function(e){ return e && !NOROUTE[e.s]; }).length) {
+    if (S.wkDay) q.push("day=" + S.wkDay);
+    if (v === "admin" && S.adminSid) q.push("svc=" + encodeURIComponent(S.adminSid));
+    if (v === "vol" && S.volSchedMode) q.push("show=" + encodeURIComponent(S.volSchedMode)); }
+  if (S.sheet && S.sheet.s) q.push("sheet=" + encodeURIComponent(S.sheet.s) + (S.sheet.id != null && S.sheet.id !== "" ? ":" + encodeURIComponent(S.sheet.id) : ""));
+  return path + (q.length ? "?" + q.join("&") : ""); }
+function curPath(){ return location.pathname + (/[?&](sheet|day|svc|show)=/.test(location.search) ? location.search : ""); }
+function qget(k){ var m = location.search.match(new RegExp("[?&]" + k + "=([^&]*)")); return m ? decodeURIComponent(m[1]) : ""; }
+function applyRoute(withSheet){
+  var m = location.pathname.match(/^\/(vol|admin)\/([^\/]+)((?:\/[^\/]+)*)\/?$/); if (!m) return false;
+  var v = m[1], tab = decodeURIComponent(m[2]); if (!SCREENS[v + ":" + tab]) return false;
+  S.view = v; S.tab[v] = tab; var st = [];
+  (m[3] || "").split("/").forEach(function(seg){ if (!seg) return; var k = seg.indexOf(":"), name = decodeURIComponent(k < 0 ? seg : seg.slice(0, k));
+    if (!SCREENS[name] || NOROUTE[name]) return; var e = { s: name }; if (k >= 0) e.id = decodeURIComponent(seg.slice(k + 1)); st.push(e); });
+  S.stack = st; S.sheet = (withSheet && HSHEET[HIDX] && withSheet === true) ? HSHEET[HIDX] : null;
+  if (tab === "sched") { var day = qget("day"), svc = qget("svc"), show = qget("show");
+    S.wkDay = /^\d{4}-\d{2}-\d{2}$/.test(day) ? day : null;
+    if (v === "admin" && svc && S.services.some(function(x){ return x.id === svc; })) S.adminSid = svc;
+    if (v === "vol" && (show === "mine" || show === "all")) S.volSchedMode = show; }
+  return true; }
+function syncRoute(){
+  if (!loaded || location.search.indexOf("handoff=") >= 0) return;
+  var r = routeOf(); if (r === curPath() && HIST[HIDX] === r) return;
+  var b = document.getElementById("body");
+  if (POPPING || !ROUTE_INIT) { HIST[HIDX] = r; history.replaceState({ i: HIDX }, "", r); ROUTE_INIT = true; saveHist(); return; }
+  HSCROLL[HIDX] = b ? b.scrollTop : 0;
+  if (HIDX > 0 && HIST[HIDX - 1] === r) { HIDX--; SKIPPOP++; history.back(); saveHist(); return; }
+  HIDX++; HIST.length = HIDX; HSCROLL.length = HIDX; HIST[HIDX] = r; HSHEET[HIDX] = S.sheet ? JSON.parse(JSON.stringify(S.sheet)) : null;
+  history.pushState({ i: HIDX }, "", r); saveHist(); }
+window.addEventListener("popstate", function(e){
+  if (SKIPPOP) { SKIPPOP--; return; }
+  var b = document.getElementById("body"); if (b) HSCROLL[HIDX] = b.scrollTop;
+  HIDX = (e.state && typeof e.state.i === "number") ? e.state.i : HIDX;
+  if (!applyRoute(true)) { S.stack = []; S.sheet = null; }
+  POPPING = true; render(); POPPING = false;
+  var y = HSCROLL[HIDX] || 0, b2 = document.getElementById("body"); if (b2) b2.scrollTop = y; saveHist(); });
+function canBack(){ return HIDX > 0 && !!HIST[HIDX - 1]; }
+function canFwd(){ return !!HIST[HIDX + 1]; }
+var baseBack17 = A.back;
+A.back = function(d, el){ if (canBack()) { history.back(); return; } if (S.stack.length) baseBack17(d, el); };
+A.fwd = function(){ if (canFwd()) history.forward(); };
+var baseRender18 = render;
+render = function(){
+  if (loaded && !ROUTE_INIT) applyRoute(false);
+  baseRender18(); syncRoute(); patchNav(); };
+/* ‹ and › in the header's empty corners: back to the last page, forward again after going back */
+function spacer(el){ return el && el.tagName === "SPAN" && !el.children.length && !el.textContent.trim(); }
+function patchNav(){ var hd = document.querySelector("#app .hd") || document.querySelector(".hd"); if (!hd) return;
+  if (canBack() && !hd.querySelector('[data-a="back"]') && spacer(hd.firstElementChild)) hd.firstElementChild.outerHTML = '<button class="ic" data-a="back" aria-label="Back">‹</button>';
+  if (canFwd() && !hd.querySelector('[data-a="fwd"]') && spacer(hd.lastElementChild)) hd.lastElementChild.outerHTML = '<button class="ic" data-a="fwd" aria-label="Forward">›</button>'; }
+/* in the installed app (no browser bar), swipe from the left edge to go back; Safari already does this itself */
+var EDGE = null;
+document.addEventListener("touchstart", function(e){ var t = e.touches[0]; EDGE = (STANDALONE && e.touches.length === 1 && t.clientX < 22 && !S.sheet) ? { x: t.clientX, y: t.clientY } : null; }, { passive: true });
+document.addEventListener("touchend", function(e){ if (!EDGE) return; var t = e.changedTouches[0], dx = t.clientX - EDGE.x, dy = Math.abs(t.clientY - EDGE.y); EDGE = null;
+  if (dx > 70 && dy < 50 && (canBack() || S.stack.length)) A.back({}); }, { passive: true });
+
 Promise.all([load(), loadMe()]).then(function(){ hubApply(); loaded = true; render(); }, function(){ loadErr = "Couldn't load the roster. Check your connection and refresh."; render(); });
 })();
 </script>

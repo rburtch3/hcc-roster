@@ -195,3 +195,17 @@ test("leaders list and unlink Hub sign-ins; others can't", async () => {
   assert.equal((await r.json()).removed, 1);
   assert.deepEqual(await s.getItem("hubLinks"), { b: "Ana" });
 });
+
+test("Hub sign-in: a person sets only their own first PIN, never someone else's", async () => {
+  const s = mem();
+  await s.put(0, JSON.stringify({ slots: [], pinHash: await mod.hashPin("1111") }));
+  await s.putItem("contacts", { Bharat: { phone: "9848012345" } });
+  const c = await signIn(s, { sub: "u-b", phone_number: "+919848012345", hub: { rota: "member" } });
+  const post = (body) => mod.handleVolPin(withCookie("/api/vpin", c, { method: "POST", body: JSON.stringify(body) }), s, Date.now(), env);
+  assert.equal((await post({ name: "Paul", pin: "1234" })).status, 403);
+  const mine = await (await post({ name: "Bharat", pin: "4321" })).json();
+  assert.equal(mine.ok, true); assert.ok(mine.key);
+  // a Hub session counts as signed in for saving the roster
+  const r = await mod.handleState(withCookie("/api/state", c, { method: "PUT", body: JSON.stringify({ rev: 1, data: { slots: [] } }) }), s, env);
+  assert.equal(r.status, 200);
+});
