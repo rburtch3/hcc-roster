@@ -2991,8 +2991,11 @@ window.addEventListener("popstate", function(e){
   if (!applyRoute(true)) { S.stack = []; S.sheet = null; }
   POPPING = true; render(); POPPING = false;
   var y = HSCROLL[HIDX] || 0, b2 = document.getElementById("body"); if (b2) b2.scrollTop = y; saveHist(); });
-function canBack(){ return HIDX > 0 && !!HIST[HIDX - 1]; }
-function canFwd(){ return !!HIST[HIDX + 1]; }
+/* the back and forward arrows are for someone using Roster: not on the sign-in or "which one is you" screens,
+   where the pages behind them can't be opened anyway */
+function navOk(){ return !!HUBME && (isAdmin() || !!hubName()); }
+function canBack(){ return navOk() && HIDX > 0 && !!HIST[HIDX - 1]; }
+function canFwd(){ return navOk() && !!HIST[HIDX + 1]; }
 var baseBack17 = A.back;
 A.back = function(d, el){ if (canBack()) { history.back(); return; } if (S.stack.length) baseBack17(d, el); };
 A.fwd = function(){ if (canFwd()) history.forward(); };
