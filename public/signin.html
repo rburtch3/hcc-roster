@@ -1,0 +1,165 @@
+<!doctype html>
+<html lang="en"><head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Sign in · Roster</title>
+<link rel="icon" href="/icon-192.png"><link rel="apple-touch-icon" href="/apple-touch-icon.png">
+<meta name="theme-color" content="#FFFEFB">
+<style>
+/* Roster's own sign-in (Nov 17): Google or an SMS code, on the church's Firebase project. */
+:root{--ground:#F0EEE9;--surface:#FFFEFB;--ink:#1B1A17;--muted:#6B665E;--line:#E4DFD6;--field:#D3CCBF;--accent:#2B59F0;--accent-ink:#fff;--late:#C4262E;--ok:#2A7448;
+  --font:-apple-system,BlinkMacSystemFont,"SF Pro Text","Inter",system-ui,"Segoe UI",sans-serif;color-scheme:light;
+  padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){--ground:#15140F;--surface:#201F1A;--ink:#EEEBE4;--muted:#AAA397;--line:#34322B;--field:#4A463D;--accent:#6E8CFF;--accent-ink:#0B0B0A;--late:#FF7A72;--ok:#6CCB8E;color-scheme:dark}}
+:root[data-theme="dark"]{--ground:#15140F;--surface:#201F1A;--ink:#EEEBE4;--muted:#AAA397;--line:#34322B;--field:#4A463D;--accent:#6E8CFF;--accent-ink:#0B0B0A;--late:#FF7A72;--ok:#6CCB8E;color-scheme:dark}
+*{box-sizing:border-box}
+body{margin:0;background:var(--ground);color:var(--ink);font:400 16px/1.45 var(--font);min-height:100vh;display:flex;justify-content:center;
+  padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:48px 32px}
+main{width:100%;max-width:380px;display:flex;flex-direction:column;gap:16px}
+.brand{display:flex;align-items:center;gap:12px}
+.brand img{width:48px;height:48px;border-radius:12px}
+h1{margin:0;font:700 24px/1.2 var(--font);letter-spacing:-.01em}
+.sub{margin:2px 0 0;color:var(--muted);font-size:15px}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:16px;padding:18px;display:flex;flex-direction:column;gap:12px}
+button{font:600 16px/22px var(--font);border-radius:12px;padding:13px 16px;border:0;cursor:pointer;width:100%}
+.primary{background:var(--accent);color:var(--accent-ink)}
+.google{background:var(--surface);color:var(--ink);border:1px solid var(--field);display:flex;align-items:center;justify-content:center;gap:10px}
+.link{background:none;color:var(--accent);padding:6px 0;width:auto;align-self:flex-start;font-weight:500}
+button:disabled{opacity:.55;cursor:default}
+.or{display:flex;align-items:center;gap:10px;color:var(--muted);font-size:13px;text-transform:uppercase;letter-spacing:.06em}
+.or::before,.or::after{content:"";flex:1;height:1px;background:var(--line)}
+label{font:600 13px/18px var(--font);color:var(--muted)}
+.phone{display:flex;gap:8px}
+select,input{font:400 17px/24px var(--font);color:var(--ink);background:var(--surface);border:1px solid var(--field);border-radius:12px;padding:11px 12px;min-width:0}
+input{flex:1;width:100%}
+.msg{margin:0;font-size:14px;color:var(--late)}
+.msg.ok{color:var(--ok)}
+.small{margin:0;font-size:13px;color:var(--muted)}
+.done{text-align:center;align-items:center}
+</style>
+</head><body>
+<main>
+  <div class="brand"><img src="/icon-192.png" alt=""><div><h1>Roster</h1><p class="sub">Hyderabad Christian Center</p></div></div>
+
+  <div class="card" id="start">
+    <button class="google" id="g" type="button"><svg width="18" height="18" viewBox="0 0 48 48" aria-hidden="true"><path fill="#EA4335" d="M24 9.5c3.5 0 6.6 1.2 9.1 3.6l6.8-6.8C35.8 2.4 30.3 0 24 0 14.6 0 6.6 5.4 2.6 13.3l7.9 6.1C12.4 13.6 17.7 9.5 24 9.5z"/><path fill="#4285F4" d="M46.5 24.5c0-1.6-.1-3.1-.4-4.5H24v9h12.7c-.6 3-2.3 5.5-4.8 7.2l7.7 6c4.5-4.2 6.9-10.3 6.9-17.7z"/><path fill="#FBBC05" d="M10.5 28.6c-.5-1.4-.8-3-.8-4.6s.3-3.2.8-4.6l-7.9-6.1C1 16.6 0 20.2 0 24s1 7.4 2.6 10.7l7.9-6.1z"/><path fill="#34A853" d="M24 48c6.5 0 11.9-2.1 15.9-5.8l-7.7-6c-2.1 1.4-4.9 2.3-8.2 2.3-6.3 0-11.6-4.1-13.5-9.9l-7.9 6.1C6.6 42.6 14.6 48 24 48z"/></svg>Continue with Google</button>
+    <div class="or">or</div>
+    <label for="num">Phone number</label>
+    <div class="phone">
+      <select id="cc" aria-label="Country"><option value="+91">+91</option><option value="+1">+1</option></select>
+      <input id="num" type="tel" inputmode="tel" autocomplete="tel-national" placeholder="98480 12345">
+    </div>
+    <button class="primary" id="send" type="button">Text me a code</button>
+    <p class="small">Codes go to India (+91) and US (+1) numbers. Elsewhere? Use Google.</p>
+    <p class="msg" id="m1" role="alert"></p>
+  </div>
+
+  <div class="card" id="codeCard" hidden>
+    <label for="code">Code from the text</label>
+    <input id="code" inputmode="numeric" autocomplete="one-time-code" maxlength="6" placeholder="6 digits">
+    <button class="primary" id="ok" type="button">Sign in</button>
+    <button class="link" id="again" type="button">Use a different number</button>
+    <p class="msg" id="m2" role="alert"></p>
+  </div>
+
+  <div class="card done" id="doneCard" hidden>
+    <h1 style="font-size:20px">You're signed in</h1>
+    <p class="small" id="doneMsg">Go back to the Roster app on your Home Screen. It opens signed in.</p>
+    <button class="primary" id="here" type="button">Open Roster here</button>
+  </div>
+  <div id="recaptcha"></div>
+</main>
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/12.19.0/firebase-app.js";
+import { getAuth, GoogleAuthProvider, RecaptchaVerifier, signInWithPopup, signInWithPhoneNumber, signOut } from "https://www.gstatic.com/firebasejs/12.19.0/firebase-auth.js";
+
+const $ = (id) => document.getElementById(id);
+const n = (new URLSearchParams(location.search).get("n") || "").toLowerCase();
+const nonce = /^[0-9a-f]{32,64}$/.test(n) ? n : "";
+let auth = null, confirmation = null, verifier = null;
+const say = (el, t, ok) => { $(el).textContent = t || ""; $(el).className = "msg" + (ok ? " ok" : ""); };
+const busy = (on) => { ["g", "send", "ok"].forEach((id) => { $(id).disabled = on; }); };
+
+async function setUp() {
+  if (auth) return auth;
+  const r = await fetch("/auth/config");
+  if (!r.ok) throw new Error("config");
+  auth = getAuth(initializeApp(await r.json()));
+  auth.useDeviceLanguage();
+  return auth;
+}
+setUp().catch(() => say("m1", "Sign-in isn't ready. Check your connection and refresh."));
+
+/** Hands the Firebase sign-in to Roster, which keeps its own session. */
+async function finish(cred) {
+  const idToken = await cred.user.getIdToken();
+  const r = await fetch("/auth/signin", { method: "POST", credentials: "same-origin", headers: { "content-type": "application/json" }, body: JSON.stringify({ idToken, n: nonce }) });
+  await signOut(auth).catch(() => {});
+  if (!r.ok) throw Object.assign(new Error("roster"), { code: "roster/" + r.status });
+  if (nonce) { $("start").hidden = true; $("codeCard").hidden = true; $("doneCard").hidden = false; return; }
+  location.replace("/");
+}
+const fail = (el, e, fallback) => {
+  const c = (e && e.code) || "";
+  console.error(e);
+  say(el, c === "auth/too-many-requests" ? "Too many tries. Wait a few minutes and try again."
+    : c === "auth/invalid-phone-number" ? "That number doesn't look right."
+    : c === "auth/invalid-verification-code" ? "That code isn't right. Check the text and try again."
+    : c === "auth/code-expired" ? "That code has expired. Send a new one."
+    : c === "auth/network-request-failed" ? "No connection. Check your internet and try again."
+    : c === "auth/popup-blocked" ? "Your browser blocked the Google window. Allow pop-ups for this site and try again."
+    : c === "auth/unauthorized-domain" ? "Sign-in isn't switched on for this address yet. Ask your admin."
+    : c.startsWith("roster/") ? "That sign-in didn't work. Try again."
+    : fallback + (c ? " (" + c + ")" : ""));
+};
+
+$("g").onclick = async () => {
+  say("m1", ""); busy(true);
+  try {
+    await setUp();
+    const p = new GoogleAuthProvider(); p.setCustomParameters({ prompt: "select_account" });
+    await finish(await signInWithPopup(auth, p));
+  } catch (e) {
+    if (e && (e.code === "auth/popup-closed-by-user" || e.code === "auth/cancelled-popup-request")) say("m1", "");
+    else fail("m1", e, "Couldn't sign in with Google. Try again.");
+  } finally { busy(false); }
+};
+
+/** The typed number as +91 or +1 and digits, or "". */
+function e164() {
+  const raw = $("num").value.trim(), d = raw.replace(/\D/g, "");
+  if (raw.startsWith("+")) return /^\+(91\d{10}|1\d{10})$/.test("+" + d) ? "+" + d : "";
+  const cc = $("cc").value;
+  if (cc === "+91") { const x = d.length === 11 && d[0] === "0" ? d.slice(1) : d.length === 12 && d.startsWith("91") ? d.slice(2) : d; return /^[6-9]\d{9}$/.test(x) ? "+91" + x : ""; }
+  const x = d.length === 11 && d[0] === "1" ? d.slice(1) : d; return /^\d{10}$/.test(x) ? "+1" + x : "";
+}
+$("send").onclick = async () => {
+  say("m1", "");
+  const phone = e164();
+  if (!phone) { say("m1", $("cc").value === "+91" ? "Type your 10-digit mobile number." : "Type your 10-digit number."); return; }
+  busy(true);
+  try {
+    await setUp();
+    // A reCAPTCHA can't be reused after a send or a failure, so every send gets a fresh one.
+    if (verifier) verifier.clear();
+    const box = document.createElement("div"); box.id = "recaptcha"; $("recaptcha").replaceWith(box);
+    verifier = new RecaptchaVerifier(auth, box, { size: "invisible" });
+    confirmation = await signInWithPhoneNumber(auth, phone, verifier);
+    $("start").hidden = true; $("codeCard").hidden = false; say("m2", "Code sent to " + phone + ".", true); $("code").focus();
+  } catch (e) { fail("m1", e, "Couldn't send the code. Try again."); }
+  finally { busy(false); }
+};
+$("ok").onclick = async () => {
+  const code = $("code").value.replace(/\D/g, "");
+  if (code.length !== 6) { say("m2", "Type the 6-digit code from the text."); return; }
+  busy(true);
+  try { await finish(await confirmation.confirm(code)); }
+  catch (e) { fail("m2", e, "Couldn't sign in. Try again."); }
+  finally { busy(false); }
+};
+$("code").addEventListener("keydown", (e) => { if (e.key === "Enter") $("ok").click(); });
+$("num").addEventListener("keydown", (e) => { if (e.key === "Enter") $("send").click(); });
+$("again").onclick = () => { confirmation = null; $("codeCard").hidden = true; $("start").hidden = false; say("m1", ""); };
+$("here").onclick = () => location.replace("/");
+</script>
+</body></html>

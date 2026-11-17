@@ -46,7 +46,8 @@ const b64url = (s) => btoa(String.fromCharCode(...new TextEncoder().encode(s))).
  * Checks a Firebase ID token from HCC Hub. Never throws.
  * { ok: true, claims: { sub, name, role, teams, phone?, email? } } or { ok: false, why: 'bad' | 'no-access', detail }.
  */
-export async function verifyHubToken(token, projectId, now = Date.now(), fetchFn = fetch) {
+/** opts.anyone: Roster's own sign-in (Nov 17): any verified account on the project, no Hub claim needed. */
+export async function verifyHubToken(token, projectId, now = Date.now(), fetchFn = fetch, opts = {}) {
   const bad = (detail) => ({ ok: false, why: "bad", detail });
   try {
     if (!projectId) return bad("HUB_PROJECT_ID not set");
@@ -67,7 +68,7 @@ export async function verifyHubToken(token, projectId, now = Date.now(), fetchFn
     if (typeof c.auth_time !== "number" || c.auth_time > t + SKEW_S) return bad("auth_time in the future");
     if (typeof c.sub !== "string" || !c.sub) return bad("no sub");
     const hub = c.hub && typeof c.hub === "object" ? c.hub : {};
-    const role = hub.rota;
+    const role = opts.anyone ? "member" : hub.rota;
     if (role !== "admin" && role !== "leader" && role !== "member") return { ok: false, why: "no-access", detail: "no rota claim" };
     const teams = role === "leader" && Array.isArray(hub.rotaTeams)
       ? [...new Set(hub.rotaTeams.filter((x) => typeof x === "string").map((x) => x.trim().slice(0, 40)).filter(Boolean))].slice(0, 10)
@@ -142,10 +143,6 @@ const last10 = (s) => digits(s).slice(-10);
 export async function rosterNameFor(sess, store) {
   const links = (await store.getItem("hubLinks")) || {};
   if (links[sess.sub]) return { name: links[sess.sub], how: "link" };
-  // The Hub's own people list says who this Hub account is in Roster: that wins over an older link
-  // from another sign-in (e.g. the same person signed in once with Google and once with their phone).
-  const hp = ((await store.getItem("hubPeople")) || {})[sess.sub];
-  if (hp && hp.name) { moveLink(links, sess.sub, hp.name); await store.putItem("hubLinks", links); return { name: hp.name, how: "hub" }; }
   const contacts = (await store.getItem("contacts")) || {};
   const taken = new Set(Object.values(links));
   const ph = sess.phone ? last10(sess.phone) : "", em = (sess.email || "").toLowerCase();
@@ -162,10 +159,7 @@ export async function rosterNameFor(sess, store) {
   return { name: "", how: found.length > 1 ? "shared" : "none" };
 }
 
-/**
- * POST /auth/hub (form idToken, as the Hub's tile sends it): checks the token, sets the session
- * cookie and goes to the app. GET /auth/hub goes to the Hub to sign in.
- */
+export const NONCE_RE_EXPORT = /^[0-9a-f]{32,64}$/;
 export const NONCE_COOKIE = "roster_nonce";
 const NONCE_RE = /^[0-9a-f]{32,64}$/;
 const HANDOFF_MS = 10 * 60_000;
@@ -175,7 +169,7 @@ const HANDOFF_MS = 10 * 60_000;
  * the Hub round trip; the POST back saves the new session under n for 10 minutes; the app then collects it
  * once from /api/handoff?n=<same>. Only the app that made n knows it.
  */
-async function saveHandoff(store, nonce, value, now = Date.now()) {
+export async function saveHandoff(store, nonce, value, now = Date.now()) {
   const all = (await store.getItem("handoffs")) || {};
   for (const k of Object.keys(all)) if (all[k].exp <= now) delete all[k];
   all[nonce] = { v: value, exp: now + HANDOFF_MS };
@@ -193,40 +187,6 @@ export async function handleHandoff(request, store, now = Date.now()) {
   return new Response(JSON.stringify({ ok: true }), { headers: { "content-type": "application/json", "cache-control": "no-store", "set-cookie": sessionCookie(h.v, SESSION_DAYS * 86400) } });
 }
 
-export async function handleAuthHub(request, env, store, fetchFn = fetch) {
-  if (request.method === "GET") {
-    const n = new URL(request.url).searchParams.get("n") || "";
-    const headers = { location: HUB_URL + "/#rota", "cache-control": "no-store" };
-    // SameSite=None: the Hub's POST back is a cross-site form post, which Lax cookies don't go with.
-    if (NONCE_RE.test(n)) headers["set-cookie"] = NONCE_COOKIE + "=" + n + "; Path=/auth/hub; HttpOnly; Secure; SameSite=None; Max-Age=900";
-    return new Response(null, { status: 302, headers });
-  }
-  if (request.method !== "POST") return new Response("Method not allowed", { status: 405 });
-  let token = "";
-  try {
-    const ct = request.headers.get("content-type") || "";
-    if (ct.includes("application/json")) token = String((await request.json()).idToken || "");
-    else token = String((await request.formData()).get("idToken") || "");
-  } catch { return page("That sign-in didn't come through. Open Roster from HCC Hub again.", 400); }
-  const r = await verifyHubToken(token, env.HUB_PROJECT_ID || "", Date.now(), fetchFn);
-  if (!r.ok) {
-    console.log("HCC Hub sign-in refused:", r.detail);
-    return r.why === "no-access"
-      ? page("You're signed in to HCC Hub, but you don't have Roster access yet. Ask an HCC Hub admin to give you Roster access.", 403)
-      : page("That sign-in didn't work. Open Roster from HCC Hub again.", 401);
-  }
-  const value = await makeSession(await sessionSecret(env, store), r.claims);
-  const n = cookieOf(request, NONCE_COOKIE);
-  const headers = new Headers({ location: "/", "cache-control": "no-store" });
-  headers.append("set-cookie", sessionCookie(value, SESSION_DAYS * 86400));
-  if (NONCE_RE.test(n)) {
-    await saveHandoff(store, n, value);
-    headers.set("location", "/?handoff=1");
-    headers.append("set-cookie", NONCE_COOKIE + "=; Path=/auth/hub; HttpOnly; Secure; SameSite=None; Max-Age=0");
-  }
-  return new Response(null, { status: 303, headers });
-}
-
 /** POST /auth/signout: clears the session cookie. */
 export function handleSignOut(request) {
   if (request.method !== "POST") return new Response("Method not allowed", { status: 405 });
@@ -235,68 +195,6 @@ export function handleSignOut(request) {
 
 const json = (body, status = 200) => new Response(JSON.stringify(body), { status, headers: { "content-type": "application/json", "cache-control": "no-store" } });
 
-/**
- * GET /api/me: { signedIn: false } or { signedIn, hubName, role, teams, name, how } (name "" = not linked yet).
- * POST /api/me { name }: links this Hub sign-in to a Roster name nobody else is linked to (first time only).
- */
-export async function handleMe(request, env, store) {
-  const sess = await sessionOf(request, env, store);
-  if (!sess) return json({ signedIn: false });
-  if (request.method === "GET") {
-    const who = await rosterNameFor(sess, store);
-    return json({ signedIn: true, hubName: sess.name, role: sess.role, teams: sess.teams, name: who.name, how: who.how });
-  }
-  if (request.method === "POST") {
-    let name = "";
-    try { name = String((await request.json()).name || "").trim().slice(0, 80); } catch { return json({ ok: false, error: "Bad JSON" }, 400); }
-    if (!name) return json({ ok: false, error: "name" }, 400);
-    const links = (await store.getItem("hubLinks")) || {};
-    if (links[sess.sub]) return json({ ok: false, error: "already linked", name: links[sess.sub] }, 409);
-    if (Object.values(links).includes(name) && !(await mayTakeOver(sess, name, store))) return json({ ok: false, error: "taken" }, 409);
-    moveLink(links, sess.sub, name);
-    await store.putItem("hubLinks", links);
-    return json({ ok: true, name });
-  }
-  return new Response("Method not allowed", { status: 405 });
-}
-
 /** Links this Hub account to name, dropping any older link to the same name. */
-function moveLink(links, sub, name) { for (const k of Object.keys(links)) if (links[k] === name && k !== sub) delete links[k]; links[sub] = name; }
+export function moveLink(links, sub, name) { for (const k of Object.keys(links)) if (links[k] === name && k !== sub) delete links[k]; links[sub] = name; }
 
-/**
- * A name another Hub sign-in already holds can be taken over only by the same person, proven by the Hub:
- * the Hub's people list names this account as them, or their verified phone or email is the one saved for
- * that person. A Hub admin can also take it, since admins can already change everything in Roster.
- */
-async function mayTakeOver(sess, name, store) {
-  if (sess.role === "admin") return true;
-  const hp = ((await store.getItem("hubPeople")) || {})[sess.sub];
-  if (hp && hp.name === name) return true;
-  const c = ((await store.getItem("contacts")) || {})[name] || {};
-  const ph = sess.phone ? last10(sess.phone) : "", em = (sess.email || "").toLowerCase();
-  return (ph.length === 10 && last10(c.phone) === ph) || (!!em && String(c.email || "").trim().toLowerCase() === em);
-}
-
-/**
- * /api/hublinks (leaders only). GET: { names } linked to an HCC Hub sign-in.
- * POST { name, unlink: true }: frees that name, so its owner can pick it again after signing in.
- */
-export async function handleHubLinks(request, store, isLead) {
-  if (!isLead) return new Response("Leaders only", { status: 403 });
-  const links = (await store.getItem("hubLinks")) || {};
-  if (request.method === "GET") return json({ names: [...new Set(Object.values(links))].sort() });
-  if (request.method !== "POST") return new Response("Method not allowed", { status: 405 });
-  let b; try { b = await request.json(); } catch { return json({ ok: false, error: "Bad JSON" }, 400); }
-  const name = String((b && b.name) || "");
-  if (!name || !b.unlink) return json({ ok: false, error: "name" }, 400);
-  let n = 0; for (const k of Object.keys(links)) if (links[k] === name) { delete links[k]; n++; }
-  await store.putItem("hubLinks", links);
-  return json({ ok: true, removed: n });
-}
-
-function page(msg, status) {
-  const esc = (s) => s.replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" })[c]);
-  return new Response('<!doctype html><meta charset=utf-8><meta name=viewport content="width=device-width,initial-scale=1"><title>HCC Roster</title>'
-    + '<body style="font:16px/1.5 -apple-system,sans-serif;max-width:420px;margin:15vh auto;padding:0 20px;text-align:center"><h2>HCC Roster</h2><p>' + esc(msg)
-    + '</p><p><a href="' + HUB_URL + '" style="color:#2B59F0">Go to HCC Hub</a></p></body>', { status, headers: { "content-type": "text/html; charset=utf-8", "cache-control": "no-store" } });
-}

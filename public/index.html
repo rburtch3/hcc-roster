@@ -1388,7 +1388,7 @@ function merge3(b, m, t){
   return t;
 }
 function saveSoon(){ if (!loaded) return; clearTimeout(saveTimer); saveTimer = setTimeout(saveNow, 400); }
-function heldBack(n){ toast("Only a leader can change the roster, so " + (n > 1 ? n + " changes were" : "that change was") + " put back."); fetch("/api/state", { cache: "no-store" }).then(function(r){ return r.ok ? r.json() : null; }).then(function(j){ if (j && j.data) { adopt(j); render.same = true; render(); } }, function(){}); }
+function heldBack(n){ toast("Only a leader can change that, so " + (n > 1 ? n + " changes were" : "that change was") + " put back."); fetch("/api/state", { cache: "no-store" }).then(function(r){ return r.ok ? r.json() : null; }).then(function(j){ if (j && j.data) { adopt(j); render.same = true; render(); } }, function(){}); }
 function saveNow(){
   if (!loaded) return;
   if (inflight) { again = true; return; }
@@ -2274,7 +2274,7 @@ var basePerson10 = SCREENS.person;
 SCREENS.person = function(o){ var r = basePerson10(o); if (!on("levels") || !r) return r; var p = o.id, l = levelOf(p);
   if (S.view !== "admin") { r.body += (l !== "volunteer" ? '<p class="small" style="margin:10px 4px 0">' + (l === "leader" ? "Leader" : "Assistant leader") + '</p>' : ''); return r; }
   r.body += '<div class="lbl sm">Level</div><div class="pick">' + LVL.map(function(v){ return '<button data-a="setLevel" data-id="' + esc(p) + '" data-v="' + v[0] + '" aria-pressed="' + (l === v[0]) + '">' + v[1] + '</button>'; }).join("") + '</div>'
-    + '<p class="small" style="margin:6px 4px 0">A level is a label. Leader view still needs the leader PIN.</p>'; return r; };
+    + '<p class="small" style="margin:6px 4px 0">A level is a label. Assistants and leaders get their team\'s leader view on their own.</p>'; return r; };
 A.setLevel = function(d){ objOf("levels")[d.id] = d.v; toast(d.id + " is now " + LVL.filter(function(v){ return v[0] === d.v; })[0][1].toLowerCase() + "."); render.same = true; render(); };
 var baseAddPersonSheet10 = SHEETS.addPerson;
 SHEETS.addPerson = function(o){ var h = baseAddPersonSheet10(o); if (!on("levels")) return h;
@@ -2358,7 +2358,7 @@ var baseSetting10 = A.setting;
 A.setting = function(d, el){ baseSetting10(d, el); if (/_ph$/.test(d.k)) S.settings[d.k.slice(0, -3)] = el.checked; };
 /* ---------- volunteer sign-in, team leader view, team thank-you chats (Nov 16) ---------- */
 FEATS.push(["volpin","Volunteer sign-in","Each volunteer signs in with their own PIN. Only they can change their availability and their emergency contact."]);
-FEATS.push(["teamlead","Team leader view","Assistant leaders open a leader view for their own team only. The leader PIN still sees everything."]);
+FEATS.push(["teamlead","Team leader view","Team leaders and assistants get a leader view for their own team only. Admins see everything."]);
 FEATS.push(["teamthanks","Team thank-you chats","Each team gets a Thanks chat in Messaging. Shout-outs post there too."]);
 var VPINS = null, vpinBusy = false, EMERG_ME, emBusy = false, EMERG_ALL = null, emAllBusy = false;
 function loadVpins(force){ if ((VPINS && !force) || vpinBusy) return; vpinBusy = true;
@@ -2424,7 +2424,7 @@ visibleReq = function(r){ if (!baseVisReq11(r)) return false; var sc = scoped();
     return r; }; });
 var baseMore11 = SCREENS["admin:more"];
 SCREENS["admin:more"] = function(){ var sc = scoped(); if (!sc) return baseMore11();
-  return { head: header("More"), body: scopeBanner(sc) + '<div class="card"><div class="t">You lead ' + esc(sc.join(", ")) + '</div><div class="small">You can fill spots, answer requests, run your team\'s checklists and to-dos, and message your team. Features, templates, services and the leader PIN stay with the main leaders.</div></div>'
+  return { head: header("More"), body: scopeBanner(sc) + '<div class="card"><div class="t">You lead ' + esc(sc.join(", ")) + '</div><div class="small">You can fill spots, answer requests, run your team\'s checklists and to-dos, and message your team. Features, templates, services and who leads each team stay with admins.</div></div>'
     + '<div class="lbl">People</div><div class="grp">' + row("Team", "Your team's people", "push", "contacts") + row("Availability and blockouts", blockSummary(), "tab", "reqs")
     + (on("onboarding") ? row("Onboarding to-dos", "Who on your team has read and confirmed", "push", "todosAdmin") : '') + '</div>'
     + '<div class="lbl">Planning</div><div class="grp">' + row("Service notes", on("attendance") ? "Attendance and what happened" : "What happened", "push", "notes")
@@ -3087,6 +3087,174 @@ statusChip = function(x){ return x && x.person === ME && x.status !== "declined"
 var baseDetail19 = SCREENS.detail;
 SCREENS.detail = function(o){ var r = baseDetail19(o), x = slot(o.id);
   if (r && r.foot && coverAsked(x)) { r.foot = '<div class="foot7"><p class="small" style="margin:0;text-align:center">Cover asked. You\'re still on until your leader approves.</p></div>'; }
+  return r; };
+/* ---------- Roster's own sign-in and role views (Nov 17) ----------
+   User: "Stop using hub authentication for now and just add Auth layer to this app - phone or Gmail".
+   User: "Don't let people change to volunteer or leader or admin view, only admins can do that" and
+   "Change a person's view when they're given a new designation or leadership role".
+   Everyone signs in on /signin with Google or a texted code. Their view follows their role, worked out
+   again on every screen: admins (a list only admins change) choose Admin or Volunteer view; team leaders
+   always get their team's leader view; everyone else gets the volunteer view. No PINs. */
+function isAdmin(){ return !!(HUBME && HUBME.admin); }
+function myRole(){ if (isAdmin()) return "admin"; var n = hubName(); return n && on("teamlead") && leadTeams(n).length ? "lead" : n ? "vol" : ""; }
+function roleLabel(){ var r = myRole(); return r === "admin" ? "Admin" : r === "lead" ? "Team leader" : r === "vol" ? "Volunteer" : "Waiting for an admin"; }
+leadTeams = baseLeadTeams15; /* who leads comes from Roster only */
+baseAdminOk11 = isAdmin;
+scopeTeams = function(){ if (!on("teamlead") || isAdmin() || !ME || ME !== hubName()) return null; var t = leadTeams(ME); return t.length ? t : null; };
+adminOk = function(){ return isAdmin() || !!scopeTeams(); };
+vk = function(){ return hubName() && hubName() === ME ? "signin" : ""; };
+hubApply = function(){
+  var n = HUBME ? hubName() : "";
+  if (ME !== n) { ME = n; LS.set("roster.me", n || null); bindMe(); EMERG_ME = undefined; }
+  LS.set("roster.admin", null); LS.set("roster.vkey", null); LS.set("roster.scope", null);
+};
+function fixView(){
+  if (!loaded) return;
+  hubApply();
+  var r = myRole(), was = S.view;
+  if (r === "admin") { if (!hubName()) S.view = "admin"; }
+  else if (r === "lead") { S.view = "admin"; if (was !== "admin") S.tab.admin = "sched"; }
+  else S.view = "vol";
+  if (was !== S.view) { S.stack = []; S.sheet = null; }
+}
+var baseApplyRoute20 = applyRoute;
+applyRoute = function(w){ var ok = baseApplyRoute20(w); fixView(); return ok; };
+var baseRender20 = render;
+render = function(){ fixView(); baseRender20(); };
+/* saves need a sign-in that is an admin or linked to a name */
+var baseSave20 = saveNow;
+saveNow = function(){ if (!HUBME || (!isAdmin() && !hubName())) return; baseSave20(); };
+/* the view switch is only for admins */
+A.toAdmin = function(){ if (!isAdmin()) { render.same = true; render(); return; } S.view = "admin"; S.stack = []; S.sheet = null; render(); };
+A.toVol = function(){ if (!isAdmin() || !hubName()) { render.same = true; render(); return; } S.view = "vol"; S.stack = []; S.sheet = null; render(); };
+A.toTeamLead = A.leaveTeamLead = A.lockAdmin = function(){ render.same = true; render(); };
+A.whoami = function(){ A.hubSignOut(); };
+
+/* signing in: this browser goes to /signin; the installed app opens /signin in the phone's browser and
+   picks the session up with a one-time code (the same hand-over as before) */
+A.hubSignIn = function(){
+  if (!STANDALONE) { location.href = "/signin"; return; }
+  HANDOFF_N = hexNonce(); LS.set("roster.handoff", HANDOFF_N);
+  window.open("/signin?n=" + HANDOFF_N, "_blank");
+  clearInterval(HANDOFF_T); HANDOFF_T = setInterval(pollHandoff, 2000); setTimeout(function(){ clearInterval(HANDOFF_T); }, 10 * 60000);
+  render(); };
+A.hubSignOut = function(){
+  fetch("/auth/signout", { method: "POST", credentials: "same-origin" }).then(function(){}, function(){}).then(function(){
+    HUBME = null; ACC = null; ADMINS = null; ME = ""; LS.set("roster.me", null); bindMe(); S.view = "vol"; S.stack = []; S.sheet = null; render(); }); };
+SCREENS.hubWait = function(){
+  return { head: plainHead("Signing in"), noTabs: true, body: '<div class="card"><div class="t" style="font:600 17px/22px var(--font)">Finish in your browser</div><p class="small" style="margin:6px 0 12px">Sign in with Google or your phone in the browser that just opened. Then come back here: Roster opens on its own.</p><button class="btn soft" data-a="hubSignIn">Open the browser again</button><button class="btn sec mt" data-a="hubWaitCancel">Cancel</button></div>' }; };
+function signInScreen(){
+  return { head: plainHead("Sign in"), noTabs: true, body: installCard() + '<div class="card"><div class="t" style="font:600 17px/22px var(--font)">HCC Roster</div><p class="small" style="margin:4px 0 12px">Sign in with Google or your phone number to see your serves.</p><button class="btn" data-a="hubSignIn">Sign in</button></div>' };
+}
+var ASK_Q = "";
+function askScreen(){
+  var asked = HUBME.asked, q = ASK_Q.trim().toLowerCase(), ps = everyone().filter(function(p){ return !q || p.toLowerCase().indexOf(q) >= 0; });
+  if (asked) return { head: plainHead("Almost there"), noTabs: true, body: '<div class="card"><div class="t" style="font:600 17px/22px var(--font)">Waiting for an admin</div><p class="small" style="margin:6px 0 0">You asked to be <b>' + esc(asked) + '</b> on Roster. Once an admin says yes, Roster opens your serves here.</p></div>'
+    + '<div class="grp mt">' + row("Check again", "", "askRefresh", "") + row("Pick a different name", "", "askAgain", "") + row("Sign out", "Signed in as " + HUBME.signedInAs, "hubSignOut", "") + '</div>' };
+  return { head: plainHead("Which one is you?"), noTabs: true, body: '<div class="card small" style="margin-bottom:12px;color:var(--ink)">Signed in as <b>' + esc(HUBME.signedInAs) + '</b>. Pick your name. An admin checks it once, then this sign-in stays yours.</div>'
+    + '<input class="field" id="askQ" placeholder="Search names" autocomplete="off" value="' + esc(ASK_Q) + '" data-in="askQ">'
+    + '<div class="grp mt">' + (ps.length ? ps.map(function(p){ return '<div class="row tap" data-a="askName" data-id="' + esc(p) + '"><span class="av">' + initials(p) + '</span><div class="m"><div class="t">' + esc(p) + '</div><div class="s">' + esc(teamsOf(p).join(" · ") || "Volunteer") + '</div></div><span class="chev">›</span></div>'; }).join("") : '<div class="row"><div class="m"><div class="s">No one by that name.</div></div></div>') + '</div>'
+    + '<p class="small mt" style="margin-left:4px">Not on the list? Type your full name and ask.</p><input class="field" id="askNew" placeholder="Your full name" autocomplete="name"><div class="btns"><button class="btn sec" data-a="askName" data-id="">Ask to join as this name</button></div>'
+    + '<div class="grp mt">' + row("Sign out", "Use a different account", "hubSignOut", "") + '</div>' };
+}
+document.addEventListener("input", function(e){ if (e.target && e.target.id === "askQ") { ASK_Q = e.target.value; var pos = e.target.selectionStart; render.same = true; render(); var el = document.getElementById("askQ"); if (el) { el.focus(); try { el.setSelectionRange(pos, pos); } catch (x) {} } } });
+A.askName = function(d){
+  var name = d.id || ((document.getElementById("askNew") || {}).value || "").trim();
+  if (!name) { toast("Type your full name first."); render.same = true; render(); return; }
+  fetch("/api/me", { method: "POST", credentials: "same-origin", headers: { "content-type": "application/json" }, body: JSON.stringify({ name: name }) })
+    .then(function(r){ return r.json().then(function(j){ return { s: r.status, j: j }; }, function(){ return { s: r.status, j: {} }; }); })
+    .then(function(x){
+      if (x.s === 200) { HUBME.name = x.j.name; S.stack = []; toast("You're " + x.j.name + " on Roster now."); render(); return; }
+      if (x.s === 202) { HUBME.asked = x.j.asked; toast("Asked. An admin will check it."); render(); return; }
+      if (x.s === 409) { loadMe().then(function(){ render(); }); return; }
+      toast("Couldn't send that. Try again."); render.same = true; render(); },
+      function(){ toast("Couldn't reach Roster. Try again."); render.same = true; render(); }); };
+A.askAgain = function(){ HUBME.asked = ""; ASK_Q = ""; render(); };
+A.askRefresh = function(){ loadMe().then(function(){ if (hubName()) toast("You're " + hubName() + " on Roster now."); render(); }); };
+setInterval(function(){ if (loaded && HUBME && !hubName() && HUBME.asked && document.visibilityState === "visible") loadMe().then(function(){ if (hubName()) { toast("You're " + hubName() + " on Roster now."); render(); } }); }, 30000);
+var baseWhoScreen20 = SCREENS.who;
+SCREENS.who = function(o){
+  if (HANDOFF_DONE) return SCREENS.handoffDone();
+  if (HANDOFF_N && !HUBME) return SCREENS.hubWait();
+  if (!HUBME) return signInScreen();
+  if (!hubName() && !isAdmin()) return askScreen();
+  return baseWhoScreen20(o); };
+SCREENS.pin = function(){ return SCREENS.who({}); };
+SCREENS.vpin = function(){ return SCREENS.who({}); };
+
+/* More: no view switching unless you're an admin; who you're signed in as; admins' screens */
+var NOSWITCH = /<div class="row tap" data-a="(?:whoami|toAdmin|toVol|toTeamLead|leaveTeamLead|lockAdmin|hubSignOut)"[\s\S]*?<span class="chev">›<\/span><\/div>|<div class="row tap" data-a="sheet" data-s="myPin"[\s\S]*?<span class="chev">›<\/span><\/div>/g;
+function tidyMore(body){
+  body = body.replace(/<div class="lbl">HCC Hub<\/div><div class="grp">[\s\S]*?<\/div><p class="small" style="margin:6px 4px 0">Tap to sign out\.<\/p>/, '');
+  body = body.replace(NOSWITCH, '');
+  return body.replace(/<div class="lbl">[^<]*<\/div><div class="grp"><\/div>/g, '');
+}
+function meSection(){
+  var s = '<div class="lbl">Signed in</div><div class="grp">' + row(HUBME.signedInAs, roleLabel() + (hubName() ? " · " + hubName() : ""), "hubSignOut", "") + '</div><p class="small" style="margin:6px 4px 0">Tap to sign out.</p>';
+  if (isAdmin()) {
+    var n = ACC ? ACC.requests.length : 0;
+    s += '<div class="lbl">This phone</div><div class="grp">' + (S.view === "admin" ? (hubName() ? row("Volunteer view", "See the roster as " + hubName(), "toVol", "") : '') : row("Admin view", "Manage the whole roster", "toAdmin", "")) + '</div>'
+      + '<div class="lbl">Admins</div><div class="grp">' + row("Sign-in requests", ACC === null ? "Loading…" : n ? n + " waiting" : "None waiting", "push", "accessReqs")
+      + row("Admins", "Who can change roles and views", "push", "admins") + row("Your Roster name", hubName() || "Not set. Pick it if you serve too.", "push", "linkMe") + '</div>';
+    loadAcc();
+  }
+  return s;
+}
+["vol:more", "admin:more"].forEach(function(k){ var base = SCREENS[k]; SCREENS[k] = function(o){ var r = base(o); if (!r || !HUBME) return r; r.body = tidyMore(r.body) + meSection(); return r; }; });
+
+/* admins: sign-in requests, linked names, the admins list, their own Roster name */
+var ACC = null, accBusy = false, ADMINS = null, admBusy = false;
+function loadAcc(force){ if ((ACC && !force) || accBusy || !isAdmin()) return; accBusy = true;
+  fetch("/api/access", { cache: "no-store", credentials: "same-origin" }).then(function(r){ return r.ok ? r.json() : { requests: [], linked: [] }; })
+    .then(function(j){ ACC = { requests: j.requests || [], linked: j.linked || [] }; accBusy = false; render.same = true; render(); }, function(){ accBusy = false; }); }
+function loadAdmins(force){ if ((ADMINS && !force) || admBusy || !isAdmin()) return; admBusy = true;
+  fetch("/api/admins", { cache: "no-store", credentials: "same-origin" }).then(function(r){ return r.ok ? r.json() : { admins: [] }; })
+    .then(function(j){ ADMINS = j.admins || []; admBusy = false; render.same = true; render(); }, function(){ admBusy = false; }); }
+function postJ(url, body, method){ return fetch(url, { method: method || "POST", credentials: "same-origin", headers: { "content-type": "application/json" }, body: JSON.stringify(body) })
+  .then(function(r){ return r.json().then(function(j){ return { s: r.status, j: j }; }, function(){ return { s: r.status, j: {} }; }); }); }
+function contactLine(q){ return [q.email, q.phone].filter(Boolean).join(" · "); }
+SCREENS.accessReqs = function(){ loadAcc();
+  var reqs = ACC ? ACC.requests : [], linked = ACC ? ACC.linked : [];
+  return { head: header("Sign-in requests"), body: (ACC === null ? '<div class="empty">Loading…</div>' : (reqs.length ? reqs.map(function(q){
+      var known = everyone().indexOf(q.want) >= 0, taken = linked.indexOf(q.want) >= 0;
+      return '<div class="card mt"><div class="t">' + esc(q.want) + '</div><div class="small">' + esc(q.who) + (contactLine(q) ? " · " + esc(contactLine(q)) : "") + '</div>'
+        + '<div class="small" style="margin-top:4px">' + (taken ? "Someone else is already signed in as " + esc(q.want) + ". Saying yes moves the name to this sign-in." : known ? "On the roster." : "Not on the roster yet. Saying yes adds them as a volunteer.") + '</div>'
+        + '<div class="btns"><button class="btn" data-a="accYes" data-id="' + esc(q.id) + '">Yes, that\'s ' + esc(q.want) + '</button><button class="btn sec" data-a="sheet" data-s="accPick" data-id="' + esc(q.id) + '">Another name</button><button class="btn sec" data-a="accNo" data-id="' + esc(q.id) + '">Say no</button></div></div>'; }).join("") : '<div class="card"><div class="small">No one is waiting.</div></div>')
+    + '<div class="lbl">Signed in</div><div class="grp">' + (linked.length ? linked.map(function(n){ return '<div class="row tap" data-a="sheet" data-s="accUnlink" data-id="' + esc(n) + '"><div class="m"><div class="t">' + esc(n) + '</div><div class="s">Tap to free this name</div></div><span class="chev">›</span></div>'; }).join("") : '<div class="row"><div class="m"><div class="s">No one yet.</div></div></div>') + '</div>'
+    + '<p class="small" style="margin:6px 4px 0">People whose phone or email is saved in Roster sign in without asking.</p>') }; };
+function accReq(id){ return ACC && ACC.requests.filter(function(q){ return q.id === id; })[0]; }
+function addPerson(name){ if (everyone().indexOf(name) >= 0) return; var c = S.cfg = S.cfg || {}; c.people = (c.people || []).concat([name]); applyCfg(); saveSoon(); }
+function accDone(x, msg){ if (x.s === 200) { toast(msg); ACC = null; loadAcc(true); } else { toast("Couldn't save that. Try again."); } S.sheet = null; render(); }
+A.accYes = function(d, el, name){ var q = accReq(d.id); if (!q) return; name = name || q.want;
+  postJ("/api/access", { id: q.id, name: name }).then(function(x){ if (x.s === 200) addPerson(name); accDone(x, name + " can sign in now."); }, function(){ toast("Couldn't reach Roster. Try again."); render(); }); };
+A.accNo = function(d){ postJ("/api/access", { id: d.id, deny: true }).then(function(x){ accDone(x, "Said no."); }, function(){ toast("Couldn't reach Roster. Try again."); render(); }); };
+SHEETS.accPick = function(o){ var q = accReq(o.id) || {};
+  return '<h4>Who is ' + esc(q.who || "this") + '?</h4><div class="grp" style="max-height:50vh;overflow:auto">' + everyone().map(function(p){ return '<div class="row tap" data-a="accAs" data-id="' + esc(o.id) + '" data-v="' + esc(p) + '"><div class="m"><div class="t">' + esc(p) + '</div></div><span class="chev">›</span></div>'; }).join("") + '</div><div class="btns"><button class="btn sec" data-a="closeSheet">Cancel</button></div>'; };
+A.accAs = function(d, el){ A.accYes({ id: d.id }, el, d.v); };
+SHEETS.accUnlink = function(o){ return '<h4>Free ' + esc(o.id) + '?</h4><p class="s">Their sign-in stops opening Roster as ' + esc(o.id) + '. If their phone or email is saved, they get it back the next time they sign in.</p><div class="btns"><button class="btn danger" data-a="accUnlink" data-id="' + esc(o.id) + '">Free the name</button><button class="btn sec" data-a="closeSheet">Cancel</button></div>'; };
+A.accUnlink = function(d){ postJ("/api/access", { name: d.id, unlink: true }).then(function(x){ accDone(x, d.id + " is free."); }, function(){ toast("Couldn't reach Roster. Try again."); render(); }); };
+SCREENS.admins = function(){ loadAdmins(); var me = [(HUBME.signedInAs || "").toLowerCase()];
+  return { head: header("Admins"), body: '<p class="small" style="margin:0 4px 10px">Admins see everything and choose who leads each team. Team leaders get their team\'s leader view and volunteers the volunteer view, on their own.</p>'
+    + '<div class="grp">' + (ADMINS === null ? '<div class="row"><div class="m"><div class="s">Loading…</div></div></div>' : ADMINS.map(function(a){ return '<div class="row tap" data-a="sheet" data-s="admRm" data-id="' + esc(a) + '"><div class="m"><div class="t">' + esc(/^\d{10}$/.test(a) ? "Phone ending " + a.slice(-4) : a) + '</div>' + (me.indexOf(a) >= 0 ? '<div class="s">You</div>' : '') + '</div><span class="chev">›</span></div>'; }).join("")) + '</div>'
+    + '<label class="fl" for="admNew">Add an admin</label><input class="field" id="admNew" placeholder="Their Google email or phone number" autocomplete="off"><div class="btns"><button class="btn" data-a="admAdd">Add admin</button></div>' }; };
+function saveAdmins(list, msg){ postJ("/api/admins", { admins: list }, "PUT").then(function(x){
+  if (x.s === 200) { ADMINS = x.j.admins; toast(msg); } else toast(x.j && x.j.error === "keep yourself" ? "You can't take yourself off. Ask another admin." : "Couldn't save that. Try again.");
+  S.sheet = null; render(); }, function(){ toast("Couldn't reach Roster. Try again."); render(); }); }
+A.admAdd = function(){ var v = ((document.getElementById("admNew") || {}).value || "").trim(); if (!v || !ADMINS) { toast("Type an email or phone number."); render.same = true; render(); return; }
+  saveAdmins(ADMINS.concat([v]), v + " is an admin now."); };
+SHEETS.admRm = function(o){ return '<h4>Take ' + esc(o.id) + ' off admins?</h4><p class="s">They keep their own view as a team leader or volunteer.</p><div class="btns"><button class="btn danger" data-a="admRm" data-id="' + esc(o.id) + '">Take off</button><button class="btn sec" data-a="closeSheet">Cancel</button></div>'; };
+A.admRm = function(d){ saveAdmins((ADMINS || []).filter(function(a){ return a !== d.id; }), d.id + " isn't an admin now."); };
+SCREENS.linkMe = function(){
+  return { head: header("Your Roster name"), body: '<p class="small" style="margin:0 4px 10px">Pick your name if you serve too. Then Volunteer view shows your own serves.</p><div class="grp">' + everyone().map(function(p){ return '<div class="row tap" data-a="linkMe" data-id="' + esc(p) + '"><div class="m"><div class="t">' + esc(p) + '</div>' + (p === hubName() ? '<div class="s">You</div>' : '') + '</div><span class="chev">›</span></div>'; }).join("") + '</div>' }; };
+A.linkMe = function(d){ var go = function(){ return postJ("/api/me", { name: d.id }); };
+  (hubName() ? postJ("/api/access", { name: hubName(), unlink: true }).then(go) : go()).then(function(x){
+    if (x.s === 200) { HUBME.name = x.j.name; ACC = null; S.stack = []; toast("You're " + x.j.name + " on Roster."); } else toast("Couldn't save that. Try again."); render(); },
+    function(){ toast("Couldn't reach Roster. Try again."); render(); }); };
+/* admins on a person: whether they've signed in, instead of their PIN */
+var basePerson20 = SCREENS.person;
+SCREENS.person = function(o){ var r = basePerson20(o); if (!r) return r;
+  r.body = r.body.replace(/<div class="lbl sm">Sign-in<\/div>[\s\S]*?<\/button><\/div><\/div>/, function(){ if (!isAdmin()) return '</div>'; loadAcc(); var on2 = ACC && ACC.linked.indexOf(o.id) >= 0;
+    return '<div class="lbl sm">Sign-in</div><div class="small">' + (ACC === null ? 'Loading…' : on2 ? 'Signed in to Roster.' : 'Hasn\'t signed in yet. Saving their phone or email lets them sign in without asking.') + '</div>' + (on2 ? '<div class="btns"><button class="btn sec" data-a="sheet" data-s="accUnlink" data-id="' + esc(o.id) + '">Free this name</button></div>' : '') + '</div>'; });
   return r; };
 Promise.all([load(), loadMe()]).then(function(){ hubApply(); loaded = true; render(); }, function(){ loadErr = "Couldn't load the roster. Check your connection and refresh."; render(); });
 })();

@@ -2,7 +2,8 @@
 // in a Durable Object (SQLite storage, no setup needed on Cloudflare).
 import { DurableObject } from "cloudflare:workers";
 import { rowsForWeek, syncRows, publishTest, publishWeek, TEST_ROWS } from "./sevenshifts.js";
-import { handleAuthHub, handleSignOut, handleMe, handleHandoff, handleHubLinks, sessionOf, rosterNameFor } from "./hub.js";
+import { handleSignOut, handleHandoff } from "./hub.js";
+import { whoIs, handleSignIn, handleConfig, handleMe, handleAccess, handleAdmins, leadTeamsOf } from "./auth.js";
 import { handleHubPeople, handleHubTeams } from "./hubpeople.js";
 
 const MAX = 1_000_000;
@@ -32,16 +33,6 @@ function hide(data) {
   if (data && typeof data === "object" && "pinHash" in data) data.pinHash = data.pinHash ? "set" : "";
   return data;
 }
-async function storedPin(store) {
-  const { data } = await store.get();
-  if (!data) return "";
-  try { return JSON.parse(data).pinHash || ""; } catch { return ""; }
-}
-export async function hashPin(pin) {
-  const b = await crypto.subtle.digest("SHA-256", new TextEncoder().encode("hcc-roster|" + pin));
-  return [...new Uint8Array(b)].map((x) => x.toString(16).padStart(2, "0")).join("");
-}
-
 /** GET: { rev, data }. PUT { rev, data }: 200 { rev } when rev is the latest, else 409 with the latest. */
 export async function handleState(request, store, env) {
   if (request.method === "GET") {
@@ -57,18 +48,12 @@ export async function handleState(request, store, env) {
     if (!body || !Number.isInteger(body.rev) || !data || typeof data !== "object" || !Array.isArray(data.slots)) {
       return new Response("Not a roster", { status: 400 });
     }
-    // Once a PIN is set, a save can't change it; before that, the first real hash wins.
-    const pin = await storedPin(store);
-    // Once a leader PIN is set (and volunteer sign-in is on), only someone signed in can save:
-    // a leader, a volunteer with their own PIN, or an HCC Hub session. Strangers can still read.
-    if (pin && !(await savesOpen(store)) && typeof store.getItem === "function") {
-      const who = await whoIs(request, store, env, pin, (await store.getItem("vpins")) || {});
-      if (!who.lead && !who.me && !who.sess) return json({ ok: false, reason: "signin" }, 401);
-    }
-    const kept = await guardAvailability(request, store, pin, data, env);
-    const held = pin && !(await savesOpen(store)) ? await guardRoster(request, store, pin, data, env) : 0;
-    if (pin) data.pinHash = pin;
-    else if ("pinHash" in data && !/^[0-9a-f]{64}$|^d[0-9a-f]+$/.test(String(data.pinHash))) data.pinHash = "";
+    // Only someone signed in can save: an admin, or a person linked to a Roster name. Strangers can still read.
+    const who = await whoIs(request, store, env);
+    if (!who.lead && !who.me) return json({ ok: false, reason: "signin" }, 401);
+    const kept = await guardAvailability(request, store, data, who);
+    const held = await guardRoster(request, store, data, who);
+    delete data.pinHash; // the leader PIN is retired: admins sign in
     const r = await store.put(body.rev, JSON.stringify(data));
     if (!r.ok) return json({ rev: r.rev, data: r.data ? hide(JSON.parse(r.data)) : null }, 409);
     const out = { rev: r.rev }; if (kept.length) out.kept = kept; if (held) out.held = held;
@@ -83,16 +68,14 @@ export async function handleState(request, store, env) {
  * is put back before saving, and the names are returned as `kept`.
  */
 export const AVAIL_KEYS = ["regularBy", "blockouts", "tempBy"];
-export async function guardAvailability(request, store, pin, data, env) {
+export async function guardAvailability(request, store, data, who) {
   const { data: oldText } = await store.get();
   if (!oldText || typeof store.getItem !== "function") return [];
   let old; try { old = JSON.parse(oldText); } catch { return []; }
-  if (old.feat && old.feat.volpin === false) return [];
-  const vp = (await store.getItem("vpins")) || {};
-  const { lead, me } = await whoIs(request, store, env, pin, vp);
+  const { lead, me } = who;
   if (lead) return [];
-  // Protected: anyone with their own PIN, and anyone linked to an HCC Hub sign-in.
-  const own = new Set([...Object.keys(vp), ...Object.values((await store.getItem("hubLinks")) || {})]);
+  // Protected: everyone linked to a sign-in.
+  const own = new Set(Object.values((await store.getItem("hubLinks")) || {}));
   const kept = [];
   for (const k of AVAIL_KEYS) {
     const a = old[k] && typeof old[k] === "object" ? old[k] : {};
@@ -106,7 +89,7 @@ export async function guardAvailability(request, store, pin, data, env) {
   return kept;
 }
 /**
- * Serves and set-up are guarded too (Nov 17). A leader (leader PIN or Hub admin) can change anything.
+ * Serves and set-up are guarded too (Nov 17). An admin (signed in) can change anything.
  * Volunteers don't accept or decline serves (Nov 17, user: like a restaurant shift, the leader rosters
  * them). A volunteer changes no serve; they can only ask for cover on their own serve, offer for an open
  * spot, or answer a swap asked of them. A team leader may change, add or remove their own team's serves,
@@ -114,15 +97,13 @@ export async function guardAvailability(request, store, pin, data, env) {
  * times stay as a leader set them. Anything else is put back before saving. Returns how many serves
  * were put back (set-up is put back quietly, since phones fill in empty set-up on their own).
  */
-export async function guardRoster(request, store, pin, data, env) {
+export async function guardRoster(request, store, data, who) {
   const { data: oldText } = await store.get(); if (!oldText) return 0;
   let old; try { old = JSON.parse(oldText); } catch { return 0; }
-  const { lead, me } = await whoIs(request, store, env, pin, (await store.getItem("vpins")) || {});
+  const { lead, me } = who;
   if (lead) return 0;
-  const cfg = old.cfg || {}, leaders = cfg.leaders || {}, pool = cfg.pool || {}, levels = old.levels || {};
-  const levelsOn = !(old.feat && old.feat.levels === false);
-  const myTeams = new Set(Object.keys(leaders).filter((t) => me && leaders[t] === me));
-  if (me && levelsOn && (levels[me] === "assistant" || levels[me] === "leader")) Object.keys(pool).forEach((t) => { if ((pool[t] || []).includes(me)) myTeams.add(t); });
+  const cfg = old.cfg || {};
+  const myTeams = new Set(leadTeamsOf(old, me));
   const same = (a, b) => JSON.stringify(a) === JSON.stringify(b);
   const empty = (v) => v === undefined || (v && typeof v === "object" && !Array.isArray(v) && !Object.keys(v).length);
   const putBack = (to, k, from) => { if (empty(from[k]) && empty(to[k])) return; if (k in from) to[k] = from[k]; else delete to[k]; };
@@ -180,70 +161,13 @@ export async function guardRoster(request, store, pin, data, env) {
   return held;
 }
 /** Volunteer sign-in switched off in the saved roster: anyone may save, as before. */
-async function savesOpen(store) {
-  const { data } = await store.get(); if (!data) return true;
-  try { const d = JSON.parse(data); return !!(d.feat && d.feat.volpin === false); } catch { return true; }
-}
-const vHash = (name, pin) => hashPin("v|" + name + "|" + pin);
-/** The volunteer this request signs in as (x-vol-name is URI-encoded), or "". */
-function volMe(request, vp) {
-  let who = ""; try { who = decodeURIComponent(request.headers.get("x-vol-name") || ""); } catch { return ""; }
-  const key = request.headers.get("x-vol-key") || "";
-  return who && vp[who] && key === vp[who] ? who : "";
-}
-/**
- * Who this request is: lead = the leader PIN key or an HCC Hub admin session; me = the volunteer
- * (their own PIN key, or the Roster name their Hub session is linked to), else "".
- */
-export async function whoIs(request, store, env, pin, vp) {
-  const sess = env && typeof store.getItem === "function" ? await sessionOf(request, env, store) : null;
-  const lead = (!!pin && request.headers.get("x-roster-key") === pin) || (!!sess && sess.role === "admin");
-  let me = volMe(request, vp || {});
-  if (!me && sess) me = (await rosterNameFor(sess, store)).name;
-  return { lead, me, sess };
-}
+/** Volunteer PINs and the leader PIN are retired (Nov 17): people sign in with Google or their phone. */
+const retired = () => json({ ok: false, reason: "retired", error: "Sign in with Google or your phone instead." }, 410);
 
-/**
- * /api/vpin  GET: { names } of volunteers who have their own PIN.
- * POST { name, pin }: checks their PIN (10 wrong tries lock it for 15 minutes); 200 { ok, key }.
- *   A first PIN is set only by that person signed in with HCC Hub, or by a leader; anyone else gets 403 "ask".
- * POST { name, pin, change: true }: a new PIN, only by that person (their own PIN key or Hub sign-in) or a leader.
- * POST { name, reset: true }: a leader clears it.
- */
-export async function handleVolPin(request, store, now = Date.now(), env) {
-  const vp = (await store.getItem("vpins")) || {};
-  if (request.method === "GET") return json({ names: Object.keys(vp) });
-  if (request.method !== "POST") return new Response("Method not allowed", { status: 405 });
-  let b; try { b = await request.json(); } catch { return new Response("Bad JSON", { status: 400 }); }
-  const name = String((b && b.name) || "").slice(0, 80), pin = String((b && b.pin) || "");
-  if (!name) return json({ ok: false, reason: "name" }, 400);
-  const { lead, me } = await whoIs(request, store, env, await storedPin(store), vp);
-  if (b.reset) {
-    if (!lead) return new Response("Leaders only", { status: 403 });
-    delete vp[name]; await store.putItem("vpins", vp); return json({ ok: true });
-  }
-  if (!/^\d{4,8}$/.test(pin)) return json({ ok: false, reason: "pin" }, 400);
-  if (b.change || !vp[name]) {
-    // Setting or changing a PIN: only the person themselves, or a leader.
-    if (!lead && me !== name) return json({ ok: false, reason: vp[name] ? "notyou" : "ask" }, 403);
-    const h = await vHash(name, pin), first = !vp[name];
-    vp[name] = h; await store.putItem("vpins", vp);
-    const fails = (await store.getItem("vfails")) || {}; if (fails[name]) { delete fails[name]; await store.putItem("vfails", fails); }
-    return json(me === name ? { ok: true, key: h, first: first || undefined } : { ok: true, first: first || undefined });
-  }
-  const fails = (await store.getItem("vfails")) || {}, f = fails[name] || { n: 0, since: now };
-  if (now - f.since > 15 * 60_000) { f.n = 0; f.since = now; }
-  if (f.n >= 10) return json({ ok: false, reason: "locked" }, 429);
-  const h = await vHash(name, pin);
-  if (vp[name] === h) { fails[name] = { n: 0, since: now }; await store.putItem("vfails", fails); return json({ ok: true, key: h }); }
-  f.n += 1; fails[name] = f; await store.putItem("vfails", fails);
-  return json({ ok: false, reason: "wrong" }, 403);
-}
-
-/** /api/emergency  GET ?name=: that volunteer (x-vol-name/x-vol-key) or a leader (x-roster-key, all if no name). PUT: only the volunteer. */
+/** /api/emergency  GET ?name=: that volunteer or an admin (all if no name). PUT: only the volunteer. */
 export async function handleEmergency(request, store, env) {
-  const url = new URL(request.url), vp = (await store.getItem("vpins")) || {};
-  const { lead: isLead, me } = await whoIs(request, store, env, await storedPin(store), vp);
+  const url = new URL(request.url);
+  const { lead: isLead, me } = await whoIs(request, store, env);
   const all = (await store.getItem("emergency")) || {};
   if (request.method === "GET") {
     const name = url.searchParams.get("name") || "";
@@ -273,8 +197,7 @@ export async function handleEmergency(request, store, env) {
  */
 const MAX_PHOTO = 60000;
 export async function handleProfile(request, store, env) {
-  const vp = (await store.getItem("vpins")) || {};
-  const { me } = await whoIs(request, store, env, await storedPin(store), vp);
+  const { me } = await whoIs(request, store, env);
   if (!me) return new Response("Sign in first", { status: 403 });
   const contacts = (await store.getItem("contacts")) || {}, photos = (await store.getItem("photos")) || {};
   if (request.method === "GET") { const c = contacts[me] || {}; return json({ name: me, phone: c.phone || "", whatsapp: c.whatsapp || "", email: c.email || "", photo: photos[me] || "" }); }
@@ -299,25 +222,9 @@ export async function handlePhotos(request, store) {
   return json({ photos: (await store.getItem("photos")) || {} });
 }
 
-/** POST { pin }: 200 { ok, key } when it matches the leader PIN. 10 wrong tries lock it for 15 minutes. */
-export async function handleUnlock(request, store, now = Date.now()) {
-  if (request.method !== "POST") return new Response("Method not allowed", { status: 405 });
-  let pin = "";
-  try { pin = String((await request.json()).pin || ""); } catch { return new Response("Bad JSON", { status: 400 }); }
-  const want = await storedPin(store);
-  if (!want) return json({ ok: false, reason: "no-pin" }, 409);
-  const f = (await store.getItem("fails")) || { n: 0, since: now };
-  if (now - f.since > 15 * 60_000) { f.n = 0; f.since = now; }
-  if (f.n >= 10) return json({ ok: false, reason: "locked" }, 429);
-  const got = /^\d{4,8}$/.test(pin) ? await hashPin(pin) : "";
-  if (got && got === want) { await store.putItem("fails", { n: 0, since: now }); return json({ ok: true, key: want }); }
-  f.n += 1; await store.putItem("fails", f);
-  return json({ ok: false, reason: "wrong" }, 403);
-}
-
-/** Phone numbers and emails, kept apart from the roster and only for leaders (x-roster-key). */
+/** Phone numbers and emails, kept apart from the roster and only for admins. */
 export async function handleContacts(request, store, env) {
-  if (!(await whoIs(request, store, env, await storedPin(store))).lead) return new Response("Leaders only", { status: 403 });
+  if (!(await whoIs(request, store, env)).lead) return new Response("Admins only", { status: 403 });
   if (request.method === "GET") return json({ contacts: (await store.getItem("contacts")) || {} });
   if (request.method === "PUT") {
     const text = await request.text();
@@ -405,23 +312,28 @@ export async function handleCal(request, store) {
 export default {
   async fetch(request, env) {
     const url = new URL(request.url);
+    const store = () => env.ROSTER.get(env.ROSTER.idFromName("hcc"));
     if (url.pathname.startsWith("/api/7shifts/")) {
+      // 7shifts can create and publish shifts, so only admins (Nov 17).
+      if (!(await whoIs(request, store(), env)).lead) return new Response("Admins only", { status: 403 });
       const loadRoster = async () => (await env.ASSETS.fetch(new URL("/sheet-shifts.json", url))).json();
       return handleSevenShifts(request, env, loadRoster);
     }
-    const store = () => env.ROSTER.get(env.ROSTER.idFromName("hcc"));
-    if (url.pathname === "/auth/hub") return handleAuthHub(request, env, store());
+    if (url.pathname === "/auth/config") return handleConfig(request, env);
+    if (url.pathname === "/auth/signin") return handleSignIn(request, env, store());
+    if (url.pathname === "/auth/hub") return new Response(null, { status: 302, headers: { location: "/signin", "cache-control": "no-store" } });
     if (url.pathname === "/auth/signout") return handleSignOut(request);
     if (url.pathname === "/api/me") return handleMe(request, env, store());
     if (url.pathname === "/api/handoff") return handleHandoff(request, store());
     if (url.pathname === "/hub/people") return handleHubPeople(request, env, store());
     if (url.pathname === "/hub/teams") return handleHubTeams(request, store());
+    if (url.pathname === "/api/vpin" || url.pathname === "/api/unlock") return retired();
+    if (url.pathname === "/api/access") { const st = store(); return handleAccess(request, st, (await whoIs(request, st, env)).lead); }
+    if (url.pathname === "/api/hublinks") { const st = store(); return handleAccess(new Request(request.url, { method: request.method, body: request.method === "POST" ? await request.text() : undefined }), st, (await whoIs(request, st, env)).lead); }
+    if (url.pathname === "/api/admins") { const st = store(); return handleAdmins(request, st, await whoIs(request, st, env)); }
     const routes = { "/api/state": handleState, "/api/contacts": handleContacts, "/api/emergency": handleEmergency, "/api/cal": handleCal };
-    if (url.pathname === "/api/unlock") return handleUnlock(request, store());
-    if (url.pathname === "/api/hublinks") { const st = store(); return handleHubLinks(request, st, (await whoIs(request, st, env, await storedPin(st))).lead); }
     if (url.pathname === "/api/profile") return handleProfile(request, store(), env);
     if (url.pathname === "/api/photos") return handlePhotos(request, store());
-    if (url.pathname === "/api/vpin") return handleVolPin(request, store(), Date.now(), env);
     const h = routes[url.pathname];
     if (h) return h(request, store(), env);
     // App pages (/vol/..., /admin/...) are all the one page; it reads the path and opens that screen.
