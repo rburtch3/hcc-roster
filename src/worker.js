@@ -2,7 +2,7 @@
 // in a Durable Object (SQLite storage, no setup needed on Cloudflare).
 import { DurableObject } from "cloudflare:workers";
 import { rowsForWeek, syncRows, publishTest, publishWeek, TEST_ROWS } from "./sevenshifts.js";
-import { handleAuthHub, handleSignOut, handleMe, handleHandoff, sessionOf, rosterNameFor } from "./hub.js";
+import { handleAuthHub, handleSignOut, handleMe, handleHandoff, handleHubLinks, sessionOf, rosterNameFor } from "./hub.js";
 import { handleHubPeople, handleHubTeams } from "./hubpeople.js";
 
 const MAX = 1_000_000;
@@ -168,6 +168,40 @@ export async function handleEmergency(request, store, env) {
   return new Response("Method not allowed", { status: 405 });
 }
 
+/**
+ * /api/profile  GET: this volunteer's own { phone, whatsapp, email, photo }.
+ * PUT { phone, whatsapp, email, photo }: saves them. Phone and email go to the leader-only contacts;
+ * photo is a small JPEG data URL (or "" to remove) that everyone in the app sees on their avatar.
+ * /api/photos  GET: { photos: { name: dataURL } } for the avatars.
+ */
+const MAX_PHOTO = 60000;
+export async function handleProfile(request, store, env) {
+  const vp = (await store.getItem("vpins")) || {};
+  const { me } = await whoIs(request, store, env, await storedPin(store), vp);
+  if (!me) return new Response("Sign in first", { status: 403 });
+  const contacts = (await store.getItem("contacts")) || {}, photos = (await store.getItem("photos")) || {};
+  if (request.method === "GET") { const c = contacts[me] || {}; return json({ name: me, phone: c.phone || "", whatsapp: c.whatsapp || "", email: c.email || "", photo: photos[me] || "" }); }
+  if (request.method !== "PUT") return new Response("Method not allowed", { status: 405 });
+  const text = await request.text();
+  if (text.length > MAX_PHOTO + 2000) return new Response("Too large", { status: 413 });
+  let b; try { b = JSON.parse(text); } catch { return new Response("Bad JSON", { status: 400 }); }
+  if (!b || typeof b !== "object") return new Response("Bad JSON", { status: 400 });
+  const c = { ...(contacts[me] || {}) };
+  for (const [k, n] of [["phone", 30], ["whatsapp", 30], ["email", 120]]) if (typeof b[k] === "string") { const v = b[k].trim().slice(0, n); if (v) c[k] = k === "email" ? v.toLowerCase() : v; else delete c[k]; }
+  contacts[me] = c; await store.putItem("contacts", contacts);
+  if (typeof b.photo === "string") {
+    if (!b.photo) delete photos[me];
+    else if (/^data:image\/(jpeg|png|webp);base64,[A-Za-z0-9+/=]+$/.test(b.photo) && b.photo.length <= MAX_PHOTO) photos[me] = b.photo;
+    else return new Response("Bad photo", { status: 400 });
+    await store.putItem("photos", photos);
+  }
+  return json({ ok: true });
+}
+export async function handlePhotos(request, store) {
+  if (request.method !== "GET") return new Response("Method not allowed", { status: 405 });
+  return json({ photos: (await store.getItem("photos")) || {} });
+}
+
 /** POST { pin }: 200 { ok, key } when it matches the leader PIN. 10 wrong tries lock it for 15 minutes. */
 export async function handleUnlock(request, store, now = Date.now()) {
   if (request.method !== "POST") return new Response("Method not allowed", { status: 405 });
@@ -287,6 +321,9 @@ export default {
     if (url.pathname === "/hub/teams") return handleHubTeams(request, store());
     const routes = { "/api/state": handleState, "/api/contacts": handleContacts, "/api/emergency": handleEmergency, "/api/cal": handleCal };
     if (url.pathname === "/api/unlock") return handleUnlock(request, store());
+    if (url.pathname === "/api/hublinks") { const st = store(); return handleHubLinks(request, st, (await whoIs(request, st, env, await storedPin(st))).lead); }
+    if (url.pathname === "/api/profile") return handleProfile(request, store(), env);
+    if (url.pathname === "/api/photos") return handlePhotos(request, store());
     if (url.pathname === "/api/vpin") return handleVolPin(request, store(), Date.now(), env);
     const h = routes[url.pathname];
     if (h) return h(request, store(), env);

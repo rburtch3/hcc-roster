@@ -161,3 +161,37 @@ test("installed app: the browser's sign-in is handed to the app once, by its ran
   assert.equal((await (await hub.handleHandoff(new Request("https://x/api/handoff?n=" + n), s)).json()).waiting, true);
   assert.equal((await hub.handleHandoff(new Request("https://x/api/handoff?n=zz"), s)).status, 400);
 });
+
+test("the same person can take back their name from an older Hub sign-in (verified phone matches)", async () => {
+  const s = mem();
+  await s.putItem("hubLinks", { "old-google": "Pastor Ryan" });
+  await s.putItem("contacts", { "Pastor Ryan": { phone: "+91 98480 11111" } });
+  const c = await signIn(s, { sub: "new-phone", phone_number: "+919848011111", hub: { rota: "member" } });
+  const r = await hub.handleMe(withCookie("/api/me", c, { method: "POST", body: JSON.stringify({ name: "Pastor Ryan" }) }), env, s);
+  assert.equal(r.status, 200);
+  assert.deepEqual(await s.getItem("hubLinks"), { "new-phone": "Pastor Ryan" });
+});
+
+test("a Hub admin can take a name; the Hub's people list links a sign-in by itself", async () => {
+  const s = mem();
+  await s.putItem("hubLinks", { other: "Paul" });
+  const c = await signIn(s, { sub: "u-admin", hub: { rota: "admin" } });
+  assert.equal((await hub.handleMe(withCookie("/api/me", c, { method: "POST", body: JSON.stringify({ name: "Paul" }) }), env, s)).status, 200);
+  const s2 = mem();
+  await s2.putItem("hubLinks", { "old": "Ana" });
+  await s2.putItem("hubPeople", { "u-ana2": { name: "Ana" } });
+  const c2 = await signIn(s2, { sub: "u-ana2", hub: { rota: "member" } });
+  const me = await (await hub.handleMe(withCookie("/api/me", c2), env, s2)).json();
+  assert.equal(me.name, "Ana");
+  assert.deepEqual(await s2.getItem("hubLinks"), { "u-ana2": "Ana" });
+});
+
+test("leaders list and unlink Hub sign-ins; others can't", async () => {
+  const s = mem();
+  await s.putItem("hubLinks", { a: "Paul", b: "Ana" });
+  assert.equal((await hub.handleHubLinks(new Request("https://x/api/hublinks"), s, false)).status, 403);
+  assert.deepEqual((await (await hub.handleHubLinks(new Request("https://x/api/hublinks"), s, true)).json()).names, ["Ana", "Paul"]);
+  const r = await hub.handleHubLinks(new Request("https://x/api/hublinks", { method: "POST", body: JSON.stringify({ name: "Paul", unlink: true }) }), s, true);
+  assert.equal((await r.json()).removed, 1);
+  assert.deepEqual(await s.getItem("hubLinks"), { b: "Ana" });
+});

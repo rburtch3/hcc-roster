@@ -142,6 +142,10 @@ const last10 = (s) => digits(s).slice(-10);
 export async function rosterNameFor(sess, store) {
   const links = (await store.getItem("hubLinks")) || {};
   if (links[sess.sub]) return { name: links[sess.sub], how: "link" };
+  // The Hub's own people list says who this Hub account is in Roster: that wins over an older link
+  // from another sign-in (e.g. the same person signed in once with Google and once with their phone).
+  const hp = ((await store.getItem("hubPeople")) || {})[sess.sub];
+  if (hp && hp.name) { moveLink(links, sess.sub, hp.name); await store.putItem("hubLinks", links); return { name: hp.name, how: "hub" }; }
   const contacts = (await store.getItem("contacts")) || {};
   const taken = new Set(Object.values(links));
   const ph = sess.phone ? last10(sess.phone) : "", em = (sess.email || "").toLowerCase();
@@ -248,12 +252,46 @@ export async function handleMe(request, env, store) {
     if (!name) return json({ ok: false, error: "name" }, 400);
     const links = (await store.getItem("hubLinks")) || {};
     if (links[sess.sub]) return json({ ok: false, error: "already linked", name: links[sess.sub] }, 409);
-    if (Object.values(links).includes(name)) return json({ ok: false, error: "taken" }, 409);
-    links[sess.sub] = name;
+    if (Object.values(links).includes(name) && !(await mayTakeOver(sess, name, store))) return json({ ok: false, error: "taken" }, 409);
+    moveLink(links, sess.sub, name);
     await store.putItem("hubLinks", links);
     return json({ ok: true, name });
   }
   return new Response("Method not allowed", { status: 405 });
+}
+
+/** Links this Hub account to name, dropping any older link to the same name. */
+function moveLink(links, sub, name) { for (const k of Object.keys(links)) if (links[k] === name && k !== sub) delete links[k]; links[sub] = name; }
+
+/**
+ * A name another Hub sign-in already holds can be taken over only by the same person, proven by the Hub:
+ * the Hub's people list names this account as them, or their verified phone or email is the one saved for
+ * that person. A Hub admin can also take it, since admins can already change everything in Roster.
+ */
+async function mayTakeOver(sess, name, store) {
+  if (sess.role === "admin") return true;
+  const hp = ((await store.getItem("hubPeople")) || {})[sess.sub];
+  if (hp && hp.name === name) return true;
+  const c = ((await store.getItem("contacts")) || {})[name] || {};
+  const ph = sess.phone ? last10(sess.phone) : "", em = (sess.email || "").toLowerCase();
+  return (ph.length === 10 && last10(c.phone) === ph) || (!!em && String(c.email || "").trim().toLowerCase() === em);
+}
+
+/**
+ * /api/hublinks (leaders only). GET: { names } linked to an HCC Hub sign-in.
+ * POST { name, unlink: true }: frees that name, so its owner can pick it again after signing in.
+ */
+export async function handleHubLinks(request, store, isLead) {
+  if (!isLead) return new Response("Leaders only", { status: 403 });
+  const links = (await store.getItem("hubLinks")) || {};
+  if (request.method === "GET") return json({ names: [...new Set(Object.values(links))].sort() });
+  if (request.method !== "POST") return new Response("Method not allowed", { status: 405 });
+  let b; try { b = await request.json(); } catch { return json({ ok: false, error: "Bad JSON" }, 400); }
+  const name = String((b && b.name) || "");
+  if (!name || !b.unlink) return json({ ok: false, error: "name" }, 400);
+  let n = 0; for (const k of Object.keys(links)) if (links[k] === name) { delete links[k]; n++; }
+  await store.putItem("hubLinks", links);
+  return json({ ok: true, removed: n });
 }
 
 function page(msg, status) {

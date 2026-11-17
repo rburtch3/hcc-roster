@@ -261,6 +261,14 @@ a.btn{box-sizing:border-box;min-width:0}.two>*{min-width:0}
 #fillList .row[hidden]{display:none}
 #fillOthers .row[hidden],#fillOthers[hidden],#fillOthersLbl[hidden]{display:none}
 .trow .m{flex:1;min-width:0}
+/* Nov 17: no sideways scrolling; iPhone drawer handle */
+.body{overflow-x:hidden;overscroll-behavior:contain;-webkit-overflow-scrolling:auto}
+html,body{overscroll-behavior:none}
+.list7{grid-template-columns:minmax(0,1fr)}.list7>*,.grp>*{min-width:0}
+.sheet .grabzone{touch-action:none;cursor:grab;padding:8px 0 6px;margin:-8px -16px 0}
+.sheet .grabzone .grab{margin:2px auto 4px}
+.sheet.full{max-height:calc(100% - 12px);height:calc(100% - 12px)}
+.card.tap:active{background:var(--track)}
 .trow .t{font:400 18px/23px var(--font);color:#2B2B2F}
 .trow .s{font:400 14px/18px var(--font);color:#6E6E76;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .pform .two{display:grid;grid-template-columns:1fr 1fr;gap:12px}
@@ -1409,7 +1417,9 @@ function saveNow(){
 function poll(){
   if (!loaded || inflight || S.sheet || document.visibilityState === "hidden" || snapshot() !== lastSaved) return;
   fetch("/api/state", { cache: "no-store" }).then(function(r){ return r.ok ? r.json() : null; }).then(function(j){
-    if (j && j.data && j.rev !== rev && !inflight && !S.sheet && snapshot() === lastSaved) { adopt(j); render.same = true; render(); }
+    if (j && j.data && j.rev !== rev && !inflight && !S.sheet && snapshot() === lastSaved) {
+      var before = lastSaved; adopt(j); if (lastSaved === before) return; /* same roster: leave the screen alone */
+      if (window.TOUCHING) { render.later = true; return; } render.same = true; render(); }
   }, function(){});
 }
 setInterval(poll, 30000);
@@ -2686,23 +2696,26 @@ A.ics = function(d){ if (calLive()) return baseIcs12(d);
   if (!S.settings.cal) { S.settings.cal = true; saveSoon(); } push("calsync", {}); };
 /* Full roster uses the admin Schedule style (Nov 16, user comment "use admin style"):
    service title with date and time, then each team with filled/total, rows with initials, role and status. */
+/* Full roster: everyone serving, in the serve details "Serving with" look; "My teams" narrows it (Nov 17, user: "should show the serving with people page") */
+LOCAL.rosterMine = 1;
+A.rosterMine = function(){ S.rosterMine = !S.rosterMine; render.same = true; render(); };
 var baseVolSched14 = SCREENS["vol:sched"];
 SCREENS["vol:sched"] = function(){
   var r = baseVolSched14(); if (!on("weekhead") || S.volSchedMode === "mine" || !r) return r;
-  var sel = wkSel(), all = !!S.rosterAll, mt = teamsOf(ME), svs = S.services.filter(function(sv){ return sv.date === sel && sv.published; });
+  var sel = wkSel(), all = !S.rosterMine, mt = teamsOf(ME), svs = S.services.filter(function(sv){ return sv.date === sel && sv.published; });
   var body = '<div class="seg"><button data-a="volMode" data-v="mine">My serves</button><button data-a="volMode" data-v="all" aria-current="true">Full roster</button></div>' + wkStrip();
   if (!svs.length) body += '<div class="empty">No services on this day.</div>';
   svs.forEach(function(sv, n){
     var nm = SVC[sv.svc] ? SVC[sv.svc].name : sv.svc;
     body += '<div style="display:flex;justify-content:space-between;align-items:flex-end;gap:10px;margin:' + (n ? '22px' : '14px') + ' 4px 8px"><div style="min-width:0"><div class="t" style="font:700 20px/26px var(--font)">' + esc(nm) + '</div><div class="small">' + esc(dLong(sv.date)) + ' · ' + esc(rangeTxt(sv.svc)) + '</div></div>'
-      + (n === 0 && mt.length ? '<a class="small" data-a="rosterAll" style="color:var(--accent);white-space:nowrap;cursor:pointer">' + (all ? 'My teams' : 'All teams') + '</a>' : '') + '</div>' + evBanner(sv.date);
+      + (n === 0 && mt.length ? '<a class="small" data-a="rosterMine" style="color:var(--accent);white-space:nowrap;cursor:pointer">' + (all ? 'My teams' : 'All teams') + '</a>' : '') + '</div>' + evBanner(sv.date);
     var shown = 0;
     Object.keys(ROLES).forEach(function(team){
       if (!all && mt.length && mt.indexOf(team) < 0) return;
       var sl = S.slots.filter(function(x){ return x.sid === sv.id && x.team === team; }); if (!sl.length) return; shown++;
-      body += '<div class="lbl">' + esc(team) + '<span class="small" style="text-transform:none;letter-spacing:0">' + sl.filter(function(x){ return x.person && x.status !== "declined"; }).length + '/' + sl.length + '</span></div><div class="grp">' + sl.map(function(x){
-        var has = x.person && x.status !== "declined";
-        return '<div class="row"><span class="av' + (has ? '' : ' g') + '">' + (x.person ? initials(x.person) : '+') + '</span><div class="m"><div class="t">' + esc(x.person ? x.person + (x.person === ME ? ' (you)' : '') : 'Open spot') + '</div><div class="s">' + esc(x.role) + '</div></div>' + statusChip(x) + '</div>'; }).join("") + '</div>';
+      body += '<div class="lbl">' + esc(team) + '<span class="small" style="text-transform:none;letter-spacing:0">' + sl.filter(function(x){ return x.person && x.status !== "declined"; }).length + '/' + sl.length + '</span></div><div class="list7">' + sl.map(function(x){
+        var who = x.person ? x.person + (x.person === ME ? ' (you)' : '') : 'Open spot';
+        return '<div class="wrow">' + (x.person ? ava(x.person, 48) : '<span class="ava open" style="width:48px;height:48px">?</span>') + '<div class="um"><div class="wt">' + esc(who) + '</div><div class="us">' + dot(x.role) + esc(x.role) + '</div></div>' + (x.person && x.status !== "confirmed" ? statusChip(x) : '') + '</div>'; }).join("") + '</div>';
     });
     if (!shown) body += '<div class="empty">No spots for your teams.</div>';
   });
@@ -2786,7 +2799,7 @@ A.hubLink = function(d){
     .then(function(r){ return r.json().then(function(j){ return { s: r.status, j: j }; }); })
     .then(function(x){
       if (x.s === 200) { HUBME.name = x.j.name; hubApply(); S.stack = []; S.tab.vol = "home"; toast("You're " + x.j.name + " on Roster now."); render(); return; }
-      toast(x.j && x.j.error === "taken" ? d.id + " is already linked to another HCC Hub sign-in. Ask a leader." : "Couldn't save that. Try again."); render.same = true; render(); },
+      toast(x.j && x.j.error === "taken" ? d.id + " is linked to a different HCC Hub sign-in. A leader can free it in More › HCC Hub sign-ins, then pick it again." : "Couldn't save that. Try again."); render.same = true; render(); },
       function(){ toast("Couldn't reach Roster. Try again."); render.same = true; render(); }); };
 var baseWhoScreen15 = SCREENS.who;
 SCREENS.who = function(o){
@@ -2807,6 +2820,112 @@ SCREENS.who = function(o){
   if (HUBME.role === "admin") r.body = r.body.replace('<div class="s">For team leaders, needs the leader PIN</div>', '<div class="s">Your HCC Hub sign-in opens it</div>');
   r.body += '<div class="lbl">HCC Hub</div><div class="grp">' + row("Signed in as " + HUBME.hubName, (HUBME.role === "admin" ? "Admin" : HUBME.role === "leader" ? "Team leader" : "Volunteer") + (hubName() ? " · Roster name " + hubName() : ""), "hubSignOut", "") + '</div><p class="small" style="margin:6px 4px 0">Tap to sign out.</p>';
   return r; }; });
+
+/* ---------- iPhone fixes (Nov 17) ---------- */
+/* Coming back to the app froze the screen: the 30-second check redrew the whole page as the finger landed,
+   and iOS then stopped scrolling it. Now it only redraws when the roster changed, waits for the finger to
+   lift, and nudges the scroll area awake when the app comes back. */
+window.TOUCHING = 0;
+document.addEventListener("touchstart", function(e){ window.TOUCHING = e.touches.length; }, { passive: true, capture: true });
+document.addEventListener("touchend", function(e){ window.TOUCHING = e.touches.length; if (!window.TOUCHING && render.later) { render.later = false; setTimeout(function(){ render.same = true; render(); }, 350); } }, { passive: true, capture: true });
+document.addEventListener("touchcancel", function(){ window.TOUCHING = 0; }, { passive: true, capture: true });
+function wakeScroll(){ var b = document.getElementById("body"); if (!b) return; var y = b.scrollTop; b.style.overflowY = "hidden"; void b.offsetHeight; b.style.overflowY = ""; b.scrollTop = y; }
+document.addEventListener("visibilitychange", function(){ if (document.visibilityState === "visible") wakeScroll(); });
+window.addEventListener("pageshow", wakeScroll);
+
+/* Drawer handle: drag up for full height, down to shrink, further down to close */
+var SHEET_FULL = false, DRAG = null;
+document.addEventListener("pointerdown", function(e){
+  var g = e.target.closest && e.target.closest(".sheet .grab, .sheet .grabzone"); if (!g) return;
+  var sh = g.closest(".sheet"); DRAG = { y: e.clientY, sh: sh, h: sh.getBoundingClientRect().height, dy: 0, id: e.pointerId };
+  sh.style.transition = "none"; try { g.setPointerCapture(e.pointerId); } catch (_) {} });
+document.addEventListener("pointermove", function(e){
+  if (!DRAG || e.pointerId !== DRAG.id) return; e.preventDefault();
+  var dy = e.clientY - DRAG.y, sh = DRAG.sh, room = sh.parentNode.clientHeight - 12; DRAG.dy = dy;
+  if (dy > 0) { sh.style.transform = "translateY(" + dy + "px)"; sh.style.height = ""; }
+  else { sh.style.transform = ""; sh.style.maxHeight = "none"; sh.style.height = Math.min(DRAG.h - dy, room) + "px"; } }, { passive: false });
+function dragEnd(e){
+  if (!DRAG || e.pointerId !== DRAG.id) return;
+  var dy = DRAG.dy, sh = DRAG.sh; DRAG = null; sh.style.transition = "transform .2s ease-out";
+  if (dy > 120 && !SHEET_FULL) { SHEET_FULL = false; A.closeSheet(); return; }
+  if (dy < -40) SHEET_FULL = true; else if (dy > 60) SHEET_FULL = false;
+  sh.style.transform = ""; sh.style.height = ""; sh.style.maxHeight = ""; sh.classList.toggle("full", SHEET_FULL); }
+document.addEventListener("pointerup", dragEnd); document.addEventListener("pointercancel", dragEnd);
+var baseRender17 = render;
+render = function(){ if (!S || !S.sheet) SHEET_FULL = false; baseRender17();
+  var sh = document.querySelector(".sheet"); if (sh) { sh.classList.toggle("full", SHEET_FULL); var g = sh.querySelector(".grab"); if (g && !g.parentNode.classList.contains("grabzone")) { var z = document.createElement("div"); z.className = "grabzone"; g.parentNode.insertBefore(z, g); z.appendChild(g); } } };
+
+/* Profile: tap your picture on More to change your photo, phone and email */
+var PHOTOS = {}, PROF = null, profBusy = false;
+function loadPhotos(){ fetch("/api/photos", { cache: "no-store" }).then(function(r){ return r.ok ? r.json() : null; }).then(function(j){ if (j && j.photos) { PHOTOS = j.photos; if (loaded) { render.same = true; render(); } } }, function(){}); }
+loadPhotos();
+var baseAva17 = ava;
+ava = function(p, size){ size = size || 44; var ph = p && PHOTOS[p];
+  return ph ? '<img class="ava" src="' + esc(ph) + '" alt="" style="width:' + size + 'px;height:' + size + 'px;object-fit:cover;border-radius:50%;flex:none">' : baseAva17(p, size); };
+var baseVolMore17 = SCREENS["vol:more"];
+SCREENS["vol:more"] = function(o){ var r = baseVolMore17(o); if (!r || !ME) return r;
+  r.body = r.body.replace(/<div class="card" style="display:flex;gap:12px;align-items:center"><span class="av"[^>]*>[^<]*<\/span>/,
+    '<div class="card tap" data-a="push" data-s="profile" role="button" aria-label="Edit your profile" style="display:flex;gap:12px;align-items:center;cursor:pointer">' + (PHOTOS[ME] ? ava(ME, 52) : '<span class="av" style="width:52px;height:52px;font-size:17px">' + initials(ME) + '</span>'))
+    .replace(/(data-s="profile"[\s\S]*?<\/div><\/div>)(<\/div>)/, '$1<span class="chev" style="margin-left:auto">›</span>$2');
+  return r; };
+function loadProfile(){ if (PROF || profBusy) return; profBusy = true;
+  fetch("/api/profile", { headers: volHeaders(), cache: "no-store" }).then(function(r){ return r.ok ? r.json() : null; })
+    .then(function(j){ profBusy = false; PROF = j || { error: true }; render.same = true; render(); }, function(){ profBusy = false; PROF = { error: true }; render.same = true; render(); }); }
+SCREENS.profile = function(){ loadProfile(); var p = PROF || {}, ph = p.photo || PHOTOS[ME] || "";
+  if (!PROF) return { head: header("Your profile"), body: '<div class="empty">Loading…</div>' };
+  if (p.error) return { head: header("Your profile"), body: '<div class="empty">Couldn\'t load your profile. Sign in again and try once more.</div>' };
+  return { head: header("Your profile"), body: '<div class="card" style="text-align:center">'
+    + (ph ? '<img id="profPic" src="' + esc(ph) + '" alt="Your photo" style="width:96px;height:96px;border-radius:50%;object-fit:cover">' : '<span class="av" id="profPic" style="width:96px;height:96px;font-size:30px;margin:0 auto">' + initials(ME) + '</span>')
+    + '<div class="t" style="font:700 20px/26px var(--font);margin-top:10px">' + esc(ME) + '</div><div class="small">' + esc(teamsOf(ME).join(" · ") || "Volunteer") + '</div>'
+    + '<div class="btns" style="justify-content:center"><label class="btn sm soft" style="width:auto;cursor:pointer">' + (ph ? 'Change photo' : 'Add a photo') + '<input type="file" id="profFile" accept="image/*" hidden></label>' + (ph ? '<button class="btn sm sec" style="width:auto" data-a="profNoPic">Remove</button>' : '') + '</div></div>'
+    + '<div class="card mt"><label class="fl" for="prPh">Phone</label><input class="field" id="prPh" type="tel" autocomplete="tel" value="' + esc(p.phone || "") + '">'
+    + '<label class="fl" for="prWa">WhatsApp (if different)</label><input class="field" id="prWa" type="tel" value="' + esc(p.whatsapp || "") + '">'
+    + '<label class="fl" for="prEm">Email</label><input class="field" id="prEm" type="email" autocomplete="email" value="' + esc(p.email || "") + '">'
+    + '<p class="small" style="margin:8px 0 0">Your leaders and team see your phone so they can reach you. To change your name, ask a leader.</p>'
+    + '<div class="btns"><button class="btn" data-a="profSave">Save</button></div></div>' };
+};
+function putProfile(body, msg, back){
+  fetch("/api/profile", { method: "PUT", headers: volHeaders({ "content-type": "application/json" }), body: JSON.stringify(body) })
+    .then(function(r){ if (!r.ok) throw new Error(r.status);
+      if ("photo" in body) { if (body.photo) PHOTOS[ME] = body.photo; else delete PHOTOS[ME]; }
+      for (var k in body) PROF[k] = body[k]; if (back && S.stack.length) S.stack.pop(); toast(msg); render(); })
+    .catch(function(){ toast("Couldn't save it. Sign in again and try once more."); render.same = true; render(); }); }
+A.profSave = function(){ var g = function(id){ return (document.getElementById(id).value || "").trim(); };
+  var b = { phone: g("prPh"), whatsapp: g("prWa"), email: g("prEm") };
+  if (b.email && !/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(b.email)) { toast("That email doesn't look right."); render.same = true; render(); return; }
+  putProfile(b, "Profile saved.", true); };
+A.profNoPic = function(){ putProfile({ photo: "" }, "Photo removed."); };
+app.addEventListener("change", function(e){ var f = e.target; if (!f || f.id !== "profFile" || !f.files || !f.files[0]) return;
+  var file = f.files[0]; if (!/^image\//.test(file.type)) { toast("Pick a photo."); render.same = true; render(); return; }
+  var url = URL.createObjectURL(file), img = new Image();
+  img.onload = function(){ var n = 240, c = document.createElement("canvas"), s = Math.min(img.width, img.height); c.width = n; c.height = n;
+    c.getContext("2d").drawImage(img, (img.width - s) / 2, (img.height - s) / 2, s, s, 0, 0, n, n); URL.revokeObjectURL(url);
+    var q = 0.82, d = c.toDataURL("image/jpeg", q); while (d.length > 58000 && q > 0.4) { q -= 0.1; d = c.toDataURL("image/jpeg", q); }
+    putProfile({ photo: d }, "Photo saved."); };
+  img.onerror = function(){ URL.revokeObjectURL(url); toast("Couldn't read that photo. Try another one."); render.same = true; render(); };
+  img.src = url; });
+
+/* Leaders: free a name that's linked to someone's HCC Hub sign-in */
+var HUBLINKS = null;
+function loadHubLinks(){ if (HUBLINKS) return; HUBLINKS = { busy: true };
+  fetch("/api/hublinks", { headers: authHeaders(), credentials: "same-origin", cache: "no-store" }).then(function(r){ return r.ok ? r.json() : null; })
+    .then(function(j){ HUBLINKS = j && j.names ? { names: j.names } : { error: true }; render.same = true; render(); }, function(){ HUBLINKS = { error: true }; render.same = true; render(); }); }
+SCREENS.hubLinks = function(){ loadHubLinks(); var h = HUBLINKS || {};
+  var body = '<p class="small" style="margin:0 4px 10px">Each name here is tied to one HCC Hub sign-in. If someone signs in a new way and gets "already linked", unlink their name. They then pick it again after signing in.</p>';
+  if (h.busy) body += '<div class="empty">Loading…</div>';
+  else if (h.error) body += '<div class="empty">Couldn\'t load the list. Unlock Admin and try again.</div>';
+  else if (!h.names.length) body += '<div class="empty">No one is linked yet.</div>';
+  else body += '<div class="grp">' + h.names.map(function(n){ return '<div class="row"><div class="m"><div class="t">' + esc(n) + '</div></div><button class="btn sm sec" style="width:auto" data-a="hubUnlink" data-id="' + esc(n) + '">Unlink</button></div>'; }).join("") + '</div>';
+  return { head: header("HCC Hub sign-ins"), body: body }; };
+A.hubUnlink = function(d){
+  fetch("/api/hublinks", { method: "POST", headers: authHeaders(), credentials: "same-origin", body: JSON.stringify({ name: d.id, unlink: true }) })
+    .then(function(r){ if (!r.ok) throw new Error(r.status); HUBLINKS = null; toast(d.id + " is free to pick again."); render.same = true; render(); })
+    .catch(function(){ toast("Couldn't unlink. Try again."); render.same = true; render(); }); };
+var baseAdmMore17 = SCREENS["admin:more"];
+SCREENS["admin:more"] = function(o){ var r = baseAdmMore17(o); if (!r || (typeof scoped === "function" && scoped())) return r;
+  r.body = r.body.replace(/(<div class="lbl">People<\/div><div class="grp">)/, '$1' + row("HCC Hub sign-ins", "Unlink a name tied to someone's sign-in", "push", "hubLinks"));
+  return r; };
+/* "already linked": say what to do */
 
 /* ---------- install on the phone (Nov 16): Home Screen app, offline copy, sign-in handed over from the browser ---------- */
 var STANDALONE = (window.matchMedia && matchMedia("(display-mode: standalone)").matches) || window.navigator.standalone === true;
