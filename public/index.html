@@ -3102,6 +3102,10 @@ leadTeams = baseLeadTeams15; /* who leads comes from Roster only */
 baseAdminOk11 = isAdmin;
 scopeTeams = function(){ if (!on("teamlead") || isAdmin() || !ME || ME !== hubName()) return null; var t = leadTeams(ME); return t.length ? t : null; };
 adminOk = function(){ return isAdmin() || !!scopeTeams(); };
+/* phone and email are for admins only (the server refuses anyone else), so a team leader never asks for them */
+var baseLoadContacts22 = loadContacts, baseSaveContacts22 = saveContacts;
+loadContacts = function(){ if (!isAdmin()) { if (!CONTACTS) CONTACTS = {}; return; } baseLoadContacts22(); };
+saveContacts = function(tries){ if (!isAdmin()) { toast("Only an admin can save phone and email."); return Promise.resolve(); } return baseSaveContacts22(tries); };
 vk = function(){ return hubName() && hubName() === ME ? "signin" : ""; };
 hubApply = function(){
   var n = HUBME ? hubName() : "";
