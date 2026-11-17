@@ -202,3 +202,39 @@ test("serves: volunteers change none, only ask for cover on their own; team lead
   r = await (await vput(s, 8, d, ADMIN)).json(); assert.equal(r.held, undefined);
   got = await now(); assert.equal(by(got, "2").person, "Ana"); assert.deepEqual(got.feat, { levels: false }); assert.deepEqual(got.requests, []);
 });
+
+test("leader-only content and other people's own settings: a volunteer's changes are put back; team leaders and admins keep theirs", async () => {
+  const s = mem();
+  await s.putItem("hubLinks", { "u-ana": "Ana", "u-cy": "Cy" });
+  const base = { services: [], slots: [], requests: [], feat: {}, cfg: { leaders: { Media: "Cy" }, pool: { Media: ["Ana", "Cy"] } },
+    announcements: [{ id: "a1", title: "Picnic" }], notes: [], events: [{ id: "e1", title: "Conference" }], checklists: [{ id: "k1", title: "Lights" }],
+    todos: [{ id: "t1", title: "Read the guide", teams: [] }], attend: { "a|Ben": "late" }, plans: {}, templates: [],
+    settingsBy: { Ana: { sched: true }, Ben: { sched: true } }, pendingBy: { Ben: { x: 1 } }, optOut: { Ben: true }, todoDone: { t1: { Ben: "1 Jan" } },
+    ticks: {}, chats: [], shouts: [], notifs: [] };
+  await put(s, 0, base);
+  const ana = await sess("u-ana"), cy = await sess("u-cy");
+  const now = async () => (await (await handleState(req("GET"), s)).json()).data;
+  // Ana (a volunteer) rewrites leader content and Ben's own things, and changes her own
+  let d = await now();
+  d.announcements = [{ id: "a1", title: "Cancelled!" }]; d.notes.push({ adults: 999 }); d.events = []; d.checklists.push({ id: "k2" }); d.todos = [];
+  d.attend["a|Ben"] = "absent"; d.plans = { a: [{ t: "x" }] }; d.templates.push({ name: "mine" });
+  d.settingsBy.Ben = { sched: false }; d.settingsBy.Ana = { sched: false }; delete d.pendingBy.Ben; d.pendingBy.Ana = { y: 1 }; delete d.optOut.Ben; d.optOut.Ana = true;
+  d.todoDone.t1 = { Ana: "2 Jan" }; // drops Ben's tick, adds her own
+  d.ticks.k = { by: "Ana" }; d.shouts.push({ to: "Ben", from: "Ana" });
+  assert.equal((await vput(s, 1, d, ana)).status, 200);
+  let got = await now();
+  for (const k of ["announcements", "notes", "events", "checklists", "todos", "attend", "templates"]) assert.deepEqual(got[k], base[k], k);
+  assert.deepEqual(got.plans || {}, {});
+  assert.deepEqual(got.settingsBy, { Ana: { sched: false }, Ben: { sched: true } });
+  assert.deepEqual(got.pendingBy, { Ben: { x: 1 }, Ana: { y: 1 } });
+  assert.deepEqual(got.optOut, { Ben: true, Ana: true });
+  assert.deepEqual(got.todoDone, { t1: { Ben: "1 Jan", Ana: "2 Jan" } });
+  assert.deepEqual(got.ticks, { k: { by: "Ana" } }); assert.equal(got.shouts.length, 1); // ticking and thanking stay open to volunteers
+  // Cy leads a team: posts an announcement and a to-do, but can't touch Ben's own settings
+  d = await now(); d.announcements.unshift({ id: "a2", title: "Rehearsal" }); d.todos.push({ id: "t2", title: "Bring cables", teams: ["Media"] }); d.settingsBy.Ben = { sched: false };
+  assert.equal((await vput(s, 2, d, cy)).status, 200);
+  got = await now(); assert.equal(got.announcements.length, 2); assert.equal(got.todos.length, 2); assert.deepEqual(got.settingsBy.Ben, { sched: true });
+  // an admin changes anything
+  d = await now(); d.announcements = []; d.settingsBy.Ben = { sched: false };
+  await put(s, 3, d); got = await now(); assert.deepEqual(got.announcements, []); assert.deepEqual(got.settingsBy.Ben, { sched: false });
+});

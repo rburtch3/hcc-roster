@@ -98,6 +98,8 @@ export async function guardAvailability(request, store, data, who) {
  * times stay as a leader set them. Anything else is put back before saving. Returns how many serves
  * were put back (set-up is put back quietly, since phones fill in empty set-up on their own).
  */
+export const LEADER_KEYS = ["announcements", "notes", "events", "checklists", "todos", "attend", "plans", "templates", "flags"];
+export const OWN_KEYS = ["settingsBy", "pendingBy", "optOut"];
 export async function guardRoster(request, store, data, who) {
   const { data: oldText } = await store.get(); if (!oldText) return 0;
   let old; try { old = JSON.parse(oldText); } catch { return 0; }
@@ -121,6 +123,23 @@ export async function guardRoster(request, store, data, who) {
     putBack(nc, k, cfg);
   }
   if (!myTeams.size && !same(old.services, data.services)) data.services = old.services;
+  // What leaders post (announcements, notes, events, checklists, to-dos, attendance, plans, line-ups) stays as a
+  // leader left it: a volunteer's change is put back quietly. Ticking a checklist, thanking someone and chat stay open.
+  const blank = (v) => empty(v) || (Array.isArray(v) && !v.length);
+  if (!myTeams.size) for (const k of LEADER_KEYS) { if (same(old[k], data[k]) || (blank(old[k]) && blank(data[k]))) continue; if (k in old) data[k] = old[k]; else delete data[k]; }
+  // Each person's own settings, raised hands and reminders switch: only theirs changes (an admin can change anyone's).
+  const mine = (was, now) => { // was/now are { name: value }: every name but `me` goes back
+    const b = now && typeof now === "object" && !Array.isArray(now) ? now : {}, a = was && typeof was === "object" ? was : {};
+    for (const n of new Set([...Object.keys(a), ...Object.keys(b)])) { if (n === me || same(a[n], b[n])) continue; if (n in a) b[n] = a[n]; else delete b[n]; }
+    return b;
+  };
+  for (const k of OWN_KEYS) if (!same(old[k], data[k])) { const b = mine(old[k], data[k]); if (Object.keys(b).length || k in old) data[k] = b; else delete data[k]; }
+  // to-dos done: { todo: { name: date } }. A volunteer marks only their own; a team leader may clear a to-do they remove.
+  if (!myTeams.size && !same(old.todoDone, data.todoDone)) {
+    const a = old.todoDone && typeof old.todoDone === "object" ? old.todoDone : {}, b = data.todoDone && typeof data.todoDone === "object" && !Array.isArray(data.todoDone) ? data.todoDone : {};
+    for (const t of new Set([...Object.keys(a), ...Object.keys(b)])) { const m = mine(a[t], b[t]); if (Object.keys(m).length) b[t] = m; else delete b[t]; }
+    data.todoDone = b;
+  }
   // serves
   const before = new Map((old.slots || []).map((x) => [x.id, x]));
   const out = []; let held = 0;
