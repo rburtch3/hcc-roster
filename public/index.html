@@ -2951,6 +2951,10 @@ var NOROUTE = { who: 1, pin: 1, vpin: 1, handoffDone: 1 };
 var HIST = [], HSHEET = [], HSCROLL = [], HIDX = 0, POPPING = false, SKIPPOP = 0, ROUTE_INIT = false;
 try { var hs = JSON.parse(sessionStorage.getItem("roster.hist") || "null"); if (hs && hs.h) { HIST = hs.h; HSCROLL = hs.y || []; } } catch (e) {}
 HIDX = (history.state && typeof history.state.i === "number") ? history.state.i : 0;
+/* a page opened afresh (after sign-in, a typed address, a new tab) starts a new trail: the saved one belongs to pages
+   the browser can no longer step to, and left a forward arrow that did nothing */
+if (!(history.state && typeof history.state.i === "number")) { HIST = []; HSCROLL = []; }
+var TAB_NAV = false;
 function saveHist(){ try { sessionStorage.setItem("roster.hist", JSON.stringify({ h: HIST.slice(0, 60), y: HSCROLL.slice(0, 60) })); } catch (e) {} }
 function routeOf(){ var v = S.view === "admin" ? "admin" : "vol", path = "/" + v + "/" + encodeURIComponent(S.tab[v] || "");
   (S.stack || []).forEach(function(e){ if (!e || NOROUTE[e.s]) return; path += "/" + encodeURIComponent(e.s) + (e.id != null && e.id !== "" ? ":" + encodeURIComponent(e.id) : ""); });
@@ -2977,17 +2981,23 @@ function applyRoute(withSheet){
   return true; }
 function syncRoute(){
   if (!loaded || location.search.indexOf("handoff=") >= 0) return;
-  var r = routeOf(); if (r === curPath() && HIST[HIDX] === r) return;
+  /* the address has been read once the first screen is up. Without this, a refreshed page (whose saved trail already
+     matched) kept re-reading the address on every tap, so tabs and rows did nothing. */
+  var r = routeOf(); if (r === curPath() && HIST[HIDX] === r) { ROUTE_INIT = true; return; }
   var b = document.getElementById("body");
   if (POPPING || !ROUTE_INIT) { HIST[HIDX] = r; history.replaceState({ i: HIDX }, "", r); ROUTE_INIT = true; saveHist(); return; }
   HSCROLL[HIDX] = b ? b.scrollTop : 0;
-  if (HIDX > 0 && HIST[HIDX - 1] === r) { HIDX--; SKIPPOP++; history.back(); saveHist(); return; }
+  /* a screen closing back onto the one before it steps back, so the trail doesn't grow. A tab tap is a new step
+     (so Back retraces the tabs you opened), and a closed sheet leaves nothing to go forward to. */
+  if (!TAB_NAV && HIDX > 0 && HIST[HIDX - 1] === r) { var wasSheet = /[?&]sheet=/.test(HIST[HIDX] || ""); HIDX--; if (wasSheet) HIST.length = HIDX + 1; SKIPPOP++; history.back(); saveHist(); return; }
   HIDX++; HIST.length = HIDX; HSCROLL.length = HIDX; HIST[HIDX] = r; HSHEET[HIDX] = S.sheet ? JSON.parse(JSON.stringify(S.sheet)) : null;
   history.pushState({ i: HIDX }, "", r); saveHist(); }
 window.addEventListener("popstate", function(e){
   if (SKIPPOP) { SKIPPOP--; return; }
   var b = document.getElementById("body"); if (b) HSCROLL[HIDX] = b.scrollTop;
+  var from = HIDX;
   HIDX = (e.state && typeof e.state.i === "number") ? e.state.i : HIDX;
+  if (from === HIDX + 1 && /[?&]sheet=/.test(HIST[from] || "")) HIST.length = HIDX + 1; /* backed out of a sheet: no forward arrow to it */
   if (!applyRoute(true)) { S.stack = []; S.sheet = null; }
   POPPING = true; render(); POPPING = false;
   var y = HSCROLL[HIDX] || 0, b2 = document.getElementById("body"); if (b2) b2.scrollTop = y; saveHist(); });
@@ -3005,9 +3015,21 @@ render = function(){
   baseRender18(); syncRoute(); patchNav(); };
 /* ‹ and › in the header's empty corners: back to the last page, forward again after going back */
 function spacer(el){ return el && el.tagName === "SPAN" && !el.children.length && !el.textContent.trim(); }
-function patchNav(){ var hd = document.querySelector("#app .hd") || document.querySelector(".hd"); if (!hd) return;
-  if (canBack() && !hd.querySelector('[data-a="back"]') && spacer(hd.firstElementChild)) hd.firstElementChild.outerHTML = '<button class="ic" data-a="back" aria-label="Back">‹</button>';
-  if (canFwd() && !hd.querySelector('[data-a="fwd"]') && spacer(hd.lastElementChild)) hd.lastElementChild.outerHTML = '<button class="ic" data-a="fwd" aria-label="Forward">›</button>'; }
+var NAV_BACK = '<button class="ic" data-a="back" aria-label="Back">‹</button>', NAV_FWD = '<button class="ic" data-a="fwd" aria-label="Forward">›</button>';
+function patchNav(){ var hd = document.querySelector("#app .hd") || document.querySelector(".hd");
+  if (!hd) { /* the Dashboard has no header bar: the arrows sit at the start of its top row */
+    var bt = document.querySelector("#app .btop"); if (!bt || bt.querySelector(".bnav") || (!canBack() && !canFwd())) return;
+    bt.insertAdjacentHTML("afterbegin", '<span class="bnav">' + (canBack() ? NAV_BACK : '') + (canFwd() ? NAV_FWD : '') + '</span>'); return; }
+  /* an empty corner becomes the arrow; a corner that already holds a button gets the arrow beside it */
+  if (canBack() && !hd.querySelector('[data-a="back"],[data-a="reqsBack"]')) { if (spacer(hd.firstElementChild)) hd.firstElementChild.outerHTML = NAV_BACK; else hd.insertAdjacentHTML("afterbegin", NAV_BACK); }
+  if (canFwd() && !hd.querySelector('[data-a="fwd"]')) { if (spacer(hd.lastElementChild)) hd.lastElementChild.outerHTML = NAV_FWD; else hd.lastElementChild.insertAdjacentHTML("beforebegin", NAV_FWD); } }
+var navCss = document.createElement("style");
+navCss.textContent = '.hd h3{min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.btop .bnav{display:flex;align-items:center;margin-left:-10px}'
+  + '.btop .bnav .ic{width:36px;height:40px;display:grid;place-items:center;border:0;background:none;color:#2B2B2F;font:400 26px/1 var(--font);cursor:pointer;border-radius:12px}.btop .bnav + .org{margin-right:auto;margin-left:4px}';
+document.head.appendChild(navCss);
+/* tapping a tab is always a new step in the trail */
+var baseTab24 = A.tab;
+A.tab = function(d, el){ TAB_NAV = true; try { return baseTab24(d, el); } finally { TAB_NAV = false; } };
 /* in the installed app (no browser bar), swipe from the left edge to go back; Safari already does this itself */
 var EDGE = null;
 document.addEventListener("touchstart", function(e){ var t = e.touches[0]; EDGE = (STANDALONE && e.touches.length === 1 && t.clientX < 22 && !S.sheet) ? { x: t.clientX, y: t.clientY } : null; }, { passive: true });
