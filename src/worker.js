@@ -125,6 +125,13 @@ export async function guardRoster(request, store, data, who) {
     putBack(nc, k, cfg);
   }
   if (!myTeams.size && !same(old.services, data.services)) data.services = old.services;
+  // A team leader may publish a service but not add or remove one: a service a leader added had no name or
+  // times (those are set-up, put back above) and stopped Schedule from opening for everyone.
+  const sids = new Set((Array.isArray(old.services) ? old.services : []).map((s) => s && s.id));
+  if (myTeams.size && Array.isArray(old.services)) {
+    const now = new Map((Array.isArray(data.services) ? data.services : []).filter((s) => s && s.id).map((s) => [s.id, s]));
+    data.services = old.services.map((o) => (o && now.get(o.id)) || o);
+  }
   // What leaders post (announcements, notes, events, checklists, to-dos, attendance, plans, line-ups) stays as a
   // leader left it: a volunteer's change is put back quietly. Ticking a checklist, thanking someone and chat stay open.
   const blank = (v) => empty(v) || (Array.isArray(v) && !v.length);
@@ -147,7 +154,7 @@ export async function guardRoster(request, store, data, who) {
   const out = []; let held = 0;
   for (const x of data.slots) {
     const o = x && before.get(x.id);
-    if (!o) { if (x && myTeams.has(x.team)) out.push(x); else held++; continue; }
+    if (!o) { if (x && myTeams.has(x.team) && sids.has(x.sid)) out.push(x); else held++; continue; }
     before.delete(o.id);
     if (same(o, x) || myTeams.has(o.team)) { out.push(x); continue; }
     const where = o.sid === x.sid && o.team === x.team && o.role === x.role && o.person === x.person;
@@ -162,13 +169,15 @@ export async function guardRoster(request, store, data, who) {
   const slotOf = new Map((old.slots || []).map((x) => [x.id, x]));
   const teamOf = (r) => (slotOf.get(r && r.slot) || {}).team;
   const was = new Map((old.requests || []).map((r) => [r.id, r]));
+  // serves whose holder has asked for cover: a teammate may offer to take one (the leader still approves)
+  const asked = new Set((old.requests || []).filter((r) => r && r.state === "pending" && (r.kind === "cant" || r.kind === "giveaway")).map((r) => r.slot));
   const reqs = []; const nr = Array.isArray(data.requests) ? data.requests : [];
   for (const r of nr) {
     const o = r && was.get(r.id);
     if (!o) {
       const x = slotOf.get(r && r.slot);
       const ok = myTeams.has(teamOf(r)) || (me && x && r.from === me && r.state === "pending" &&
-        (r.kind === "pickup" ? !x.person || x.status === "open" || x.status === "declined" : ["cant", "swap", "giveaway"].includes(r.kind) && x.person === me));
+        (r.kind === "pickup" ? !x.person || x.status === "open" || x.status === "declined" || asked.has(x.id) : ["cant", "swap", "giveaway"].includes(r.kind) && x.person === me));
       if (ok) reqs.push(r); else held++;
       continue;
     }

@@ -574,12 +574,15 @@ function tabbar(){
   }).join("") + '</nav>';
 }
 function render(){
-  var top = S.stack[S.stack.length-1];
-  var html;
-  if (top) html = SCREENS[top.s](top);
-  else html = SCREENS[S.view + ":" + S.tab[S.view]]();
+  var top, html;
+  /* Nov 18: a screen that cannot be drawn (a link to a request or person that is gone, a typed address) closes back
+     to the one under it. It used to throw and leave "Loading the roster…" with no way out. */
+  while ((top = S.stack[S.stack.length-1])) { html = null; try { if (screenOk(top)) html = SCREENS[top.s](top); } catch (e) { console.error(e); } if (html) break; S.stack.pop(); S.sheet = null; }
+  if (!top) { try { html = SCREENS[S.view + ":" + S.tab[S.view]](); } catch (e) { console.error(e); html = null; }
+    if (!html) html = { head: header(""), body: '<div class="empty">This screen couldn\'t be shown. Try another tab, or refresh.</div>' }; }
   var out = statusBar() + html.head + '<div class="body" id="body">' + html.body + '</div>' + (html.foot || "") + (html.noTabs ? "" : tabbar());
-  if (S.sheet) out += '<div class="sheet-bg" data-a="closeSheet"><div class="sheet" data-stop="1"><div class="grab"></div>' + SHEETS[S.sheet.s](S.sheet) + '</div></div>';
+  if (S.sheet) { var shHtml = ""; try { shHtml = SHEETS[S.sheet.s] ? SHEETS[S.sheet.s](S.sheet) : ""; } catch (e) { console.error(e); }
+    if (shHtml) out += '<div class="sheet-bg" data-a="closeSheet"><div class="sheet" data-stop="1"><div class="grab"></div>' + shHtml + '</div></div>'; else S.sheet = null; }
   if (S.toast) out += '<div class="toast" role="status">' + esc(S.toast) + '</div>';
   var keep = document.getElementById("body"), y = keep && render.same ? keep.scrollTop : 0;
   app.innerHTML = out;
@@ -590,7 +593,13 @@ function render(){
   drawJumps();
 }
 var toastTimer;
-function toast(t){ S.toast = t; clearTimeout(toastTimer); toastTimer = setTimeout(function(){ S.toast = null; render.same = true; render(); }, 2400); }
+/* Nov 18: a message is drawn the moment it is set and taken away on its own. It used to wait for the next redraw
+   (so "Copy link", "Save checklist" and others looked dead) and then redrew the whole screen 2.4 s later, which
+   emptied any form you had started typing in. */
+function toast(t){ S.toast = t; clearTimeout(toastTimer); drawToast();
+  toastTimer = setTimeout(function(){ S.toast = null; var el = app.querySelector(".toast"); if (el) el.remove(); }, 2400); }
+function drawToast(){ var old = app.querySelector(".toast"); if (old) old.remove();
+  if (S.toast && app.firstChild) app.insertAdjacentHTML("beforeend", '<div class="toast" role="status">' + esc(S.toast) + '</div>'); }
 function push(s, extra){ var o = { s: s }; for (var k in extra) o[k] = extra[k]; S.stack.push(o); S.sheet = null; render(); var b = document.getElementById("body"); if (b) b.scrollTop = 0; }
 
 /* ---------------- volunteer screens ---------------- */
@@ -1420,7 +1429,7 @@ function poll(){
   fetch("/api/state", { cache: "no-store" }).then(function(r){ return r.ok ? r.json() : null; }).then(function(j){
     if (j && j.data && j.rev !== rev && !inflight && !S.sheet && snapshot() === lastSaved) {
       var before = lastSaved; adopt(j); if (lastSaved === before) return; /* same roster: leave the screen alone */
-      if (window.TOUCHING) { render.later = true; return; } render.same = true; render(); }
+      if (window.TOUCHING) { render.later = true; return; } render.same = true; render.keep = true; render(); }
   }, function(){});
 }
 setInterval(poll, 30000);
@@ -2382,8 +2391,8 @@ render = function(){
   if (on("volpin") && S.view === "vol" && ME && !vk()) { if (!S.stack[0] || S.stack[0].s !== "vpin") S.stack = [{ s: "vpin" }]; S.sheet = null; }
   else if (S.stack[0] && S.stack[0].s === "vpin") S.stack = [];
   var sc = scoped(), keepR = ROLES, keepP = POOL;
-  if (sc) { ROLES = pickKeys(ROLES, sc); POOL = pickKeys(POOL, sc); }
-  try { baseRender11(); } finally { ROLES = keepR; POOL = keepP; }
+  if (sc) { ALLTEAMS = { r: keepR, p: keepP }; ROLES = pickKeys(ROLES, sc); POOL = pickKeys(POOL, sc); }
+  try { baseRender11(); } finally { ROLES = keepR; POOL = keepP; ALLTEAMS = null; }
 };
 var baseVisReq11 = visibleReq;
 visibleReq = function(r){ if (!baseVisReq11(r)) return false; var sc = scoped(); if (!sc) return true; var x = r.slot && slot(r.slot);
@@ -2576,7 +2585,10 @@ SCREENS["admin:reqs"] = function(o){ var r = baseReqs13(o);
   if (r && r.head && S.reqsBack && !S.stack.length && r.head.indexOf('data-a="reqsBack"') < 0)
     r.head = r.head.replace(/^<div class="hd">(<span style="width:40px"><\/span>)?/, '<div class="hd"><button class="ic" data-a="reqsBack" aria-label="Back">‹</button>');
   return r; };
-A.reqsBack = function(){ var t = S.reqsBack || "dash"; S.reqsBack = null; A.tab({ v: t }); };
+A.reqsBack = function(){ var t = S.reqsBack || "dash"; S.reqsBack = null;
+  /* Nov 18: back means back. As a new step, the page you returned to then had a ‹ that led to Requests again. */
+  if (typeof canBack === "function" && canBack()) { history.back(); return; }
+  UP_NAV = true; try { A.tab({ v: t }); } finally { UP_NAV = false; } };
 
 /* templates can be edited: rename, change who fills each spot, delete (Nov 16) */
 var baseTpl13 = SHEETS.templates;
@@ -2845,7 +2857,7 @@ SCREENS.profile = function(){ loadProfile(); var p = PROF || {}, ph = p.photo ||
     + '<div class="card mt"><label class="fl" for="prPh">Phone</label><input class="field" id="prPh" type="tel" autocomplete="tel" value="' + esc(p.phone || "") + '">'
     + '<label class="fl" for="prWa">WhatsApp (if different)</label><input class="field" id="prWa" type="tel" value="' + esc(p.whatsapp || "") + '">'
     + '<label class="fl" for="prEm">Email</label><input class="field" id="prEm" type="email" autocomplete="email" value="' + esc(p.email || "") + '">'
-    + '<p class="small" style="margin:8px 0 0">Your leaders and team see your phone so they can reach you. To change your name, ask a leader.</p>'
+    + '<p class="small" style="margin:8px 0 0">Admins see your phone and email so they can reach you. To change your name, ask an admin.</p>'
     + '<div class="btns"><button class="btn" data-a="profSave">Save</button></div></div>' };
 };
 function putProfile(body, msg, back){
@@ -2947,57 +2959,86 @@ SCREENS.who = function(o){ if (HANDOFF_DONE) return SCREENS.handoffDone(); if (H
 /* ---------- Pages have their own address (Nov 17, user: "using proper route paths", "back and forth navigation") ----------
    Each screen has a path like /vol/sched or /admin/sched/service:ID. The phone's back and forward, refresh and shared
    links keep your place, and each page keeps its scroll spot. ‹ goes back and › goes forward in the header. */
-var NOROUTE = { who: 1, pin: 1, vpin: 1, handoffDone: 1 };
+var NOROUTE = { who: 1, pin: 1, vpin: 1, handoffDone: 1, hubWait: 1 };
 var HIST = [], HSHEET = [], HSCROLL = [], HIDX = 0, POPPING = false, SKIPPOP = 0, ROUTE_INIT = false;
 try { var hs = JSON.parse(sessionStorage.getItem("roster.hist") || "null"); if (hs && hs.h) { HIST = hs.h; HSCROLL = hs.y || []; } } catch (e) {}
 HIDX = (history.state && typeof history.state.i === "number") ? history.state.i : 0;
 /* a page opened afresh (after sign-in, a typed address, a new tab) starts a new trail: the saved one belongs to pages
    the browser can no longer step to, and left a forward arrow that did nothing */
 if (!(history.state && typeof history.state.i === "number")) { HIST = []; HSCROLL = []; }
-var TAB_NAV = false;
+var TAB_NAV = false, UP_NAV = false;
 function saveHist(){ try { sessionStorage.setItem("roster.hist", JSON.stringify({ h: HIST.slice(0, 60), y: HSCROLL.slice(0, 60) })); } catch (e) {} }
 function routeOf(){ var v = S.view === "admin" ? "admin" : "vol", path = "/" + v + "/" + encodeURIComponent(S.tab[v] || "");
   (S.stack || []).forEach(function(e){ if (!e || NOROUTE[e.s]) return; path += "/" + encodeURIComponent(e.s) + (e.id != null && e.id !== "" ? ":" + encodeURIComponent(e.id) : ""); });
-  var q = [];
-  if (S.tab[v] === "sched" && !(S.stack || []).filter(function(e){ return e && !NOROUTE[e.s]; }).length) {
-    if (S.wkDay) q.push("day=" + S.wkDay);
+  var q = [], nstack = (S.stack || []).filter(function(e){ return e && !NOROUTE[e.s]; }).length;
+  if (S.tab[v] === "sched" && !nstack) {
+    /* the admin Schedule keeps its picked day apart from the volunteer one (Nov 18: a picked day with no service
+       was not in the address, so a refresh jumped back) */
+    var aday = v === "admin" && S.adminDay && S.adminDay.sid === S.adminSid ? S.adminDay.d : "";
+    if (v === "admin" ? aday : S.wkDay) q.push("day=" + (v === "admin" ? aday : S.wkDay));
     if (v === "admin" && S.adminSid) q.push("svc=" + encodeURIComponent(S.adminSid));
     if (v === "vol" && S.volSchedMode) q.push("show=" + encodeURIComponent(S.volSchedMode)); }
+  if (!nstack) { if (S.tab[v] === "msgs" && S.msgTab) q.push("mt=" + encodeURIComponent(S.msgTab));
+    if (v === "admin" && S.tab[v] === "reqs" && S.reqFilter && S.reqFilter !== "pending") q.push("rf=" + encodeURIComponent(S.reqFilter)); }
   if (S.sheet && S.sheet.s) q.push("sheet=" + encodeURIComponent(S.sheet.s) + (S.sheet.id != null && S.sheet.id !== "" ? ":" + encodeURIComponent(S.sheet.id) : ""));
   return path + (q.length ? "?" + q.join("&") : ""); }
-function curPath(){ return location.pathname + (/[?&](sheet|day|svc|show)=/.test(location.search) ? location.search : ""); }
-function qget(k){ var m = location.search.match(new RegExp("[?&]" + k + "=([^&]*)")); return m ? decodeURIComponent(m[1]) : ""; }
+function curPath(){ return location.pathname + (/[?&](sheet|day|svc|show|mt|rf)=/.test(location.search) ? location.search : ""); }
+function dec(s){ try { return decodeURIComponent(s); } catch (e) { return ""; } } /* a broken % in a typed address is not an error */
+function qget(k){ var m = location.search.match(new RegExp("[?&]" + k + "=([^&]*)")); return m ? dec(m[1]) : ""; }
 function applyRoute(withSheet){
   var m = location.pathname.match(/^\/(vol|admin)\/([^\/]+)((?:\/[^\/]+)*)\/?$/); if (!m) return false;
-  var v = m[1], tab = decodeURIComponent(m[2]); if (!SCREENS[v + ":" + tab]) return false;
+  var v = m[1], tab = dec(m[2]); if (!SCREENS[v + ":" + tab]) return false;
   S.view = v; S.tab[v] = tab; var st = [];
-  (m[3] || "").split("/").forEach(function(seg){ if (!seg) return; var k = seg.indexOf(":"), name = decodeURIComponent(k < 0 ? seg : seg.slice(0, k));
-    if (!SCREENS[name] || NOROUTE[name]) return; var e = { s: name }; if (k >= 0) e.id = decodeURIComponent(seg.slice(k + 1)); st.push(e); });
-  S.stack = st; S.sheet = (withSheet && HSHEET[HIDX] && withSheet === true) ? HSHEET[HIDX] : null;
-  if (tab === "sched") { var day = qget("day"), svc = qget("svc"), show = qget("show");
-    S.wkDay = /^\d{4}-\d{2}-\d{2}$/.test(day) ? day : null;
+  (m[3] || "").split("/").forEach(function(seg){ if (!seg) return; var k = seg.indexOf(":"), name = dec(k < 0 ? seg : seg.slice(0, k));
+    if (!SCREENS[name] || NOROUTE[name] || (name.indexOf(":") >= 0 && !(v === "vol" && name === "vol:pool"))) return; var e = { s: name }; if (k >= 0) e.id = dec(seg.slice(k + 1)); st.push(e); });
+  /* a sheet is never reopened from the address: its step leaves the trail when it closes (Nov 18) */
+  S.stack = st; S.sheet = null;
+  if (tab === "sched") { var day = qget("day"), svc = qget("svc"), show = qget("show"); day = /^\d{4}-\d{2}-\d{2}$/.test(day) ? day : "";
+    if (v === "vol") S.wkDay = day || null;
     if (v === "admin" && svc && S.services.some(function(x){ return x.id === svc; })) S.adminSid = svc;
+    if (v === "admin") { if (!day) S.adminDay = null; else if (svc && S.adminSid === svc) S.adminDay = { d: day, sid: svc }; else adminPickDay(day); }
     if (v === "vol" && (show === "mine" || show === "all")) S.volSchedMode = show; }
+  if (tab === "msgs") { var mt = qget("mt"); if (mt === "ann" || mt === "chats") S.msgTab = mt; }
+  if (v === "admin" && tab === "reqs") { var rf = qget("rf"); S.reqFilter = rf === "approved" || rf === "declined" ? rf : "pending"; }
   return true; }
+function isSheetR(r){ return /[?&]sheet=/.test(r || ""); }
+/* the same screen with only its tab or filter changed (Messages / Announcements, Pending / Approved) is one step */
+function noSeg(r){ return (r || "").replace(/([?&])(mt|rf)=[^&]*&?/g, "$1").replace(/[?&]$/, ""); }
+function putStep(r){ HIST[HIDX] = r; HSHEET[HIDX] = null; history.replaceState({ i: HIDX }, "", r); saveHist(); }
 function syncRoute(){
   if (!loaded || location.search.indexOf("handoff=") >= 0) return;
+  /* signed out, or waiting for an admin: the address is left alone, so the page you came for is still there
+     after a refresh and opens once you are in (Nov 18) */
+  if (!navOk()) return;
   /* the address has been read once the first screen is up. Without this, a refreshed page (whose saved trail already
      matched) kept re-reading the address on every tap, so tabs and rows did nothing. */
-  var r = routeOf(); if (r === curPath() && HIST[HIDX] === r) { ROUTE_INIT = true; return; }
-  var b = document.getElementById("body");
-  if (POPPING || !ROUTE_INIT) { HIST[HIDX] = r; history.replaceState({ i: HIDX }, "", r); ROUTE_INIT = true; saveHist(); return; }
+  var r = routeOf(), cur = HIST[HIDX]; if (r === curPath() && cur === r) { ROUTE_INIT = true; return; }
+  var b = document.getElementById("body"), first = !ROUTE_INIT, n = 0; ROUTE_INIT = true;
+  /* Nov 18: the trail rules. A sheet is one step while it is open and none once it is closed: closing it steps back,
+     swapping it for another sheet or going on to a screen takes its place. Before this, sheet after sheet left steps
+     behind, and Back reopened a finished sheet for ever. */
+  var sh = isSheetR(cur);
+  if (!UP_NAV && !POPPING) {
+    if ((sh || !TAB_NAV) && HIDX > 0 && HIST[HIDX - 1] === r) n = 1; else if (sh && HIDX > 1 && HIST[HIDX - 2] === r) n = 2; }
+  /* a page refreshed with a sheet open comes back without the sheet: its step goes too */
+  if (first && !(n && sh)) n = 0;
+  if (n) { if (!first) HSCROLL[HIDX] = b ? b.scrollTop : 0; HIDX -= n; if (sh) HIST.length = HIDX + 1; SKIPPOP++; history.go(-n); saveHist(); return; }
+  /* ‹ with nothing behind it (a page opened from a link) goes up a level in place: as a new step, the next ‹ came
+     straight back down again */
+  if (POPPING || first || UP_NAV) { putStep(r); return; }
+  if (sh || (!TAB_NAV && noSeg(cur) === noSeg(r))) { HIST.length = HIDX + 1; putStep(r); return; }
   HSCROLL[HIDX] = b ? b.scrollTop : 0;
-  /* a screen closing back onto the one before it steps back, so the trail doesn't grow. A tab tap is a new step
-     (so Back retraces the tabs you opened), and a closed sheet leaves nothing to go forward to. */
-  if (!TAB_NAV && HIDX > 0 && HIST[HIDX - 1] === r) { var wasSheet = /[?&]sheet=/.test(HIST[HIDX] || ""); HIDX--; if (wasSheet) HIST.length = HIDX + 1; SKIPPOP++; history.back(); saveHist(); return; }
-  HIDX++; HIST.length = HIDX; HSCROLL.length = HIDX; HIST[HIDX] = r; HSHEET[HIDX] = S.sheet ? JSON.parse(JSON.stringify(S.sheet)) : null;
+  HIDX++; HIST.length = HIDX; HSCROLL.length = HIDX; HIST[HIDX] = r; HSHEET[HIDX] = null;
   history.pushState({ i: HIDX }, "", r); saveHist(); }
 window.addEventListener("popstate", function(e){
   if (SKIPPOP) { SKIPPOP--; return; }
+  var to = (e.state && typeof e.state.i === "number") ? e.state.i : HIDX;
+  /* the browser's own Forward onto a sheet that was closed: there is nothing there to open */
+  if (to > HIDX && (HIST[to] == null || isSheetR(HIST[to]))) { SKIPPOP++; history.go(HIDX - to); return; }
   var b = document.getElementById("body"); if (b) HSCROLL[HIDX] = b.scrollTop;
   var from = HIDX;
-  HIDX = (e.state && typeof e.state.i === "number") ? e.state.i : HIDX;
-  if (from === HIDX + 1 && /[?&]sheet=/.test(HIST[from] || "")) HIST.length = HIDX + 1; /* backed out of a sheet: no forward arrow to it */
+  HIDX = to;
+  if (from > HIDX && isSheetR(HIST[from])) HIST.length = HIDX + 1; /* backed out of a sheet: no forward arrow to it */
   if (!applyRoute(true)) { S.stack = []; S.sheet = null; }
   POPPING = true; render(); POPPING = false;
   var y = HSCROLL[HIDX] || 0, b2 = document.getElementById("body"); if (b2) b2.scrollTop = y; saveHist(); });
@@ -3007,7 +3048,7 @@ function navOk(){ return !!HUBME && (isAdmin() || !!hubName()); }
 function canBack(){ return navOk() && HIDX > 0 && !!HIST[HIDX - 1]; }
 function canFwd(){ return navOk() && !!HIST[HIDX + 1]; }
 var baseBack17 = A.back;
-A.back = function(d, el){ if (canBack()) { history.back(); return; } if (S.stack.length) baseBack17(d, el); };
+A.back = function(d, el){ if (canBack()) { history.back(); return; } if (S.stack.length) { UP_NAV = true; try { baseBack17(d, el); } finally { UP_NAV = false; } } };
 A.fwd = function(){ if (canFwd()) history.forward(); };
 var baseRender18 = render;
 render = function(){
@@ -3085,7 +3126,27 @@ function fixView(){
      an old link) is put back on the screen before it */
   if (r !== "admin") for (var i = 0; i < (S.stack || []).length; i++) if (S.stack[i] && ADMIN_ONLY[S.stack[i].s]) { S.stack = S.stack.slice(0, i); S.sheet = null; break; }
 }
-var ADMIN_ONLY = { admins: 1, accessReqs: 1, linkMe: 1, hubLinks: 1 };
+var ADMIN_ONLY = { admins: 1, accessReqs: 1, linkMe: 1, hubLinks: 1, features: 1, svcTimes: 1, svcRoles: 1, teamRoles: 1 };
+/* Nov 18: a screen opens only for someone it is for, and only for something that is still there. A typed address or
+   an old link to anything else closes back to the screen under it. (Team leaders could open Features and Service
+   times, volunteers the leaders' screens: every change there was quietly put back by the server.) */
+var LEAD_ONLY = { reqDetail: 1, notes: 1, todosAdmin: 1, checklistsAdmin: 1, eventsAdmin: 1 };
+function screenOk(e){
+  if (!e || !SCREENS[e.s]) return false;
+  if (NOROUTE[e.s]) return true;
+  if (e.s === "hubLinks") return false; /* went with HCC Hub sign-in */
+  if (ADMIN_ONLY[e.s] && !isAdmin()) return false;
+  if (LEAD_ONLY[e.s] && S.view !== "admin") return false;
+  if (e.s === "person") return !!e.id && everyone().indexOf(e.id) >= 0;
+  if (e.s === "detail") return !!slot(e.id);
+  if (e.s === "teamRoles") return !!e.id && !!POOL[e.id];
+  if (e.s === "reqDetail") { var q = req(e.id); return !!q && visibleReq(q); }
+  if (e.s === "notifSettings") return on("notify");
+  if (e.s === "chat") { var c = chatOf(e.id), me = meName(); /* your own direct messages and your own teams' channels */
+    if (c && c.dm) return c.dm.indexOf(me) >= 0;
+    if (!c && String(e.id).indexOf("ch:") !== 0) return false;
+    if (String(e.id).indexOf("ch:") === 0) return chans().some(function(h){ return h.id === e.id; }); }
+  return true; }
 var baseApplyRoute20 = applyRoute;
 applyRoute = function(w){ var ok = baseApplyRoute20(w); fixView(); return ok; };
 var baseRender20 = render;
@@ -3109,7 +3170,10 @@ A.hubSignIn = function(){
   render(); };
 A.hubSignOut = function(){
   fetch("/auth/signout", { method: "POST", credentials: "same-origin" }).then(function(){}, function(){}).then(function(){
-    HUBME = null; ACC = null; ADMINS = null; ME = ""; LS.set("roster.me", null); bindMe(); S.view = "vol"; S.stack = []; S.sheet = null; render(); }); };
+    HUBME = null; ACC = null; ADMINS = null; ME = ""; LS.set("roster.me", null); bindMe(); S.view = "vol"; S.stack = []; S.sheet = null;
+    /* signed out: the trail and the address start over (the next person is not sent to the last one's page) */
+    HIST = []; HSHEET = []; HSCROLL = []; HIDX = 0; ROUTE_INIT = false; try { history.replaceState({ i: 0 }, "", "/"); } catch (e) {} saveHist(); LANDED = "";
+    render(); }); };
 SCREENS.hubWait = function(){
   return { head: plainHead("Signing in"), noTabs: true, body: '<div class="card"><div class="t" style="font:600 17px/22px var(--font)">Finish in your browser</div><p class="small" style="margin:6px 0 12px">Sign in with Google or your phone in the browser that just opened. Then come back here: Roster opens on its own.</p><button class="btn soft" data-a="hubSignIn">Open the browser again</button><button class="btn sec mt" data-a="hubWaitCancel">Cancel</button></div>' }; };
 function signInScreen(){
@@ -3299,7 +3363,7 @@ SCREENS["admin:dash"] = function(o){ var r = baseAdminDash24(o); if (!r || !r.bo
 function youCard(){ var n = hubName();
   if (!n) return isAdmin() ? '<div class="card tap" data-a="push" data-s="linkMe" role="button" style="display:flex;gap:12px;align-items:center;cursor:pointer;margin-bottom:12px">' + ava("", 52)
     + '<div class="m"><div class="t" style="font:600 17px/22px var(--font)">' + esc(HUBME.signedInAs || "Admin") + '</div><div class="small">Admin · Pick your Roster name to add your picture</div></div><span class="chev" style="margin-left:auto">›</span></div>' : '';
-  var teams = teamsOf(n);
+  var teams = allTeamsOf(n); leadsOf(n).forEach(function(t){ if (teams.indexOf(t) < 0) teams.push(t); });
   return '<div class="card tap" data-a="push" data-s="profile" role="button" aria-label="Edit your profile" style="display:flex;gap:12px;align-items:center;cursor:pointer;margin-bottom:12px">'
     + (PHOTOS[n] ? ava(n, 52) : '<span class="av" style="width:52px;height:52px;font-size:17px">' + esc(initials(n)) + '</span>')
     + '<div class="m"><div class="t" style="font:600 17px/22px var(--font)">' + esc(n) + '</div><div class="small">' + esc(roleLabel() + (teams.length ? " · " + teams.join(" · ") : "")) + '</div></div><span class="chev" style="margin-left:auto">›</span></div>'
@@ -3310,6 +3374,116 @@ SCREENS["admin:more"] = function(o){ var r = baseAdminMore24(o); if (!r || !r.bo
   /* the profile row used to sit under Admins: it is in the You group now */
   r.body = youCard() + r.body.split(row("Your profile", "Your name, phone, email and photo", "push", "profile")).join("");
   return r; };
+
+/* ---------- Team leaders are offered only what a team leader can do (Nov 18) ----------
+   The leader view showed admin controls (add a service, add a person, levels, phone and email) and counted or filled
+   other teams' spots. The server put every one of those back, some with a "saved" message first. Adding a service
+   half-saved and then stopped Schedule and Dashboard from opening for everyone. */
+var ALLTEAMS = null;
+function withAllTeams(fn){ if (!ALLTEAMS) return fn(); var r = ROLES, p = POOL; ROLES = ALLTEAMS.r; POOL = ALLTEAMS.p; try { return fn(); } finally { ROLES = r; POOL = p; } }
+function allTeamsOf(p){ return withAllTeams(function(){ return teamsOf(p); }); }
+/* a team leader's counts, lists and bulk actions cover their own teams' spots only */
+function onlyMine(fn){ var sc = scoped(); if (!sc) return fn(); var all = S.slots; S.slots = all.filter(function(x){ return sc.indexOf(x.team) >= 0; }); try { return fn(); } finally { S.slots = all; } }
+["admin:dash", "admin:sched"].forEach(function(k){ var base = SCREENS[k]; SCREENS[k] = function(o){ var r = onlyMine(function(){ return base(o); });
+  if (r && !isAdmin()) { /* adding a service is an admin's job */
+    if (r.head) r.head = r.head.replace(/<button class="ic" data-a="sheet" data-s="newOneOff"[^>]*>\+<\/button>/g, '');
+    if (r.body) r.body = r.body.replace(/<div class="btns"><button class="btn soft" data-a="sheet" data-s="newOneOff">Add a service<\/button><\/div>/g, ''); }
+  return r; }; });
+["statList", "publish", "copy", "templates", "fill"].forEach(function(k){ var base = SHEETS[k]; if (base) SHEETS[k] = function(o){ return onlyMine(function(){ return base(o); }); }; });
+["useTemplate", "publish"].forEach(function(k){ var base = A[k]; if (base) A[k] = function(d, el){ return onlyMine(function(){ return base(d, el); }); }; });
+function adminsOnly(what){ S.sheet = null; toast("Only an admin can " + what + "."); render.same = true; render(); }
+["newOneOff", "newSvc", "discardSvc", "addPerson", "addTeam"].forEach(function(k){ var base = SHEETS[k]; if (base) SHEETS[k] = function(o){
+  return isAdmin() ? base(o) : '<h4>Ask an admin</h4><p class="s">Only an admin can ' + (k === "addPerson" ? "add a person" : k === "addTeam" ? "add a team" : "add or remove a service") + '. You can fill your own team\'s spots once it is there.</p><div class="btns"><button class="btn sec" data-a="closeSheet">OK</button></div>'; }; });
+[["addOneOff", "add a service"], ["addSvc", "add a service"], ["discardSvc", "remove a service"], ["addPerson", "add a person"], ["addTeam", "add a team"], ["setLevel", "change a level"]].forEach(function(x){ var base = A[x[0]];
+  if (base) A[x[0]] = function(d, el){ if (!isAdmin()) return adminsOnly(x[1]); return base(d, el); }; });
+/* Copy last week copies last week (it ran Auto-fill), and both leave other teams' spots alone */
+var baseAutofill25 = A.autofill;
+A.autofill = function(d, el){ return onlyMine(function(){
+  if (!d || d.t !== "copy") return baseAutofill25(d, el);
+  var sv = svc(S.adminSid), n = 0; if (!sv) return;
+  var prevDate = new Date(dt(sv.date).getTime() - 7 * 864e5).toISOString().slice(0, 10), prev = S.services.filter(function(x){ return x.date === prevDate && x.svc === sv.svc; })[0];
+  var same = function(sid, x){ return S.slots.filter(function(y){ return y.sid === sid && y.team === x.team && y.role === x.role; }); };
+  if (prev) S.slots.forEach(function(x){ if (x.sid !== sv.id || (x.person && x.status !== "declined")) return;
+    /* the person who had this spot last week, else anyone who served the same role then and is free now */
+    var then = same(prev.id, x), i = same(sv.id, x).indexOf(x), p = then.slice(i, i + 1).concat(then).map(function(y){ return y && y.status !== "declined" ? y.person : ""; })
+      .filter(function(q){ return q && (POOL[x.team] || []).indexOf(q) >= 0 && !servingAt(sv.id, q) && !blockedOn(q, sv); })[0];
+    if (p) { x.person = p; x.status = "confirmed"; x.dirty = true; n++; } });
+  S.sheet = null;
+  toast(n ? "Copied " + n + " " + (n > 1 ? "people" : "person") + " from last week. Check, then publish." : prev ? "No one to copy: last week's people are already on, away, or their spots were empty." : "There was no " + ((SVC[sv.svc] && SVC[sv.svc].name) || sv.svc) + " service last week to copy.");
+  render.same = true; render(); }); };
+/* Edit teams as a team leader changes that leader's teams only (it used to take the person off every other team) */
+var baseSetTeams25 = setTeams;
+setTeams = function(p, ts){ var sc = scoped(); if (!sc) return baseSetTeams25(p, ts);
+  sc.forEach(function(t){ var a = POOL[t]; if (!a) return; var i = a.indexOf(p); if (ts.indexOf(t) >= 0) { if (i < 0) a.push(p); } else if (i >= 0) a.splice(i, 1); }); };
+/* a team leader's to-do with no team picked is for that leader's teams (it went to everyone and never showed in their list) */
+var baseSaveTodo25 = A.saveTodo;
+A.saveTodo = function(d, el){ var bs = document.querySelectorAll("#tdTeams button");
+  if (scoped() && bs.length && !document.querySelector("#tdTeams [aria-pressed=true]")) [].forEach.call(bs, function(b){ b.setAttribute("aria-pressed", "true"); });
+  return baseSaveTodo25(d, el); };
+/* a person's page: phone, email, invite and levels are an admin's (the server gives them to no one else).
+   Volunteers and team leaders no longer get WhatsApp and Call buttons that could never work. */
+var basePerson25 = SCREENS.person;
+SCREENS.person = function(o){ var r = basePerson25(o); if (!r || !r.body) return r; var p = o.id;
+  if (!isAdmin()) {
+    r.body = r.body.replace(/<div class="two">(?:<button class="btn wa"[\s\S]*?<\/button><button class="btn sec"[\s\S]*?<\/button>|<a class="btn wa"[\s\S]*?<\/a><a class="btn sec"[\s\S]*?<\/a>)<\/div>/, '')
+      .replace(/<div class="lbl sm">Contact<\/div>[\s\S]*?(?=<div class="btns"><button class="btn sec" data-a="sheet" data-s="editTeams")/, '')
+      .replace(/<div class="lbl sm">Level<\/div><div class="pick">[\s\S]*?<\/div><p class="small"[^>]*>A level is a label\.[\s\S]*?<\/p>/, function(){ var l = levelOf(p); return l !== "volunteer" ? '<p class="small" style="margin:10px 4px 0">' + (l === "leader" ? "Leader" : "Assistant leader") + '</p>' : ''; });
+  } else if (S.view === "admin") {
+    /* no number saved: one button that says so (WhatsApp and Call used to open the edit form with no reason given) */
+    r.body = r.body.replace(/<div class="two"><button class="btn wa" data-a="sheet" data-s="editContact"[\s\S]*?<\/button><button class="btn sec" data-a="sheet" data-s="editContact"[\s\S]*?<\/button><\/div>/,
+      '<div class="btns" style="margin-top:0"><button class="btn soft" data-a="sheet" data-s="editContact" data-id="' + esc(p) + '">Add a phone number to call or WhatsApp</button></div>'); }
+  return r; };
+var baseContacts25 = SCREENS.contacts;
+SCREENS.contacts = function(o){ var r = baseContacts25(o); if (!r) return r;
+  if (!isAdmin() && r.head) r.head = r.head.replace(/<button class="ic" data-a="sheet" data-s="addPerson"[^>]*>\+<\/button>/, '<span style="width:40px"></span>');
+  if (S.view !== "admin" && r.body) { /* volunteer's Team contacts: the search box works, and an empty list says why */
+    var none = r.body.indexOf('data-s="person"') < 0;
+    r.body = r.body.replace('<input class="field" placeholder="Search" style="margin-bottom:12px" aria-label="Search">', none ? '' : '<input class="field" id="volSearch" placeholder="Search" style="margin-bottom:12px" aria-label="Search" autocomplete="off">')
+      + (none ? '<div class="empty">You\'re not on a team yet, so there is no one to show here.</div>' : '<div class="empty" id="volNone" hidden>No one matches.</div>'); }
+  return r; };
+document.addEventListener("input", function(e){ if (!e.target || e.target.id !== "volSearch") return; var q = e.target.value.trim().toLowerCase(), n = 0;
+  [].forEach.call(document.querySelectorAll('#body [data-a="push"][data-s="person"]'), function(el){ var hit = !q || String(el.dataset.id || "").toLowerCase().indexOf(q) >= 0; el.hidden = !hit; if (hit) n++; });
+  var none = document.getElementById("volNone"); if (none) none.hidden = n > 0; });
+var baseVolMore25 = SCREENS["vol:more"];
+SCREENS["vol:more"] = function(o){ var r = baseVolMore25(o); if (r && r.body) r.body = r.body.replace("Call, WhatsApp or thank your team", "Who is on your teams"); return r; };
+/* your own screens show all your teams, not only the ones you lead */
+["profile", "avail", "emerg", "calsync"].forEach(function(k){ var base = SCREENS[k]; if (base) SCREENS[k] = function(o){ return withAllTeams(function(){ return base(o); }); }; });
+/* the bell's gear follows the Notification settings switch */
+var baseNotifs25 = SCREENS.notifs;
+SCREENS.notifs = function(o){ var r = baseNotifs25(o); if (r && r.head && !on("notify")) r.head = r.head.replace(/<button class="ic" data-a="push" data-s="notifSettings"[\s\S]*?<\/button>/, '<span style="width:40px"></span>'); return r; };
+/* asking for cover twice on one serve says so (it said "Asked" and saved nothing) */
+var baseCantDo25 = A.cantDo;
+A.cantDo = function(d, el){ var x = slot(d.id); if (x && x.person === ME && coverAsked(x)) { S.sheet = null; toast("You already asked for cover on this serve. Your leader will answer."); render.same = true; render(); return; } return baseCantDo25(d, el); };
+
+/* ---------- What you typed stays typed (Nov 18) ----------
+   Every redraw rebuilds the screen from saved data. A "that phone number looks too short" message, a search box on
+   the same screen, or new data arriving from the server used to throw away whatever was in the other boxes. Now a
+   redraw of the same screen puts back each box you had changed, unless the roster itself changed (a sent message
+   clears its box) or the redraw gave that box a new value on purpose. */
+var KEEP = { sig: "", snap: "" };
+function viewSig(){ return S.view + "|" + JSON.stringify(S.tab) + "|" + (S.stack || []).map(function(e){ return e.s + ":" + (e.id == null ? "" : e.id); }).join("/") + "|" + (S.sheet ? S.sheet.s + ":" + (S.sheet.id == null ? "" : S.sheet.id) : ""); }
+function fieldEls(){ return [].slice.call(app.querySelectorAll("input, textarea, select")).filter(function(el){ return el.type !== "file" && el.type !== "hidden"; }); }
+function fieldState(el){ var cb = el.type === "checkbox" || el.type === "radio", def;
+  if (el.tagName === "SELECT") { def = el.options.length ? el.options[0].value : ""; [].forEach.call(el.options, function(o){ if (o.defaultSelected) def = o.value; }); }
+  else def = cb ? el.defaultChecked : el.defaultValue;
+  return { key: el.id || el.name || "", tag: el.tagName + ":" + el.type, def: def, val: cb ? el.checked : el.value, cb: cb }; }
+var baseRender25 = render;
+render = function(){
+  var force = render.keep; render.keep = false;
+  var before = null, focus = null;
+  if (loaded && app.firstChild && viewSig() === KEEP.sig) { var els = fieldEls(), st = els.map(fieldState);
+    if (st.some(function(x){ return x.val !== x.def; }) && (force || snapshot() === KEEP.snap)) { before = st;
+      var act = document.activeElement, ai = els.indexOf(act);
+      if (ai >= 0) { focus = { i: ai }; try { focus.a = act.selectionStart; focus.b = act.selectionEnd; } catch (e) {} } } }
+  baseRender25();
+  if (before && viewSig() === KEEP.sig) { var now = fieldEls(), byKey = {}, same = now.length === before.length;
+    now.forEach(function(el){ var k = el.id || el.name; if (k && !byKey[k]) byKey[k] = el; });
+    before.forEach(function(x, i){ if (x.val === x.def) return; var el = x.key ? byKey[x.key] : same ? now[i] : null; if (!el) return;
+      var s = fieldState(el); if (s.tag !== x.tag || s.def !== x.def) return;
+      if (x.cb) el.checked = x.val; else el.value = x.val; });
+    if (focus && same && now[focus.i] && document.activeElement !== now[focus.i] && !app.contains(document.activeElement)) { var f = now[focus.i]; f.focus();
+      try { if (focus.a != null) f.setSelectionRange(focus.a, focus.b); } catch (e) {} } }
+  KEEP.sig = viewSig(); KEEP.snap = loaded ? snapshot() : ""; };
 
 Promise.all([load(), loadMe()]).then(function(){ hubApply(); loaded = true;
   if (JUST_SIGNED_IN) { var nx = takeNext(); history.replaceState(null, "", nx || location.pathname); if (!nx && isAdmin()) { S.view = "admin"; S.tab.admin = "dash"; S.stack = []; S.sheet = null; } }

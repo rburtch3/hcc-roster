@@ -253,3 +253,28 @@ test("an admin saving one person's contact leaves everyone else's as it is now",
   assert.equal((await r({ name: "Ana", contact: "x" })).status, 400);
   assert.equal((await r({ name: "Ana", contact: { phone: "1" } }, await sess("u-vol"))).status, 403);
 });
+
+test("a team leader publishes a service but cannot add or remove one; a teammate may offer for a serve whose holder asked for cover", async () => {
+  const s = mem();
+  await s.putItem("hubLinks", { "u-ana": "Ana", "u-cy": "Cy" });
+  const sl = (id, sid, team, person, status) => ({ id, sid, team, role: "R" + id, person, status });
+  await put(s, 0, { services: [{ id: "a", date: "2099-01-04", svc: "Sun AM", published: false }],
+    cfg: { leaders: { Media: "Cy" }, pool: { Media: ["Ana", "Cy"], Worship: ["Ben"] } }, feat: {},
+    requests: [{ id: "q1", kind: "cant", slot: "1", from: "Cy", state: "pending" }], slots: [sl("1", "a", "Media", "Cy", "confirmed"), sl("2", "a", "Worship", "Ben", "confirmed")] });
+  const ana = await sess("u-ana"), cy = await sess("u-cy");
+  const now = async () => (await (await handleState(req("GET"), s)).json()).data;
+  // Cy (leads Media) adds a service with a Media serve on it, and publishes the one that exists
+  let d = await now(); d.services[0].published = true; d.services.push({ id: "b", date: "2099-01-08", svc: "Revival" }); d.slots.push(sl("9", "b", "Media", "Cy", "confirmed"));
+  let r = await (await vput(s, 1, d, cy)).json(); assert.equal(r.held, 1);
+  let got = await now(); assert.deepEqual(got.services.map((x) => [x.id, x.published]), [["a", true]]); assert.deepEqual(got.slots.map((x) => x.id), ["1", "2"]);
+  // Cy removes the service: it stays
+  d = await now(); d.services = [];
+  await vput(s, 2, d, cy); assert.deepEqual((await now()).services.map((x) => x.id), ["a"]);
+  // Ana offers to take Cy's serve, which Cy asked cover for (kept); and Ben's, which nobody asked about (put back)
+  d = await now(); d.requests.push({ id: "q2", kind: "pickup", slot: "1", from: "Ana", state: "pending" }, { id: "q3", kind: "pickup", slot: "2", from: "Ana", state: "pending" });
+  r = await (await vput(s, 3, d, ana)).json(); assert.equal(r.held, 1);
+  assert.deepEqual((await now()).requests.map((q) => q.id), ["q1", "q2"]);
+  // an admin adds a service
+  d = await now(); d.services.push({ id: "b", date: "2099-01-08", svc: "Revival" });
+  await vput(s, 4, d, ADMIN); assert.deepEqual((await now()).services.map((x) => x.id), ["a", "b"]);
+});
