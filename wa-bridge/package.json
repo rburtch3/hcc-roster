@@ -1,0 +1,13 @@
+{
+  "name": "roster-wa-bridge",
+  "private": true,
+  "type": "module",
+  "description": "WhatsApp link test for Roster (Baileys). Runs on a computer, not in the Cloudflare Worker.",
+  "engines": { "node": ">=20" },
+  "scripts": { "spike": "node spike.js" },
+  "dependencies": {
+    "@whiskeysockets/baileys": "7.0.0-rc14",
+    "pino": "9.5.0",
+    "qrcode-terminal": "0.12.0"
+  }
+}
