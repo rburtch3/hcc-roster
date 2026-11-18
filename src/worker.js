@@ -379,7 +379,16 @@ export default {
     const h = routes[url.pathname];
     if (h) return h(request, store(), env);
     // App pages (/vol/..., /admin/...) are all the one page; it reads the path and opens that screen.
+    // the church site's /roster link, with or without a trailing slash, opens Roster
+    if (request.method === "GET" && /^\/roster\/?$/.test(url.pathname)) return new Response(null, { status: 302, headers: { location: "/", "cache-control": "no-store" } });
     if (request.method === "GET" && /^\/(vol|admin)(\/|$)/.test(url.pathname)) return env.ASSETS.fetch(new Request(new URL("/", url), request));
-    return env.ASSETS.fetch(request);
+    const res = await env.ASSETS.fetch(request);
+    // An address that is no part of Roster (an old or mistyped link) answered with a blank page: show one that leads back.
+    // (Done here, not with the assets' own not-found setting: that one answers /vol/... and /admin/... before this Worker runs.)
+    if (res.status === 404 && request.method === "GET" && (request.headers.get("accept") || "").includes("text/html")) {
+      const page = await env.ASSETS.fetch(new Request(new URL("/notfound", url), { headers: request.headers }));
+      if (page.ok) return new Response(page.body, { status: 404, headers: { "content-type": "text/html; charset=utf-8", "cache-control": "no-store" } });
+    }
+    return res;
   },
 };

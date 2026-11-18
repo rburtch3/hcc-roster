@@ -1279,7 +1279,7 @@ A.publish = function(){ var sv = svc(S.adminSid); sv.published = true; var ch = 
   S.slots.forEach(function(x){ if (x.sid === sv.id) x.dirty = false; }); S.sheet = null; toast("Published. " + n + " volunteer" + (n === 1 ? "" : "s") + " told."); render.same = true; render(); };
 A.postAnn = function(){ var to = document.querySelector("#anTo [aria-pressed=true]"); S.announcements.unshift({ id: "a" + Date.now(), who: ADMIN, to: to ? to.textContent : "Everyone", aud: to && to.dataset.sid, when: "Just now", title: document.getElementById("anTitle").value || "Announcement", text: document.getElementById("anText").value }); S.notifs.unshift({ t: "New announcement", s: document.getElementById("anTitle").value, when: "Now" }); S.sheet = null; S.msgTab = "ann"; toast(to && to.dataset.sid ? "Posted to the people serving then." : "Posted. Volunteers see it in Messages."); render(); };
 A.sendShout = function(d){ var b = document.querySelector("#shBadge [aria-pressed=true]"); S.shouts.unshift({ to: d.id, from: S.view === "admin" ? ADMIN : ME, badge: b ? b.textContent : "Thank you", text: (document.getElementById("shText").value || "").trim(), when: "Just now", team: teamsOf(d.id)[0] || "" }); S.sheet = null; toast("Shout-out sent to " + d.id + "."); render.same = true; render(); };
-A.saveEvent = function(){ var t = (document.getElementById("evTitle").value || "").trim(); if (!t) return; if (!/^\d{4}-\d{2}-\d{2}$/.test(document.getElementById("evDate").value || "")) { toast("Pick a day for the event."); return; } S.events.push({ id: "e" + Date.now(), date: document.getElementById("evDate").value, title: t, note: document.getElementById("evNote").value }); S.sheet = null; toast("Event added. It shows on that day for everyone."); render.same = true; render(); };
+A.saveEvent = function(){ var t = (document.getElementById("evTitle").value || "").trim(); if (!t) { toast("Give the event a title."); return; } if (!/^\d{4}-\d{2}-\d{2}$/.test(document.getElementById("evDate").value || "")) { toast("Pick a day for the event."); return; } S.events.push({ id: "e" + Date.now(), date: document.getElementById("evDate").value, title: t, note: document.getElementById("evNote").value }); S.sheet = null; toast("Event added. It shows on that day for everyone."); render.same = true; render(); };
 A.toggleBtn = function(d, el){ el.setAttribute("aria-pressed", String(el.getAttribute("aria-pressed") !== "true")); };
 A.saveTodo = function(){ var teams = [].map.call(document.querySelectorAll("#tdTeams [aria-pressed=true]"), function(b){ return b.textContent; }); S.todos.push({ id: "t" + Date.now(), title: document.getElementById("tdTitle").value || "To-do", text: document.getElementById("tdText").value, teams: teams }); S.sheet = null; toast("To-do added."); render.same = true; render(); };
 app.addEventListener("submit", function(e){ var f = e.target; if (f.dataset.a !== "addItem") return; e.stopImmediatePropagation(); e.preventDefault(); var v = f.querySelector("input").value.trim(); if (!v) return; S.checklists.filter(function(k){ return k.id === f.dataset.id; })[0].items.push(v); render.same = true; render(); }, true);
@@ -2354,7 +2354,7 @@ SCREENS.notifSettings = function(){ if (!on("notifchan") || S.view === "admin") 
 var baseSetting10 = A.setting;
 A.setting = function(d, el){ baseSetting10(d, el); if (/_ph$/.test(d.k)) S.settings[d.k.slice(0, -3)] = el.checked; };
 /* ---------- volunteer sign-in, team leader view, team thank-you chats (Nov 16) ---------- */
-FEATS.push(["volpin","Volunteer sign-in","Each volunteer signs in with their own PIN. Only they can change their availability and their emergency contact."]);
+FEATS.push(["volpin","Emergency contact","Each volunteer can save an emergency contact. Only they can change it; admins see it on their page."]);
 FEATS.push(["teamlead","Team leader view","Team leaders and assistants get a leader view for their own team only. Admins see everything."]);
 FEATS.push(["teamthanks","Team thank-you chats","Each team gets a Thanks chat in Messaging. Shout-outs post there too."]);
 var EMERG_ME, emBusy = false, EMERG_ALL = null, emAllBusy = false;
@@ -2743,7 +2743,9 @@ render();
 var HUBME = null, HUB_OFF = false, HUB_URL = "https://hub.hyderabadchristiancenter.com";
 function loadMe(){
   return fetch("/api/me", { cache: "no-store", credentials: "same-origin" }).then(function(r){ return r.ok ? r.json() : null; })
-    .then(function(j){ HUBME = j && j.signedIn ? j : null; }, function(){ HUBME = null; HUB_OFF = true; });
+    /* Nov 18: only a real answer changes who you are. A dropped connection or a server error used to read as signed
+       out and threw a signed-in person onto the Sign in screen. */
+    .then(function(j){ if (j) HUBME = j.signedIn ? j : null; }, function(){ if (!HUBME) HUB_OFF = true; });
 }
 function hubName(){ return HUBME && HUBME.name ? HUBME.name : ""; }
 /** After load: the Hub sign-in decides who this phone is. */
@@ -3164,12 +3166,15 @@ A.whoami = function(){ A.hubSignOut(); };
    picks the session up with a one-time code (the same hand-over as before) */
 A.hubSignIn = function(){
   if (!STANDALONE) { location.href = "/signin"; return; }
-  HANDOFF_N = hexNonce(); LS.set("roster.handoff", HANDOFF_N);
+  /* "Open the browser again" keeps the same one-time code, so a sign-in finished on the first browser page still lands here */
+  HANDOFF_N = HANDOFF_N || hexNonce(); LS.set("roster.handoff", HANDOFF_N);
   window.open("/signin?n=" + HANDOFF_N, "_blank");
   clearInterval(HANDOFF_T); HANDOFF_T = setInterval(pollHandoff, 2000); setTimeout(function(){ clearInterval(HANDOFF_T); }, 10 * 60000);
   render(); };
 A.hubSignOut = function(){
-  fetch("/auth/signout", { method: "POST", credentials: "same-origin" }).then(function(){}, function(){}).then(function(){
+  fetch("/auth/signout", { method: "POST", credentials: "same-origin" }).then(function(r){ return r.ok; }, function(){ return false; }).then(function(ok){
+    /* still signed in if the request never got through: say so (on a shared phone the next person got your Roster) */
+    if (!ok) { S.sheet = null; toast("Couldn't sign out. Check your connection and try again."); render.same = true; render(); return; }
     HUBME = null; ACC = null; ADMINS = null; ME = ""; LS.set("roster.me", null); bindMe(); S.view = "vol"; S.stack = []; S.sheet = null;
     /* signed out: the trail and the address start over (the next person is not sent to the last one's page) */
     HIST = []; HSHEET = []; HSCROLL = []; HIDX = 0; ROUTE_INIT = false; try { history.replaceState({ i: 0 }, "", "/"); } catch (e) {} saveHist(); LANDED = "";
@@ -3197,17 +3202,23 @@ A.askName = function(d){
   fetch("/api/me", { method: "POST", credentials: "same-origin", headers: { "content-type": "application/json" }, body: JSON.stringify({ name: name }) })
     .then(function(r){ return r.json().then(function(j){ return { s: r.status, j: j }; }, function(){ return { s: r.status, j: {} }; }); })
     .then(function(x){
+      if (x.s === 200 && !(x.j && x.j.name)) { toast("Your sign-in has ended. Sign in again."); whoNow(); return; }
       if (x.s === 200) { HUBME.name = x.j.name; S.stack = []; toast("You're " + x.j.name + " on Roster now."); render(); return; }
       if (x.s === 202) { HUBME.asked = x.j.asked; toast("Asked. An admin will check it."); render(); return; }
       if (x.s === 409) { loadMe().then(function(){ render(); }); return; }
       toast("Couldn't send that. Try again."); render.same = true; render(); },
       function(){ toast("Couldn't reach Roster. Try again."); render.same = true; render(); }); };
 A.askAgain = function(){ HUBME.asked = ""; ASK_Q = ""; render(); };
-A.askRefresh = function(){ loadMe().then(function(){ if (hubName()) toast("You're " + hubName() + " on Roster now."); render(); }); };
-setInterval(function(){ if (loaded && HUBME && !hubName() && HUBME.asked && document.visibilityState === "visible") loadMe().then(function(){ if (hubName()) { toast("You're " + hubName() + " on Roster now."); render(); } }); }, 30000);
+/* an admin's yes or no both show up here (a no used to leave "Waiting for an admin" up for good) */
+function askCheck(tell){ var was = HUBME && HUBME.asked; return loadMe().then(function(){
+  if (hubName()) { toast("You're " + hubName() + " on Roster now."); render(); }
+  else if (HUBME && was && !HUBME.asked) { toast("An admin didn't match you to " + was + ". Pick your name again."); render(); }
+  else if (tell) { if (HUBME && HUBME.asked) toast("Still waiting for an admin."); render(); } }); }
+A.askRefresh = function(){ askCheck(true); };
+setInterval(function(){ if (loaded && HUBME && !hubName() && HUBME.asked && document.visibilityState === "visible") askCheck(false); }, 30000);
 var baseWhoScreen20 = SCREENS.who;
 SCREENS.who = function(o){
-  if (HANDOFF_DONE) return SCREENS.handoffDone();
+  if (HANDOFF_DONE && HUBME) return SCREENS.handoffDone();
   if (HANDOFF_N && !HUBME) return SCREENS.hubWait();
   if (!HUBME) return signInScreen();
   if (!hubName() && !isAdmin()) return askScreen();
@@ -3241,10 +3252,10 @@ function meSection(){
 /* admins: sign-in requests, linked names, the admins list, their own Roster name */
 var ACC = null, accBusy = false, ADMINS = null, admBusy = false;
 function loadAcc(force){ if ((ACC && !force) || accBusy || !isAdmin()) return; accBusy = true;
-  fetch("/api/access", { cache: "no-store", credentials: "same-origin" }).then(function(r){ return r.ok ? r.json() : { requests: [], linked: [] }; })
+  fetch("/api/access", { cache: "no-store", credentials: "same-origin" }).then(function(r){ if (r.status === 401 || r.status === 403) whoNow(); return r.ok ? r.json() : { requests: [], linked: [] }; })
     .then(function(j){ ACC = { requests: j.requests || [], linked: j.linked || [] }; accBusy = false; render.same = true; render(); }, function(){ accBusy = false; }); }
 function loadAdmins(force){ if ((ADMINS && !force) || admBusy || !isAdmin()) return; admBusy = true;
-  fetch("/api/admins", { cache: "no-store", credentials: "same-origin" }).then(function(r){ return r.ok ? r.json() : { admins: [] }; })
+  fetch("/api/admins", { cache: "no-store", credentials: "same-origin" }).then(function(r){ if (r.status === 401 || r.status === 403) whoNow(); return r.ok ? r.json() : { admins: [] }; })
     .then(function(j){ ADMINS = j.admins || []; admBusy = false; render.same = true; render(); }, function(){ admBusy = false; }); }
 function postJ(url, body, method){ return fetch(url, { method: method || "POST", credentials: "same-origin", headers: { "content-type": "application/json" }, body: JSON.stringify(body) })
   .then(function(r){ return r.json().then(function(j){ return { s: r.status, j: j }; }, function(){ return { s: r.status, j: {} }; }); }); }
@@ -3260,7 +3271,7 @@ SCREENS.accessReqs = function(){ loadAcc();
     + '<p class="small" style="margin:6px 4px 0">People whose phone or email is saved in Roster sign in without asking.</p>') }; };
 function accReq(id){ return ACC && ACC.requests.filter(function(q){ return q.id === id; })[0]; }
 function addPerson(name){ if (everyone().indexOf(name) >= 0) return; var c = S.cfg = S.cfg || {}; c.people = (c.people || []).concat([name]); applyCfg(); saveSoon(); }
-function accDone(x, msg){ if (x.s === 200) { toast(msg); ACC = null; loadAcc(true); } else { toast("Couldn't save that. Try again."); } S.sheet = null; render(); }
+function accDone(x, msg){ if (x.s === 200) { toast(msg); ACC = null; loadAcc(true); whoNow(); /* the freed name may be your own */ } else { toast("Couldn't save that. Try again."); } S.sheet = null; render(); }
 A.accYes = function(d, el, name){ var q = accReq(d.id); if (!q) return; name = name || q.want;
   postJ("/api/access", { id: q.id, name: name }).then(function(x){ if (x.s === 200) addPerson(name); accDone(x, name + " can sign in now."); }, function(){ toast("Couldn't reach Roster. Try again."); render(); }); };
 A.accNo = function(d){ postJ("/api/access", { id: d.id, deny: true }).then(function(x){ accDone(x, "Said no."); }, function(){ toast("Couldn't reach Roster. Try again."); render(); }); };
@@ -3271,20 +3282,26 @@ SHEETS.accUnlink = function(o){ return '<h4>Free ' + esc(o.id) + '?</h4><p class
 A.accUnlink = function(d){ postJ("/api/access", { name: d.id, unlink: true }).then(function(x){ accDone(x, d.id + " is free."); }, function(){ toast("Couldn't reach Roster. Try again."); render(); }); };
 SCREENS.admins = function(){ loadAdmins(); var me = [(HUBME.signedInAs || "").toLowerCase()];
   return { head: header("Admins"), body: '<p class="small" style="margin:0 4px 10px">Admins see everything and choose who leads each team. Team leaders get their team\'s leader view and volunteers the volunteer view, on their own.</p>'
-    + '<div class="grp">' + (ADMINS === null ? '<div class="row"><div class="m"><div class="s">Loading…</div></div></div>' : ADMINS.map(function(a){ return '<div class="row tap" data-a="sheet" data-s="admRm" data-id="' + esc(a) + '"><div class="m"><div class="t">' + esc(/^\d{10}$/.test(a) ? "Phone ending " + a.slice(-4) : a) + '</div>' + (me.indexOf(a) >= 0 ? '<div class="s">You</div>' : '') + '</div><span class="chev">›</span></div>'; }).join("")) + '</div>'
+    + '<div class="grp">' + (ADMINS === null ? '<div class="row"><div class="m"><div class="s">Loading…</div></div></div>' : ADMINS.map(function(a){ var you = me.indexOf(a) >= 0; /* your own row is not a button: you can't take yourself off */
+      return '<div class="row' + (you ? '' : ' tap" data-a="sheet" data-s="admRm" data-id="' + esc(a)) + '"><div class="m"><div class="t">' + esc(/^\d{10}$/.test(a) ? "Phone ending " + a.slice(-4) : a) + '</div>' + (you ? '<div class="s">You</div>' : '') + '</div>' + (you ? '' : '<span class="chev">›</span>') + '</div>'; }).join("")) + '</div>'
     + '<label class="fl" for="admNew">Add an admin</label><input class="field" id="admNew" placeholder="Their Google email or phone number" autocomplete="off"><div class="btns"><button class="btn" data-a="admAdd">Add admin</button></div>' }; };
 function saveAdmins(list, msg){ postJ("/api/admins", { admins: list }, "PUT").then(function(x){
-  if (x.s === 200) { ADMINS = x.j.admins; toast(msg); } else toast(x.j && x.j.error === "keep yourself" ? "You can't take yourself off. Ask another admin." : "Couldn't save that. Try again.");
+  if (x.s === 200) { var grew = x.j.admins.length !== (ADMINS || []).length; ADMINS = x.j.admins; var box = document.getElementById("admNew"); if (box && grew) box.value = "";
+    toast(grew ? msg : "Nothing changed. Type a full email address or a 10-digit phone number."); } else toast(x.j && x.j.error === "keep yourself" ? "You can't take yourself off. Ask another admin." : "Couldn't save that. Try again.");
   S.sheet = null; render(); }, function(){ toast("Couldn't reach Roster. Try again."); render(); }); }
-A.admAdd = function(){ var v = ((document.getElementById("admNew") || {}).value || "").trim(); if (!v || !ADMINS) { toast("Type an email or phone number."); render.same = true; render(); return; }
+A.admAdd = function(){ var v = ((document.getElementById("admNew") || {}).value || "").trim(); if (!v || !ADMINS) { toast("Type an email or phone number."); return; }
+  if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(v) && v.replace(/\D/g, "").length < 10) { toast("Type a full email address or a 10-digit phone number."); return; }
   saveAdmins(ADMINS.concat([v]), v + " is an admin now."); };
 SHEETS.admRm = function(o){ return '<h4>Take ' + esc(o.id) + ' off admins?</h4><p class="s">They keep their own view as a team leader or volunteer.</p><div class="btns"><button class="btn danger" data-a="admRm" data-id="' + esc(o.id) + '">Take off</button><button class="btn sec" data-a="closeSheet">Cancel</button></div>'; };
 A.admRm = function(d){ saveAdmins((ADMINS || []).filter(function(a){ return a !== d.id; }), d.id + " isn't an admin now."); };
-SCREENS.linkMe = function(){
-  return { head: header("Your Roster name"), body: '<p class="small" style="margin:0 4px 10px">Pick your name if you serve too. Then Volunteer view shows your own serves.</p><div class="grp">' + everyone().map(function(p){ return '<div class="row tap" data-a="linkMe" data-id="' + esc(p) + '"><div class="m"><div class="t">' + esc(p) + '</div>' + (p === hubName() ? '<div class="s">You</div>' : '') + '</div><span class="chev">›</span></div>'; }).join("") + '</div>' }; };
+SHEETS.linkTake = function(o){ return '<h4>Take ' + esc(o.id) + '?</h4><p class="s">Someone is signed in to Roster as ' + esc(o.id) + '. If you take this name, their sign-in stops opening Roster until an admin gives them a name again.</p><div class="btns"><button class="btn danger" data-a="linkMe" data-id="' + esc(o.id) + '">Take this name</button><button class="btn sec" data-a="closeSheet">Cancel</button></div>'; };
+SCREENS.linkMe = function(){ loadAcc();
+  return { head: header("Your Roster name"), body: '<p class="small" style="margin:0 4px 10px">Pick your name if you serve too. Then Volunteer view shows your own serves.</p><div class="grp">' + everyone().map(function(p){ var held = p !== hubName() && ACC && ACC.linked.indexOf(p) >= 0; /* someone else is signed in as this name: ask before taking it */
+      return '<div class="row tap" ' + (held ? 'data-a="sheet" data-s="linkTake"' : 'data-a="linkMe"') + ' data-id="' + esc(p) + '"><div class="m"><div class="t">' + esc(p) + '</div>' + (p === hubName() ? '<div class="s">You</div>' : held ? '<div class="s">Someone is signed in as this name</div>' : '') + '</div><span class="chev">›</span></div>'; }).join("") + '</div>' }; };
 A.linkMe = function(d){ var go = function(){ return postJ("/api/me", { name: d.id }); };
   (hubName() ? postJ("/api/access", { name: hubName(), unlink: true }).then(go) : go()).then(function(x){
-    if (x.s === 200) { HUBME.name = x.j.name; ACC = null; S.stack = []; toast("You're " + x.j.name + " on Roster."); } else toast("Couldn't save that. Try again."); render(); },
+    if (x.s === 200 && x.j && x.j.name) { HUBME.name = x.j.name; ACC = null; S.stack = []; S.sheet = null; toast("You're " + x.j.name + " on Roster."); }
+    else if (x.s === 200) { toast("Your sign-in has ended. Sign in again."); whoNow(); } else toast("Couldn't save that. Try again."); render(); },
     function(){ toast("Couldn't reach Roster. Try again."); render(); }); };
 /* admins on a person: whether they've signed in, instead of their PIN */
 var basePerson20 = SCREENS.person;
@@ -3306,7 +3323,10 @@ function renamePerson(from, to, contact){
     .then(function(r){ return r.json().catch(function(){ return {}; }).then(function(j){ if (!r.ok || !j.ok) throw new Error(j.error || "Couldn't change the name. Try again."); return j; }); });
 }
 /* a new name reaches every saved copy, so this phone reloads to pick it up */
-function renamed(msg){ toast(msg); render.same = true; render(); setTimeout(function(){ location.reload(); }, 800); }
+function renamed(msg, from, to){ toast(msg); render.same = true; render();
+  /* the page for the old name is gone: reload onto the new name's page (it reloaded onto an empty page for the old one) */
+  var path = from && to ? curPath().split("person:" + encodeURIComponent(from)).join("person:" + encodeURIComponent(to)) : "";
+  setTimeout(function(){ if (path && path !== curPath()) { try { history.replaceState(history.state, "", path); } catch (e) {} } location.reload(); }, 800); }
 var baseEditContact21 = SHEETS.editContact;
 SHEETS.editContact = function(o){ var h = baseEditContact21(o); if (!isAdmin()) return h;
   return h.replace('<label class="fl" for="ecEmail">', '<label class="fl" for="ecName">Name</label><input class="field" id="ecName" autocomplete="off" maxlength="40" value="' + esc(o.id) + '"><label class="fl" for="ecEmail">'); };
@@ -3318,7 +3338,7 @@ A.saveContact = function(d){
   var em = (document.getElementById("ecEmail").value || "").trim(), ph = (document.getElementById("ecPhone").value || "").trim();
   if (em && !okEmail(em)) { toast("That email doesn't look right."); render.same = true; render(); return; }
   if (ph && digits(ph).length < 10) { toast("That phone number looks too short."); render.same = true; render(); return; }
-  renamePerson(d.id, to, { phone: ph, email: em }).then(function(){ S.sheet = null; renamed(d.id + " is now " + to + "."); },
+  renamePerson(d.id, to, { phone: ph, email: em }).then(function(){ S.sheet = null; renamed(d.id + " is now " + to + ".", d.id, to); },
     function(e){ toast(e.message); render.same = true; render(); });
 };
 var baseProfile21 = SCREENS.profile;
@@ -3343,7 +3363,7 @@ A.profSave = function(){ var n = document.getElementById("prNm"), to = n ? (n.va
     .replace(/<div class="lbl">[^<]*<\/div><div class="grp"><\/div>/g, '');
   return r; }; });
 var baseMeSection21 = meSection;
-meSection = function(){ var s = baseMeSection21();
+meSection = function(){ var s = baseMeSection21(); return s; /* Nov 18: the profile card at the top of More opens Your profile; this row doubled it */
   if (!isAdmin() || !hubName()) return s;
   return s.replace('<div class="lbl">Admins</div><div class="grp">', '<div class="lbl">Admins</div><div class="grp">' + row("Your profile", "Your name, phone, email and photo", "push", "profile")); };
 
@@ -3454,6 +3474,51 @@ SCREENS.notifs = function(o){ var r = baseNotifs25(o); if (r && r.head && !on("n
 /* asking for cover twice on one serve says so (it said "Asked" and saved nothing) */
 var baseCantDo25 = A.cantDo;
 A.cantDo = function(d, el){ var x = slot(d.id); if (x && x.person === ME && coverAsked(x)) { S.sheet = null; toast("You already asked for cover on this serve. Your leader will answer."); render.same = true; render(); return; } return baseCantDo25(d, el); };
+
+/* ---------- Dead buttons and links, and who you are (Nov 18) ---------- */
+/* who is signed in is asked again when it may have changed: a session that ended, a name an admin freed, or another
+   tab of this browser signing in as someone else (the old tab kept saving as the person before) */
+function whoKey(){ return HUBME ? [HUBME.signedInAs, HUBME.name, !!HUBME.admin].join("|") : ""; }
+var whoBusy = false, whoAt = 0;
+function whoNow(){ if (whoBusy) return; whoBusy = true; var was = whoKey();
+  loadMe().then(function(){ whoBusy = false; whoAt = Date.now(); if (whoKey() !== was) { if (was && whoKey() && HUBME.signedInAs !== was.split("|")[0]) { location.reload(); return; } S.sheet = null; render(); } }, function(){ whoBusy = false; }); }
+document.addEventListener("visibilitychange", function(){ if (document.visibilityState === "visible" && loaded && Date.now() - whoAt > 20000) whoNow(); });
+/* More > Availability and blockouts opened Requests, which lists no blockouts: it has its own list now */
+function comingBlocks(){ var sc = scoped(), out = [];
+  Object.keys(S.blockouts || {}).forEach(function(p){ if (sc && !allTeamsOf(p).some(function(t){ return sc.indexOf(t) >= 0; })) return;
+    (S.blockouts[p] || []).forEach(function(b){ if (!b.toIso || b.toIso >= TODAY) out.push({ p: p, b: b }); }); });
+  return out.sort(function(x, y){ return (x.b.fromIso || "") < (y.b.fromIso || "") ? -1 : 1; }); }
+SCREENS.blockouts = function(){ var l = comingBlocks();
+  return { head: header("Availability and blockouts"), body: '<p class="small" style="margin:0 4px 10px">Dates people have said they can\'t serve. Each person sets their own in More, Availability.</p>'
+    + (l.length ? '<div class="grp">' + l.map(function(x){ return '<div class="row tap" data-a="push" data-s="person" data-id="' + esc(x.p) + '">' + ava(x.p, 40) + '<div class="m"><div class="t">' + esc(x.p) + '</div><div class="s">Away ' + esc(x.b.from + (x.b.to && x.b.to !== x.b.from ? " to " + x.b.to : "") + (x.b.reason ? " · " + x.b.reason : "")) + '</div></div><span class="chev">›</span></div>'; }).join("") + '</div>'
+      : '<div class="empty">No blockouts coming up.</div>') }; };
+LEAD_ONLY.blockouts = 1;
+var baseAdminMore25 = SCREENS["admin:more"];
+SCREENS["admin:more"] = function(o){ var r = baseAdminMore25(o); if (r && r.body) r.body = r.body.replace(/<div class="row tap" data-a="tab" data-s="reqs" data-t="reqs" data-v="reqs">(<div class="m"><div class="t">Availability and blockouts<\/div>)/, '<div class="row tap" data-a="push" data-s="blockouts">$1'); return r; };
+/* fill a spot: "Message <name>" always said no phone number was saved. Admins get the person's WhatsApp, or a way to
+   add the number; team leaders (who don't see phone numbers) don't get the button. */
+var baseFill25 = SHEETS.fill;
+SHEETS.fill = function(o){ var h = baseFill25(o); if (!h) return h; var x = slot(o.id), p = x && x.person;
+  return h.replace(/<button class="btn soft" data-a="toast" data-t="No phone number saved for [^"]*">[^<]*<\/button>/, function(){ if (!p || !isAdmin()) return '';
+    loadContacts(); var w = digits(ct(p).phone);
+    return w ? '<a class="btn soft" href="https://wa.me/' + w + '" target="_blank" rel="noopener">Message ' + esc(p) + '</a>' : '<button class="btn soft" data-a="sheet" data-s="editContact" data-id="' + esc(p) + '">Add ' + esc(p) + '\'s number</button>'; }); };
+/* New announcement: "Also share on WhatsApp" did nothing. It opens WhatsApp with the announcement ready to send to
+   the chat or group you pick. */
+var baseAnnounce25 = SHEETS.announce;
+SHEETS.announce = function(o){ var h = baseAnnounce25(o); return h ? h.replace(/(Opens WhatsApp for you to send<\/div><\/div><input type="checkbox" class="tog")/, '$1 id="anWa"') : h; };
+var basePostAnn25 = A.postAnn;
+A.postAnn = function(d, el){ var wa = document.getElementById("anWa"), share = wa && wa.checked, ti = ((document.getElementById("anTitle") || {}).value || "").trim(), tx = ((document.getElementById("anText") || {}).value || "").trim(), n0 = S.announcements.length;
+  var r = basePostAnn25(d, el);
+  if (share && S.announcements.length > n0 && (ti || tx)) window.open("https://wa.me/?text=" + encodeURIComponent((ti ? "*" + ti + "*" + (tx ? "\n\n" : "") : "") + tx), "_blank", "noopener");
+  return r; };
+/* an admin's page for a person says whether they have signed in, with a way to free the name (this block was lost
+   when PINs went) */
+var basePerson26 = SCREENS.person;
+SCREENS.person = function(o){ var r = basePerson26(o); if (!r || !r.body || !isAdmin() || S.view !== "admin") return r;
+  loadAcc(); var inn = ACC && ACC.linked.indexOf(o.id) >= 0;
+  r.body += '<div class="lbl sm">Sign-in</div><div class="small" style="margin:0 4px">' + (ACC === null ? 'Loading…' : inn ? 'Signed in to Roster.' : 'Hasn\'t signed in yet. Saving their phone or email lets them sign in without asking.') + '</div>'
+    + (inn ? '<div class="btns"><button class="btn sec" data-a="sheet" data-s="accUnlink" data-id="' + esc(o.id) + '">Free this name</button></div>' : '');
+  return r; };
 
 /* ---------- What you typed stays typed (Nov 18) ----------
    Every redraw rebuilds the screen from saved data. A "that phone number looks too short" message, a search box on

@@ -54,6 +54,8 @@
   }
   async function go(method, path) {
     var res = await fetch(path, { method: method });
+    // signed out or not an admin: the answer is plain text, not 7shifts being down
+    if (res.status === 401 || res.status === 403) return { error: "Only an admin can use this page. Sign in to Roster as an admin, then come back." };
     return res.json();
   }
   $("preview").onclick = async function () {
