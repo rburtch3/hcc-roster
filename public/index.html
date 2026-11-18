@@ -542,7 +542,7 @@ function icsFor(list){
   function stamp(iso, hm, add){ var d = new Date(Date.UTC(+iso.slice(0,4), +iso.slice(5,7) - 1, +iso.slice(8,10), hm[0], hm[1]) - 330 * 60000 + (add || 0)); return d.toISOString().replace(/[-:]/g, "").slice(0,15) + "Z"; }
   var lines = ["BEGIN:VCALENDAR","VERSION:2.0","PRODID:-//HCC//Roster//EN","CALSCALE:GREGORIAN"];
   list.forEach(function(x){ var sv = svc(x.sid), c = SVC[sv.svc] || {}, hm = to24(c.call);
-    lines.push("BEGIN:VEVENT","UID:" + x.id.replace(/[^A-Za-z0-9]/g, "") + "@hcc-roster","DTSTAMP:" + stamp(TODAY, [0,0]),"DTSTART:" + stamp(sv.date, hm),"DTEND:" + stamp(sv.date, hm, 2 * 3600000),"SUMMARY:" + (x.role + " · " + (c.name || sv.svc)).replace(/[,;]/g, " "),"DESCRIPTION:" + (x.team + ". Call time " + (c.call || "") + "\\, service " + (c.time || "")).replace(/;/g, " "),"END:VEVENT"); });
+    lines.push("BEGIN:VEVENT","UID:" + x.id.replace(/[^A-Za-z0-9]/g, "") + "@hcc-roster","DTSTAMP:" + stamp(TODAY, [0,0]),"DTSTART:" + stamp(sv.date, hm),"DTEND:" + stamp(sv.date, to24(svcEnd(sv.svc) || fmtMins(minsOf(c.call) + 120))),"SUMMARY:" + (x.role + " · " + (c.name || sv.svc)).replace(/[,;]/g, " "),"DESCRIPTION:" + (x.team + ". Call time " + (c.call || "") + "\\, service " + (c.time || "")).replace(/;/g, " "),"END:VEVENT"); });
   lines.push("END:VCALENDAR");
   var a = document.createElement("a"); a.href = URL.createObjectURL(new Blob([lines.join("\r\n")], { type: "text/calendar" })); a.download = "hcc-roster.ics"; document.body.appendChild(a); a.click(); a.remove(); }
 var ICON = {
@@ -866,7 +866,7 @@ var A = {
   publish: function(){ var sv = svc(S.adminSid); sv.published = true; var n = S.slots.filter(function(x){ return x.dirty; }).length; S.slots.forEach(function(x){ x.dirty = false; }); S.sheet = null; toast("Published. " + (n ? n + " volunteer" + (n > 1 ? "s" : "") + " notified." : "Volunteers can see it now.")); render.same = true; render(); },
   postAnn: function(){ var to = document.querySelector("#anTo [aria-pressed=true]"); S.announcements.unshift({ id: "a" + Date.now(), who: ADMIN, to: to ? to.textContent : "Everyone", when: "Just now", title: document.getElementById("anTitle").value || "Announcement", text: document.getElementById("anText").value }); S.notifs.unshift({ t: "New announcement", s: document.getElementById("anTitle").value, when: "Now" }); S.sheet = null; S.msgTab = "ann"; toast("Posted. Switch to Volunteer to see it."); render(); },
   makeChat: function(d){ var c = { id: "c" + Date.now(), name: d.t, auto: true, msgs: [{ who: "HCC Roster", t: "Chat started for " + d.t + "." }] }; S.chats.unshift(c); S.sheet = null; S.msgTab = "chats"; push("chat", { id: c.id }); },
-  addBlock: function(){ var f = document.getElementById("bf").value.trim(), t = document.getElementById("bt").value.trim() || f, fi = parseDay(f), ti = parseDay(t); if (!fi || !ti) { toast("Pick a From date."); render.same = true; render(); return; } myBlocks().push({ from: dm(fi), to: dm(ti), fromIso: fi, toIso: ti < fi ? fi : ti, reason: document.getElementById("br").value.trim() }); S.sheet = null; toast("Blocked out. " + leaderOf(teamsOf(ME)[0]) + " can see it."); render.same = true; render(); },
+  addBlock: function(){ var f = document.getElementById("bf").value.trim(), t = document.getElementById("bt").value.trim() || f, fi = parseDay(f), ti = parseDay(t); if (!fi || !ti) { toast("Pick a From date."); render.same = true; render(); return; } if (ti < fi) { toast("The To date is before the From date."); return; } myBlocks().push({ from: dm(fi), to: dm(ti), fromIso: fi, toIso: ti < fi ? fi : ti, reason: document.getElementById("br").value.trim() }); S.sheet = null; toast("Blocked out. " + leaderOf(teamsOf(ME)[0]) + " can see it."); render.same = true; render(); },
   saveNote: function(){ var ns = noteSvc(); S.notes.unshift({ date: ns ? dShort(ns.date) : dShort(TODAY), svc: ns ? ns.svc : "", adults: +document.getElementById("na").value || 0, kids: +document.getElementById("nk").value || 0, visitors: +document.getElementById("nv").value || 0, text: document.getElementById("nt").value }); S.sheet = null; render(); },
   setting: function(d, el){ S.settings[d.k] = el.checked; },
   regular: function(d, el){ S.regular[d.k] = el.checked; }
@@ -1139,7 +1139,8 @@ SCREENS["admin:reqs"] = function(){
     return '<div class="card" style="margin-bottom:10px"><div style="display:flex;gap:10px;align-items:center"><span class="av">' + initials(r.from) + '</span><div class="m" style="flex:1;min-width:0"><div class="t" style="font:600 16px/21px var(--font)">' + esc(t[0]) + '</div><div class="small">' + esc(t[1]) + '</div></div><span class="chip c-acc">' + kind + '</span></div>'
       + (r.kind === "swap" ? swapSteps(r) : '')
       + (r.note ? '<p class="small" style="margin:8px 0 0;color:var(--ink)">"' + esc(r.note) + '"</p>' : '')
-      + (waiting ? '<div class="mt"><span class="chip c-mut">Waiting for ' + esc(r.to) + ' to accept</span></div>'
+      + (waiting && r.to === ME ? '<div class="btns two"><button class="btn sm" style="width:100%" data-a="acceptSwap" data-id="' + r.id + '">Accept</button><button class="btn sm sec" style="width:100%" data-a="declineSwap" data-id="' + r.id + '">Can\'t swap</button></div>'
+        : waiting ? '<div class="mt"><span class="chip c-mut">Waiting for ' + esc(r.to) + ' to accept</span></div>'
         : r.state === "pending" ? '<div class="btns two"><button class="btn sm" style="width:100%" data-a="approve" data-id="' + r.id + '">Approve</button><button class="btn sm sec" style="width:100%" data-a="decline" data-id="' + r.id + '">Decline</button></div>' : '<div class="mt"><span class="chip ' + (r.state === "approved" ? 'c-ok' : 'c-late') + '">' + (r.state === "approved" ? 'Approved' : 'Declined') + '</span></div>')
       + '</div>'; }).join("") : '<div class="empty">Nothing here.</div>';
   return { head: header("Requests"), body: body };
@@ -1190,7 +1191,8 @@ SCREENS.features = function(){
 var FLAGS = ["Came","Late","No-show","Sick","Called off"];
 SCREENS.notes = function(){
   var body = '';
-  var ls = lastSvc(), past = pastOf(ls), ak = function(p){ return ls.id + "|" + p; };
+  /* one row and one count per person: someone with two spots on the service was listed and counted twice */
+  var ls = lastSvc(), past = (function(l){ var by = {}, out = []; l.forEach(function(p){ if (by[p[0]]) { by[p[0]][1] += ", " + p[1]; return; } out.push(by[p[0]] = [p[0], p[1]]); }); return out; })(pastOf(ls)), ak = function(p){ return ls.id + "|" + p; };
   if (on("attendance") && ls) {
     var cnt = {}; FLAGS.forEach(function(f){ cnt[f] = 0; }); past.forEach(function(p){ if (S.attend[ak(p[0])]) cnt[S.attend[ak(p[0])]]++; });
     var marked = past.filter(function(p){ return S.attend[ak(p[0])]; }).length;
@@ -1250,7 +1252,7 @@ SHEETS.templates = function(){ var sv = svc(S.adminSid);
     + '<label class="fl" for="tplName">Save this service as a template</label><input class="field" id="tplName" placeholder="Like: Sunday AM, Band C"><div class="btns"><button class="btn sec" data-a="saveTemplate">Save template</button></div>'; };
 SHEETS.announce = function(){
   var groups = [["Everyone"]].concat(Object.keys(ROLES).map(function(t){ return [t]; })).concat([["Leaders"]]);
-  if (on("audience")) upc().filter(function(s){ return s.published; }).slice(0,4).forEach(function(s){ var n = S.slots.filter(function(x){ return x.sid === s.id && x.person && x.status !== "declined"; }).length; groups.push(["Serving " + dShort(s.date) + " " + (s.svc.split(" ")[1] || s.svc) + " (" + n + ")", s.id]); });
+  if (on("audience")) upc().filter(function(s){ return s.published; }).slice(0,4).forEach(function(s){ var who = {}; S.slots.forEach(function(x){ if (x.sid === s.id && x.person && x.status !== "declined") who[x.person] = 1; }); var n = Object.keys(who).length; groups.push(["Serving " + dShort(s.date) + " " + (s.svc.split(" ")[1] || s.svc) + " (" + n + ")", s.id]); });
   return '<h4>New announcement</h4><label class="fl" for="anTo">To</label><div class="pick" id="anTo">' + groups.map(function(g, i){ return '<button data-a="pickReason"' + (g[1] ? ' data-sid="' + g[1] + '"' : '') + ' aria-pressed="' + (i === 0) + '">' + esc(g[0]) + '</button>'; }).join("") + '</div>'
   + '<label class="fl" for="anTitle">Title</label><input class="field" id="anTitle" placeholder="Short headline">'
   + '<label class="fl" for="anText">Message</label><textarea class="field" id="anText" placeholder="What everyone should know"></textarea>'
@@ -2650,7 +2652,7 @@ function calLive(){ return /workers\.dev$/.test(location.hostname) || location.h
 function calFeed(){ return APP_URL + "api/cal?n=" + encodeURIComponent(ME || ""); }
 function calStamp(iso, hm, add){ var d = new Date(Date.UTC(+iso.slice(0,4), +iso.slice(5,7) - 1, +iso.slice(8,10), hm[0], hm[1]) - 330 * 60000 + (add || 0)); return d.toISOString().replace(/[-:]/g, "").slice(0,15) + "Z"; }
 function gcalFor(x){ var sv = svc(x.sid), c = SVC[sv.svc] || {}, hm = to24(c.call);
-  return "https://calendar.google.com/calendar/render?action=TEMPLATE&text=" + encodeURIComponent(x.role + " · " + (c.name || sv.svc)) + "&dates=" + calStamp(sv.date, hm) + "/" + calStamp(sv.date, hm, 2 * 3600000) + "&details=" + encodeURIComponent(x.team + ". Call time " + (c.call || "") + ", service " + (c.time || "")) + "&location=" + encodeURIComponent("HCC"); }
+  return "https://calendar.google.com/calendar/render?action=TEMPLATE&text=" + encodeURIComponent(x.role + " · " + (c.name || sv.svc)) + "&dates=" + calStamp(sv.date, hm) + "/" + calStamp(sv.date, to24(svcEnd(sv.svc) || fmtMins(minsOf(c.call) + 120))) + "&details=" + encodeURIComponent(x.team + ". Call time " + (c.call || "") + ", service " + (c.time || "")) + "&location=" + encodeURIComponent("HCC"); }
 SCREENS.calsync = function(){
   var st = S.settings || {}, body = '<div class="grp"><label class="row tap"><div class="m"><div class="t">Calendar sync</div><div class="s">Your serves in your phone calendar</div></div><input type="checkbox" class="tog" data-a="setting" data-k="cal"' + (st.cal ? ' checked' : '') + '></label></div>';
   if (!st.cal) return { head: header("Calendar sync"), body: body + '<p class="small" style="margin:8px 4px 0">Turn it on to put your serves in Google Calendar or your iPhone calendar.</p>' };
@@ -3577,6 +3579,117 @@ render = function(){ var all = S.requests, live = loaded && all && all.some(func
   if (!live) return baseRender26();
   if (isAdmin()) { S.requests = live; return baseRender26(); }
   S.requests = live; try { return baseRender26(); } finally { if (S.requests === live) S.requests = all; } };
+
+/* ---------- Third pass over every screen (Nov 18) ----------
+   Notifications are for the person they are about. They were one list for the whole church: everyone saw "You're
+   on!" and "Swap accepted" meant for someone else, and every bell counted them. A decline told no one, though the
+   message said it had. Each one now names who it is for, and carries the time it happened. */
+var PERSONAL_OLD = { "Swap approved": 1, "You're on!": 1, "Give-away approved": 1, "Your leader saw it": 1, "Blockout approved": 1, "Swap accepted": 1 };
+function whenOf(at, was){ if (!at) return was || ""; var d = Date.now() - at; if (d < 90000) return "Just now"; if (d < 3600000) return Math.round(d / 60000) + " min ago";
+  var x = new Date(at + 330 * 60000), iso = x.toISOString().slice(0, 10); return iso === TODAY ? "Today " + fmtMins(x.getUTCHours() * 60 + x.getUTCMinutes()) : dShort(iso); }
+function notifFor(n, me){ if (!n) return false; if (n.to) return !!me && n.to.indexOf(me) >= 0;
+  if (n.ann) return visibleAnns().some(function(a){ return a.id === n.ann; });
+  if (n.sid) return !!me && servingAt(n.sid, me);
+  return !PERSONAL_OLD[n.t]; /* older ones name no one: the personal kinds are shown to nobody */ }
+function myNotifs(){ return (S.notifs || []).filter(function(n){ return notifFor(n, ME); }); }
+function tell(to, t, s){ to = [].concat(to).filter(function(p, i, a){ return p && a.indexOf(p) === i; }); if (!to.length) return;
+  S.notifs.unshift({ t: t, s: s || "", when: "Now", at: Date.now(), to: to }); if (S.notifs.length > 300) S.notifs.length = 300; }
+function stampTop(n0, more){ if (S.notifs.length <= n0) return; var n = S.notifs[0]; n.at = Date.now(); for (var k in more) n[k] = more[k]; }
+seenKey = function(){ return "roster.seen2." + (S.view === "admin" ? "a:" : "v:") + (ME || ""); };
+unread = function(){ var l = myNotifs().length, v = LS.get(seenKey()); if (v == null) { LS.set(seenKey(), String(l)); return 0; } return Math.max(0, l - (+v || 0)); };
+var baseNotifs26 = SCREENS.notifs;
+SCREENS.notifs = function(o){ var all = S.notifs; S.notifs = myNotifs().map(function(n){ return n.at ? { t: n.t, s: n.s, when: whenOf(n.at, n.when) } : n; });
+  try { return baseNotifs26(o); } finally { S.notifs = all; } };
+var baseShoutCard26 = shoutCard;
+shoutCard = function(h){ if (!h || !h.at) return baseShoutCard26(h); var c = {}; for (var k in h) c[k] = h[k]; c.when = whenOf(h.at, h.when); return baseShoutCard26(c); };
+var DECLINED = { swap: "Swap declined", pickup: "Not this time", cant: "Cover request declined", giveaway: "Give-away declined", blockout: "Blockout declined" };
+var baseApprove26 = A.approve;
+A.approve = function(d, el){ var r = req(d.id), n0 = S.notifs.length, was = r && r.state, out = baseApprove26(d, el);
+  if (r) stampTop(n0, { to: [r.from].concat(r.kind === "swap" && r.to ? [r.to] : []) });
+  /* a raised hand from someone already serving then: say what approving just did */
+  if (r && was === "pending" && r.state === "approved" && r.kind === "pickup") { var x = slot(r.slot), twice = x && S.slots.filter(function(y){ return y.sid === x.sid && y.person === r.from && y.status !== "declined"; }).length > 1;
+    if (twice) toast("Approved. " + r.from + " now has two spots at that service."); }
+  return out; };
+var baseDecline26 = A.decline;
+A.decline = function(d, el){ var r = req(d.id), was = r && r.state, sub = r ? reqTitle(r)[1] : "", out = baseDecline26(d, el);
+  if (r && was === "pending" && r.state === "declined") tell(r.from, DECLINED[r.kind] || "Request declined", sub);
+  return out; };
+var baseAcceptSwap26 = A.acceptSwap;
+A.acceptSwap = function(d, el){ var r = req(d.id); if (!r || r.to !== ME || r.state !== "pending") return; var n0 = S.notifs.length, out = baseAcceptSwap26(d, el);
+  stampTop(n0, { to: [r.from] }); if (S.view === "admin") toast("Accepted. It can be approved now."); return out; };
+var baseDeclineSwap26 = A.declineSwap;
+A.declineSwap = function(d, el){ var r = req(d.id); if (!r || r.to !== ME || r.state !== "pending") return; var out = baseDeclineSwap26(d, el);
+  tell(r.from, "Swap declined", ME + " can't swap. Ask someone else, or your leader.");
+  var top = S.stack[S.stack.length - 1]; if (top && top.s === "reqDetail") { S.stack.pop(); render(); } /* the request is answered: back to the list */
+  return out; };
+var basePostAnn26 = A.postAnn;
+A.postAnn = function(d, el){ var a0 = S.announcements.length, n0 = S.notifs.length, out = basePostAnn26(d, el);
+  if (S.announcements.length > a0 && S.announcements[0]) stampTop(n0, { ann: S.announcements[0].id }); return out; };
+var baseRemindApp26 = A.remindApp;
+A.remindApp = function(d, el){ var sv = dashSvc(), n0 = S.notifs.length, out = baseRemindApp26(d, el); if (sv) stampTop(n0, { sid: sv.id }); return out; };
+/* a shout-out's sheet says the person gets a notification: now they do */
+var baseSendShout26 = A.sendShout;
+A.sendShout = function(d, el){ var s0 = S.shouts.length, out = baseSendShout26(d, el);
+  if (S.shouts.length > s0 && S.shouts[0]) { var h = S.shouts[0]; h.at = Date.now(); tell(h.to, "You got a shout-out", h.from + (h.badge ? " · " + h.badge : "") + (h.text ? ": " + h.text : "")); }
+  return out; };
+/* Publish says "N volunteers told": the people put on, or everyone on a service published for the first time, are told */
+var basePublish26 = A.publish;
+A.publish = function(d, el){ var sv = svc(S.adminSid), sc = scoped(), first = sv && !sv.published;
+  var who = sv ? S.slots.filter(function(x){ return x.sid === sv.id && x.person && x.status !== "declined" && (first || x.dirty) && (!sc || sc.indexOf(x.team) >= 0); }) : [];
+  var out = basePublish26(d, el);
+  who.forEach(function(x){ tell(x.person, "You're on the roster", x.role + " · " + dShort(sv.date) + " " + ((SVC[sv.svc] && SVC[sv.svc].name) || sv.svc)); });
+  return out; };
+
+/* Open spots does not offer a spot at a service you already serve (approving it gave people two spots at once), and
+   the leader's page for such a raised hand says so. "Hand raised" follows the request: once a leader has answered,
+   it clears (a declined hand stayed raised for good). */
+var baseOpenFor26 = openFor;
+openFor = function(p){ return baseOpenFor26(p).filter(function(x){ return !servingAt(x.sid, p) || (p === ME && S.pendingMine && S.pendingMine[x.id]); }); };
+function syncHands(){ if (!loaded || !ME || !S.pendingMine) return; var live = {};
+  S.requests.forEach(function(r){ if (r.kind === "pickup" && r.from === ME && r.state === "pending") live[r.slot] = 1; });
+  Object.keys(S.pendingMine).forEach(function(k){ if (!live[k]) delete S.pendingMine[k]; }); }
+var baseRender27 = render;
+render = function(){ syncHands(); return baseRender27(); };
+/* a swap asked of you shows in your Requests whichever team the serve is on, until you answer it (a team leader
+   asked to swap on another team's serve never saw the request, so it could not be accepted) */
+var baseVisReq26 = visibleReq;
+visibleReq = function(r){ return baseVisReq26(r) || (!!ME && !!r && r.kind === "swap" && r.to === ME && r.state === "pending" && r.stage < 2 && on("swaps")); };
+/* a swap that was declined or approved says so (My requests and the request's page showed only the steps) */
+var STEPMARK = false, baseSwapSteps26 = swapSteps;
+swapSteps = function(r){ return baseSwapSteps26(r) + (STEPMARK && r.state !== "pending" ? '<div class="mt"><span class="chip ' + (r.state === "approved" ? 'c-ok' : 'c-late') + '">' + (r.state === "approved" ? 'Approved' : 'Declined') + '</span></div>' : ''); };
+["myReqs", "reqDetail"].forEach(function(k){ var base = SCREENS[k]; SCREENS[k] = function(o){ STEPMARK = true; try { var r = base(o); } finally { STEPMARK = false; }
+  if (k === "reqDetail" && r && r.body) { var q = req(o.id), x = q && q.slot && slot(q.slot);
+    if (q && q.kind === "pickup" && q.state === "pending" && x && servingAt(x.sid, q.from)) { var other = S.slots.filter(function(y){ return y.sid === x.sid && y.person === q.from && y.status !== "declined"; })[0];
+      r.body = r.body.replace('<div class="btns"><button class="btn" data-a="approve"', '<div class="lbl">Checks</div><div class="grp"><div class="row"><span class="chip c-warn">Note</span><div class="m"><div class="s">' + esc(q.from) + ' already serves at this service' + (other ? ' (' + esc(other.role) + ')' : '') + '. Approving gives them two spots.</div></div></div></div><div class="btns"><button class="btn" data-a="approve"'); } }
+  return r; }; });
+/* a serve that has passed has nothing to ask cover for */
+function passed(x){ var sv = x && svc(x.sid); return !!sv && sv.date < TODAY; }
+var baseDetail26 = SCREENS.detail;
+SCREENS.detail = function(o){ var r = baseDetail26(o); if (r && r.foot && passed(slot(o.id))) { r.foot = ""; r.noTabs = false; } return r; };
+["cover", "cant", "change", "swap"].forEach(function(k){ var base = SHEETS[k]; if (base) SHEETS[k] = function(o){ return passed(slot(o.id)) ? '<h4>This serve has passed</h4><p class="s">There is nothing to ask cover for.</p><div class="btns"><button class="btn sec" data-a="closeSheet">OK</button></div>' : base(o); }; });
+["cantDo", "swapWith"].forEach(function(k){ var base = A[k]; if (base) A[k] = function(d, el){ if (passed(slot(d.id))) { S.sheet = null; toast("That serve has passed."); render.same = true; render(); return; } return base(d, el); }; });
+/* Availability: a blockout can be taken off, and ones that have passed drop off the list */
+var baseAvail26 = SCREENS.avail;
+SCREENS.avail = function(o){ if (ME && S.blockouts[ME]) { var keep = S.blockouts[ME].filter(function(b){ return !b.toIso || b.toIso >= TODAY; }); if (keep.length !== S.blockouts[ME].length) S.blockouts[ME] = keep; }
+  var r = baseAvail26(o), i = 0; if (r && r.body) r.body = r.body.replace(/<span class="chip c-ok">Leader told<\/span>/g, function(){ return '<button class="btn sm sec" data-a="rmBlock" data-i="' + (i++) + '" aria-label="Remove this blockout">Remove</button>'; });
+  return r; };
+A.rmBlock = function(d){ var l = myBlocks(), i = +d.i; if (!(i >= 0) || !l[i]) return; l.splice(i, 1); toast("Blockout removed."); render.same = true; render(); };
+/* your own things in the leader and admin views: the requests you made and your to-dos had no row */
+var baseYouCard26 = youCard;
+youCard = function(){ var h = baseYouCard26(); if (!hubName()) return h;
+  return h.replace(row("Emergency contact", "Only you can change it", "push", "emerg"), row("My requests", "Cover and swaps you asked for", "push", "myReqs") + (on("onboarding") ? row("To-dos", "Things to read and confirm", "push", "todosVol") : '') + row("Emergency contact", "Only you can change it", "push", "emerg")); };
+/* a change is sent before the page goes away (a refresh inside the half second after a tap lost it) */
+function flushSave(){ if (loaded && snapshot() !== lastSaved) { clearTimeout(saveTimer); saveNow(); } }
+document.addEventListener("visibilitychange", function(){ if (document.visibilityState === "hidden") flushSave(); });
+window.addEventListener("pagehide", flushSave);
+/* service notes with nothing in them are not saved, and a saved one says so */
+var baseSaveNote26 = A.saveNote;
+A.saveNote = function(d, el){ var any = ["na", "nk", "nv", "nt"].some(function(id){ return ((document.getElementById(id) || {}).value || "").trim(); });
+  if (!any) { toast("Type a count or a note first."); return; } var out = baseSaveNote26(d, el); toast("Notes saved."); return out; };
+/* a phone number in your profile is a whole number or nothing (it took "12") */
+var baseProfSave26 = A.profSave;
+A.profSave = function(d, el){ var bad = ["prPh", "prWa"].some(function(id){ var v = ((document.getElementById(id) || {}).value || "").replace(/\D/g, ""); return v.length > 0 && v.length < 10; });
+  if (bad) { toast("That phone number looks too short."); return; } return baseProfSave26(d, el); };
 
 /* ---------- What you typed stays typed (Nov 18) ----------
    Every redraw rebuilds the screen from saved data. A "that phone number looks too short" message, a search box on

@@ -140,8 +140,11 @@ test("calendar feed lists only that person's published serves", async () => {
   const s = mem();
   const st = { services: [{ id: "a", date: "2099-01-04", svc: "Sun AM", published: true }, { id: "b", date: "2099-01-07", svc: "Wed PM", published: false }],
     slots: [{ id: "x1", sid: "a", person: "Ann", role: "Singer", team: "Worship" }, { id: "x2", sid: "b", person: "Ann", role: "Singer", team: "Worship" }, { id: "x3", sid: "a", person: "Bo", role: "Drums", team: "Worship" }],
-    cfg: { services: { "Sun AM": { name: "Sunday Morning", call: "9:30 AM", time: "10:00 AM" } } } };
+    cfg: { services: { "Sun AM": { name: "Sunday Morning", call: "9:30 AM", time: "10:00 AM" } } }, settingsBy: { Ann: { cal: true }, Bo: { cal: false } } };
   await s.put(0, JSON.stringify(st));
+  // Bo has calendar sync off: an empty calendar
+  const off = await (await mod.handleCal(new Request("https://x/api/cal?n=Bo"), s)).text();
+  assert.equal((off.match(/BEGIN:VEVENT/g) || []).length, 0); assert.match(off, /END:VCALENDAR/);
   const r = await mod.handleCal(new Request("https://x/api/cal?n=Ann"), s);
   assert.equal(r.status, 200);
   assert.match(r.headers.get("content-type"), /text\/calendar/);
@@ -149,6 +152,7 @@ test("calendar feed lists only that person's published serves", async () => {
   assert.equal((t.match(/BEGIN:VEVENT/g) || []).length, 1);
   assert.match(t, /SUMMARY:Singer · Sunday Morning/);
   assert.match(t, /DTSTART:20990104T040000Z/);
+  assert.match(t, /DTEND:20990104T063000Z/); // two hours after the 10:00 AM start, as the app shows
 });
 
 test("app page paths (/vol/..., /admin/...) serve the one page", async () => {

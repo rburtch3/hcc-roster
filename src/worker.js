@@ -338,11 +338,15 @@ export async function handleCal(request, store) {
   const clean = (t) => String(t || "").replace(/[\\;,]/g, " ").replace(/[\r\n]+/g, " ");
   const now = stamp(new Date().toISOString().slice(0, 10), [0, 0]);
   const lines = ["BEGIN:VCALENDAR", "VERSION:2.0", "PRODID:-//HCC//Roster//EN", "CALSCALE:GREGORIAN", "METHOD:PUBLISH", "X-WR-CALNAME:HCC Roster" + (name ? " " + clean(name) : ""), "REFRESH-INTERVAL;VALUE=DURATION:PT6H", "X-PUBLISHED-TTL:PT6H"];
-  if (name) (st.slots || []).forEach((x) => {
+  // The feed is that person's own switch (More > Calendar sync): off, it is empty, so a phone that still asks gets nothing.
+  const synced = !!(name && st.settingsBy && st.settingsBy[name] && st.settingsBy[name].cal);
+  // ends when the app says the serve ends: the service's own end time, else two hours after it starts
+  const endOf = (c) => { if (c.end) return hm(c.end); const s = hm(c.time || c.call); return [s[0] + 2, s[1]]; };
+  if (synced) (st.slots || []).forEach((x) => {
     const sv = svcs[x.sid];
     if (x.person !== name || x.status === "declined" || !sv || sv.published === false || !sv.date || sv.date < since) return;
     const c = cfg[sv.svc] || {}, t = hm(c.call);
-    lines.push("BEGIN:VEVENT", "UID:" + String(x.id).replace(/[^A-Za-z0-9]/g, "") + "@hcc-roster", "DTSTAMP:" + now, "DTSTART:" + stamp(sv.date, t), "DTEND:" + stamp(sv.date, t, 2 * 3600000),
+    lines.push("BEGIN:VEVENT", "UID:" + String(x.id).replace(/[^A-Za-z0-9]/g, "") + "@hcc-roster", "DTSTAMP:" + now, "DTSTART:" + stamp(sv.date, t), "DTEND:" + stamp(sv.date, endOf(c)),
       "SUMMARY:" + clean((x.role || "Serving") + " · " + (c.name || sv.svc)), "DESCRIPTION:" + clean((x.team || "") + ". Call time " + (c.call || "") + " service " + (c.time || "")), "END:VEVENT");
   });
   lines.push("END:VCALENDAR");
