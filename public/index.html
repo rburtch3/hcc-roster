@@ -2494,6 +2494,8 @@ LOCAL.wkDay = 1;
   + '.wkcal b{position:absolute;top:10px;left:0;right:0;text-align:center;font:700 9px/10px var(--font);color:var(--ink)}'
   + '.wkstrip{display:flex;align-items:stretch;gap:2px;margin:2px -4px 12px}'
   + '.wkstrip .nav{flex:0 0 22px;border:0;background:none;color:var(--muted);font:400 22px/1 var(--font);cursor:pointer;padding:0}'
+  + '.wkscroll{flex:1 1 0;min-width:0;display:flex;overflow-x:auto;overflow-y:hidden;scroll-snap-type:x mandatory;scrollbar-width:none;-webkit-overflow-scrolling:touch;overscroll-behavior-x:contain}'
+  + '.wkscroll::-webkit-scrollbar{display:none}.wkscroll .wkd{flex:0 0 calc(100% / 7 - 2px);margin:0 1px;scroll-snap-align:start}'
   + '.wkd{flex:1 1 0;min-width:0;border:0;background:none;border-radius:10px;padding:6px 0 4px;cursor:pointer;color:var(--muted);display:flex;flex-direction:column;align-items:center;gap:2px}'
   + '.wkd small{font:500 13px/16px var(--font)}.wkd span{font:400 22px/26px var(--font);color:var(--ink)}'
   + '.wkd i{width:5px;height:5px;border-radius:50%;background:transparent;margin-top:2px}.wkd i.on{background:var(--accent)}'
@@ -2506,10 +2508,31 @@ function myDates(){ var o = {}; S.slots.forEach(function(x){ if (x.person === ME
 function wkHead(){ var sel = dt(wkSel()), td = dt(TODAY).getUTCDate();
   return '<div class="hd"><button class="ic wkcal" data-a="wkToday" aria-label="Go to today"><svg viewBox="0 0 24 24"><rect x="3.5" y="5" width="17" height="15.5" rx="2.5"/><path d="M3.5 9.5h17M8 3v4M16 3v4"/></svg><b>' + td + '</b></button>'
     + '<h3><button class="wkm" data-a="sheet" data-s="wkMonth" aria-label="Pick a month">' + MONTHS[sel.getUTCMonth()] + (sel.getUTCFullYear() !== dt(TODAY).getUTCFullYear() ? ' ' + sel.getUTCFullYear() : '') + '<svg viewBox="0 0 24 24"><path d="M6 9l6 6 6-6"/></svg></button></h3><span style="width:40px"></span></div>'; }
-function wkStrip(){ var sel = wkSel(), start = isoAddDays(sel, -dt(sel).getUTCDay()), dots = myDates(), out = '';
-  for (var i = 0; i < 7; i++) { var iso = isoAddDays(start, i);
+/* Nov 19 (user: "Make date bar scrollable"): the strip holds about a year of days and slides sideways under a finger,
+   seven days across. It used to hold one week, changed only by the two arrows. */
+var WK_BACK = 8, WK_AHEAD = 44; /* weeks before and after this week */
+function wkRange(sel){ var t0 = isoAddDays(TODAY, -dt(TODAY).getUTCDay()), s0 = isoAddDays(sel, -dt(sel).getUTCDay());
+  var from = isoAddDays(t0, -7 * WK_BACK), to = isoAddDays(t0, 7 * WK_AHEAD); /* a picked day outside that still gets its own weeks */
+  if (s0 < from) from = isoAddDays(s0, -14); if (isoAddDays(s0, 21) > to) to = isoAddDays(s0, 21);
+  return { from: from, days: Math.round((dt(to) - dt(from)) / 864e5) }; }
+function wkStrip(){ var sel = wkSel(), start = isoAddDays(sel, -dt(sel).getUTCDay()), dots = myDates(), out = '', rg = wkRange(sel);
+  for (var i = 0; i < rg.days; i++) { var iso = isoAddDays(rg.from, i);
     out += '<button class="wkd' + (iso === TODAY ? ' today' : '') + '" data-a="wkDay" data-v="' + iso + '"' + (iso === sel ? ' aria-current="date"' : '') + ' aria-label="' + esc(dLong(iso)) + (dots[iso] ? ', you serve' : '') + '"><small>' + DOW[dt(iso).getUTCDay()] + '</small><span>' + dt(iso).getUTCDate() + '</span><i' + (dots[iso] ? ' class="on"' : '') + '></i></button>'; }
-  return '<div class="wkstrip"><button class="nav" data-a="wkDay" data-v="' + isoAddDays(start, -7) + '" aria-label="Last week">‹</button>' + out + '<button class="nav" data-a="wkDay" data-v="' + isoAddDays(start, 7) + '" aria-label="Next week">›</button></div>'; }
+  return '<div class="wkstrip"><button class="nav" data-a="wkDay" data-v="' + isoAddDays(start, -7) + '" aria-label="Last week">‹</button><div class="wkscroll" id="wkScroll" data-from="' + rg.from + '" data-sel="' + sel + '">' + out + '</div><button class="nav" data-a="wkDay" data-v="' + isoAddDays(start, 7) + '" aria-label="Next week">›</button></div>'; }
+/* a redraw rebuilds the strip, so it is put back where it was: on the week you were looking at if the picked day is in
+   view there, else on the picked day's week */
+function wkDayAt(el, x){ var w = el.clientWidth / 7; return w ? isoAddDays(el.dataset.from, Math.round(x / w)) : el.dataset.sel; }
+function wkPlace(el, keep){ var w = el.clientWidth / 7; if (!w) return; var sel = el.dataset.sel, n = function(iso){ return Math.round((dt(iso) - dt(el.dataset.from)) / 864e5); };
+  var first = keep && keep.from === el.dataset.from ? keep.first : null, off = first == null ? -1 : n(sel) - first;
+  el.scrollLeft = (off >= 0 && off < 7 ? first : n(isoAddDays(sel, -dt(sel).getUTCDay()))) * w; wkMonthLabel(el); }
+/* the month in the header follows the days in view */
+function wkMonthLabel(el){ var b = document.querySelector("#app .wkm"); if (!b || !b.firstChild || b.firstChild.nodeType !== 3) return;
+  var d = dt(wkDayAt(el, el.scrollLeft + el.clientWidth * 3 / 7)), txt = MONTHS[d.getUTCMonth()] + (d.getUTCFullYear() !== dt(TODAY).getUTCFullYear() ? ' ' + d.getUTCFullYear() : '');
+  if (b.firstChild.nodeValue !== txt) b.firstChild.nodeValue = txt; }
+document.addEventListener("scroll", function(e){ var el = e.target; if (el && el.id === "wkScroll") wkMonthLabel(el); }, true);
+var baseRenderWk = render;
+render = function(){ var old = document.getElementById("wkScroll"), keep = old && old.clientWidth ? { from: old.dataset.from, first: Math.round(old.scrollLeft / (old.clientWidth / 7)) } : null;
+  baseRenderWk(); var el = document.getElementById("wkScroll"); if (el) wkPlace(el, keep); };
 function wkSlotRow(x){ return '<div class="row">' + (x.person ? ava(x.person, 36) : '<span class="ava open" style="width:36px;height:36px">?</span>') + '<div class="m"><div class="t">' + esc(x.person || "Open") + (x.person === ME ? ' (you)' : '') + '</div><div class="s">' + esc(x.role) + ' | ' + esc(x.team) + '</div></div></div>'; }
 var baseVolSched12 = SCREENS["vol:sched"];
 SCREENS["vol:sched"] = function(){ if (!on("weekhead")) return baseVolSched12();
