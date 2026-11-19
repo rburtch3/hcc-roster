@@ -3088,11 +3088,13 @@ function spacer(el){ return el && el.tagName === "SPAN" && !el.children.length &
 var NAV_BACK = '<button class="ic" data-a="back" aria-label="Back">‹</button>', NAV_FWD = '<button class="ic" data-a="fwd" aria-label="Forward">›</button>';
 function patchNav(){ var hd = document.querySelector("#app .hd") || document.querySelector(".hd");
   if (!hd) { /* the Dashboard has no header bar: the arrows sit at the start of its top row */
-    var bt = document.querySelector("#app .btop"); if (!bt || bt.querySelector(".bnav") || (!canBack() && !canFwd())) return;
-    bt.insertAdjacentHTML("afterbegin", '<span class="bnav">' + (canBack() ? NAV_BACK : '') + (canFwd() ? NAV_FWD : '') + '</span>'); return; }
+    /* Nov 19 (user: "The app shows the forward button when I go back to another screen, and that should not be
+       there"): only ‹ is shown. The phone's own forward still works. */
+    var bt = document.querySelector("#app .btop"); if (!bt || bt.querySelector(".bnav") || !canBack()) return;
+    bt.insertAdjacentHTML("afterbegin", '<span class="bnav">' + NAV_BACK + '</span>'); return; }
   /* an empty corner becomes the arrow; a corner that already holds a button gets the arrow beside it */
   if (canBack() && !hd.querySelector('[data-a="back"],[data-a="reqsBack"]')) { if (spacer(hd.firstElementChild)) hd.firstElementChild.outerHTML = NAV_BACK; else hd.insertAdjacentHTML("afterbegin", NAV_BACK); }
-  if (canFwd() && !hd.querySelector('[data-a="fwd"]')) { if (spacer(hd.lastElementChild)) hd.lastElementChild.outerHTML = NAV_FWD; else hd.lastElementChild.insertAdjacentHTML("beforebegin", NAV_FWD); } }
+}
 var navCss = document.createElement("style");
 navCss.textContent = '.hd h3{min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.btop .bnav{display:flex;align-items:center;margin-left:-10px}'
   + '.btop .bnav .ic{width:36px;height:40px;display:grid;place-items:center;border:0;background:none;color:#2B2B2F;font:400 26px/1 var(--font);cursor:pointer;border-radius:12px}.btop .bnav + .org{margin-right:auto;margin-left:4px}';
