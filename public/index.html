@@ -3747,41 +3747,70 @@ swapSteps = function(r){ return baseSwapSteps27(r) + (r && r.state === "declined
 var basePending28 = pendingReqs;
 pendingReqs = function(){ return basePending28().filter(function(r){ return !(r.kind === "swap" && r.stage < 2 && r.to !== ME); }); };
 
-/* ---------- Fill a spot: pick, then confirm with ✓ (Nov 25) ----------
-   User: "Add a check mark in top right to confirm selection before slide menu disappears". Tapping a name in the
-   fill sheet only picks it; the ✓ at the top right puts them on the spot and closes the sheet. Closing the sheet any
-   other way changes nothing. */
-var FILL_PICK = null;
+/* ---------- Fill a spot: changes wait for ✓ (Nov 25) ----------
+   User: "Add a check mark in top right to confirm selection before slide menu disappears", then "dont close the
+   slider when i hit flag or save or anything else until I hit the checkmark - make the check mark clickable if I added
+   a flag or a note or any other data". In the fill sheet, picking a name, Flag, Remove flag, Save note, Leave open and
+   Post to Open spots only change the sheet. The ✓ at the top right turns blue once something changed; tapping it
+   saves it all and closes the sheet. Closing the sheet any other way saves nothing. */
+var FILL_PICK = null; /* the sheet's unsaved changes: { id, p, clear, post, flag (text, or null to remove), note } */
 (function(){ var st = document.createElement("style"); st.textContent =
   '.fillhd{position:sticky;top:-8px;z-index:3;display:flex;align-items:center;gap:12px;margin:-8px -16px 4px;padding:8px 16px 4px;background:inherit}'
   + '.fillhd h4{flex:1;min-width:0}.fillok{flex:none;width:44px;height:44px;border-radius:50%;border:0;background:var(--line);color:var(--muted);font:600 22px/1 var(--font);cursor:pointer;display:grid;place-items:center}'
-  + '.fillok.on{background:var(--accent);color:#fff}.sheet .row.picked{background:var(--band);box-shadow:inset 0 0 0 1.5px var(--accent);border-radius:12px}';
+  + '.fillok.on{background:var(--accent);color:#fff}.sheet .row.picked{background:var(--band);box-shadow:inset 0 0 0 1.5px var(--accent);border-radius:12px}'
+  + '.fillunsaved{margin:0 0 8px;font:500 13px/18px var(--font);color:var(--accent)}';
   document.head.appendChild(st); })();
+function fillDraft(id){ if (!FILL_PICK || FILL_PICK.id !== id) FILL_PICK = { id: id }; return FILL_PICK; }
+function fillChanged(dr, x){ if (!dr || !x) return false; var fl = objOf("flags")[dr.id] || "";
+  return (dr.p != null && dr.p !== x.person) || (dr.clear && !!x.person) || !!dr.post
+    || (dr.flag !== undefined && (dr.flag || "") !== fl) || (dr.note !== undefined && dr.note !== (x.note || "")); }
+/* the sheet is drawn as it will be once saved */
 var baseFill28 = SHEETS.fill;
-SHEETS.fill = function(o){ var h = baseFill28(o); if (!h) return h; var x = slot(o.id);
-  if (!FILL_PICK || FILL_PICK.id !== o.id) FILL_PICK = { id: o.id, p: null };
-  var i = h.indexOf("<h4"), j = h.indexOf("</h4>"); if (i < 0 || j < 0) return h;
-  var on = FILL_PICK.p && (!x || FILL_PICK.p !== x.person);
-  h = h.slice(0, i) + '<div class="fillhd">' + h.slice(i, j + 5) + '<button class="fillok' + (on ? ' on' : '') + '" data-a="fillOk" data-id="' + esc(o.id) + '" aria-label="Confirm">✓</button></div>' + h.slice(j + 5);
-  if (FILL_PICK.p) h = h.split('data-a="assign" data-id="' + o.id + '" data-p="' + esc(FILL_PICK.p) + '"').join('data-a="assign" data-id="' + o.id + '" data-p="' + esc(FILL_PICK.p) + '" aria-selected="true"').replace(/<div class="row tap"( data-a="assign"[^>]*aria-selected="true")/g, '<div class="row tap picked"$1');
+SHEETS.fill = function(o){ var x = slot(o.id); if (!x) return baseFill28(o); var dr = fillDraft(o.id), fl = objOf("flags"), keep = { person: x.person, status: x.status, note: x.note, has: o.id in fl, flag: fl[o.id] }, h;
+  try {
+    if (dr.clear || dr.post) { x.person = null; x.status = "open"; } else if (dr.p != null) { x.person = dr.p; x.status = "confirmed"; }
+    if (dr.note !== undefined) x.note = dr.note;
+    if (dr.flag !== undefined) { if (dr.flag) fl[o.id] = dr.flag; else delete fl[o.id]; }
+    h = baseFill28(o);
+  } finally { x.person = keep.person; x.status = keep.status; x.note = keep.note; if (keep.has) fl[o.id] = keep.flag; else delete fl[o.id]; }
+  if (!h) return h; var i = h.indexOf("<h4"), j = h.indexOf("</h4>"); if (i < 0 || j < 0) return h;
+  var on = fillChanged(dr, x);
+  h = h.slice(0, i) + '<div class="fillhd">' + h.slice(i, j + 5) + '<button class="fillok' + (on ? ' on' : '') + '" data-a="fillOk" data-id="' + esc(o.id) + '" aria-label="Save">✓</button></div>'
+    + '<p class="fillunsaved"' + (on ? '' : ' hidden') + '>Not saved yet. Tap ✓ to save.</p>' + h.slice(j + 5);
+  if (dr.p != null && !dr.clear && !dr.post) h = h.split('data-a="assign" data-id="' + o.id + '" data-p="' + esc(dr.p) + '"').join('data-a="assign" data-id="' + o.id + '" data-p="' + esc(dr.p) + '" aria-selected="true"').replace(/<div class="row tap"( data-a="assign"[^>]*aria-selected="true")/g, '<div class="row tap picked"$1');
   return h; };
+function inFill(el){ return !!(el && el.closest && el.closest(".sheet") && S.sheet && S.sheet.s === "fill"); }
+function fillShow(){ var x = FILL_PICK && slot(FILL_PICK.id), on = fillChanged(FILL_PICK, x), ok = app.querySelector(".sheet .fillok"), u = app.querySelector(".sheet .fillunsaved");
+  if (ok) ok.classList.toggle("on", on); if (u) u.hidden = !on; }
+/* each of these now changes the sheet only */
 var baseAssign28 = A.assign;
-A.assign = function(d, el){
-  if (!(el && el.closest && el.closest(".sheet") && S.sheet && S.sheet.s === "fill")) return baseAssign28(d, el);
-  /* a tap in the sheet picks; the sheet stays open (the search box keeps what was typed) */
-  FILL_PICK = { id: d.id, p: d.p }; var x = slot(d.id);
+A.assign = function(d, el){ if (!inFill(el)) return baseAssign28(d, el);
+  /* picking keeps the list and the search box as they are */
+  var dr = fillDraft(d.id); dr.p = d.p; dr.clear = dr.post = false;
   app.querySelectorAll(".sheet .row.picked").forEach(function(r){ r.classList.remove("picked"); r.removeAttribute("aria-selected"); });
-  el.classList.add("picked"); el.setAttribute("aria-selected", "true");
-  var ok = app.querySelector(".sheet .fillok"); if (ok) ok.classList.toggle("on", !x || d.p !== x.person); };
+  el.classList.add("picked"); el.setAttribute("aria-selected", "true"); fillShow(); };
+var FILL_ACTS = {
+  flagSpot: function(d){ var v = ((document.getElementById("flagWhy") || {}).value || "").trim(); if (!v) { toast("Write a short reason for the flag."); return; } fillDraft(d.id).flag = v.slice(0, 60); },
+  unflag: function(d){ fillDraft(d.id).flag = null; },
+  saveSpotNote: function(d){ fillDraft(d.id).note = ((document.getElementById("spotNote") || {}).value || "").trim(); },
+  clearSlot: function(d){ var dr = fillDraft(d.id); dr.clear = true; dr.post = false; dr.p = null; },
+  postOpen: function(d){ var dr = fillDraft(d.id); dr.post = true; dr.clear = false; dr.p = null; } };
+Object.keys(FILL_ACTS).forEach(function(k){ var base = A[k]; A[k] = function(d, el){ if (!inFill(el)) return base(d, el); var before = JSON.stringify(FILL_PICK);
+  FILL_ACTS[k](d, el); if (JSON.stringify(FILL_PICK) === before) return; render.same = true; render(); }; });
 /* a pick is forgotten once the sheet closes, whichever way */
 var baseRender28 = render;
 render = function(){ if (!S.sheet || S.sheet.s !== "fill") FILL_PICK = null; return baseRender28(); };
-A.fillOk = function(d){ var x = slot(d.id), p = FILL_PICK && FILL_PICK.id === d.id ? FILL_PICK.p : null; FILL_PICK = null;
-  if (!x) { S.sheet = null; render(); return; }
-  if (!p) { toast("Tap a name first, then ✓."); FILL_PICK = { id: d.id, p: null }; return; }
-  if (p === x.person) { S.sheet = null; render.same = true; render(); return; }
-  baseAssign28({ id: d.id, p: p }); };
-
+A.fillOk = function(d){ var x = slot(d.id), dr = FILL_PICK && FILL_PICK.id === d.id ? FILL_PICK : null;
+  if (!x) { FILL_PICK = null; S.sheet = null; render(); return; }
+  if (!fillChanged(dr, x)) { toast("Nothing to save yet. Tap outside the sheet to close it."); return; }
+  var said = [], fl = objOf("flags");
+  if (dr.clear && x.person) { x.person = null; x.status = "open"; x.dirty = true; said.push("Spot left open."); }
+  else if (dr.post && (x.person || x.status !== "open")) { x.person = null; x.status = "open"; said.push("Posted. Volunteers on " + x.team + " can say I can serve."); }
+  else if (dr.post) said.push("Posted. Volunteers on " + x.team + " can say I can serve.");
+  else if (dr.p != null && dr.p !== x.person) { x.person = dr.p; x.status = "confirmed"; x.dirty = true; said.push(dr.p + " added. Publish to tell them."); }
+  if (dr.flag !== undefined && (dr.flag || "") !== (fl[d.id] || "")) { if (dr.flag) { fl[d.id] = dr.flag; said.push("Spot flagged."); } else { delete fl[d.id]; said.push("Flag removed."); } }
+  if (dr.note !== undefined && dr.note !== (x.note || "")) { x.note = dr.note; said.push(dr.note ? "Note saved." : "Note removed."); }
+  FILL_PICK = null; S.sheet = null; toast(said.join(" ")); render.same = true; render(); };
 /* ---------- An invite to post in the church's WhatsApp groups (Nov 25) ----------
    User: "I want to send an invite to the roster app that I can send to people on the team. They should be able to sign
    up w/ email or whatsapp/phone number - I plan to send this invite to our whatsapp groups so they can sign up".
@@ -3881,7 +3910,7 @@ render = function(){
       var s = fieldState(el); if (s.tag !== x.tag || s.def !== x.def) return;
       if (x.cb) el.checked = x.val; else el.value = x.val;
       /* a search box that filters the list on screen filters it again */
-      if (el.id === "volSearch" || el.id === "teamSearch") el.dispatchEvent(new Event("input", { bubbles: true })); });
+      if (el.id === "volSearch" || el.id === "teamSearch" || el.id === "fillSearch") el.dispatchEvent(new Event("input", { bubbles: true })); });
     if (focus && same && now[focus.i] && document.activeElement !== now[focus.i] && !app.contains(document.activeElement)) { var f = now[focus.i]; f.focus();
       try { if (focus.a != null) f.setSelectionRange(focus.a, focus.b); } catch (e) {} } }
   KEEP.sig = viewSig(); KEEP.snap = loaded ? snapshot() : ""; };
