@@ -1136,7 +1136,8 @@ SCREENS["admin:reqs"] = function(){
   var f = S.reqFilter, list = S.requests.filter(function(r){ return r.state === f && visibleReq(r); });
   var body = '<div class="seg">' + [["pending","Pending"],["approved","Approved"],["declined","Declined"]].map(function(x){ return '<button data-a="reqFilter" data-v="' + x[0] + '"' + (f === x[0] ? ' aria-current="true"' : '') + '>' + x[1] + '</button>'; }).join("") + '</div>';
   body += list.length ? list.map(function(r){ var t = reqTitle(r), kind = { swap: "Swap", pickup: "Hand up", giveaway: "Give away", blockout: "Blockout", cant: "Can't serve" }[r.kind], waiting = r.kind === "swap" && r.stage < 2 && r.state === "pending";
-    return '<div class="card" style="margin-bottom:10px"><div style="display:flex;gap:10px;align-items:center"><span class="av">' + initials(r.from) + '</span><div class="m" style="flex:1;min-width:0"><div class="t" style="font:600 16px/21px var(--font)">' + esc(t[0]) + '</div><div class="small">' + esc(t[1]) + '</div></div><span class="chip c-acc">' + kind + '</span></div>'
+    /* Nov 25 (user: "Add the details page to the reqs itself so that the req is clickable in reqs page"): the card opens the request; its buttons still do their own thing */
+    return '<div class="card tap" role="button" data-a="push" data-s="reqDetail" data-id="' + r.id + '" style="margin-bottom:10px;cursor:pointer"><div style="display:flex;gap:10px;align-items:center"><span class="av">' + initials(r.from) + '</span><div class="m" style="flex:1;min-width:0"><div class="t" style="font:600 16px/21px var(--font)">' + esc(t[0]) + '</div><div class="small">' + esc(t[1]) + '</div></div><span class="chip c-acc">' + kind + '</span></div>'
       + (r.kind === "swap" ? swapSteps(r) : '')
       + (r.note ? '<p class="small" style="margin:8px 0 0;color:var(--ink)">"' + esc(r.note) + '"</p>' : '')
       + (waiting && r.to === ME ? '<div class="btns two"><button class="btn sm" style="width:100%" data-a="acceptSwap" data-id="' + r.id + '">Accept</button><button class="btn sm sec" style="width:100%" data-a="declineSwap" data-id="' + r.id + '">Can\'t swap</button></div>'
@@ -3739,6 +3740,12 @@ A.swapDelete = function(d){ var r = req(d.id); if (!canStopSwap(r)) return; var 
 /* a declined swap shows why */
 var baseSwapSteps27 = swapSteps;
 swapSteps = function(r){ return baseSwapSteps27(r) + (r && r.state === "declined" && r.reason ? '<p class="small" style="margin:8px 0 0;color:var(--ink)">Reason: ' + esc(r.reason) + '</p>' : ''); };
+
+/* Nov 25 (user: "Remove the needs you part for these mid level swap reqs"): a swap still waiting for the teammate has
+   nothing for a leader to do yet, so it is not in Needs you or the Requests count. It still shows under Requests,
+   where it can be stopped. A swap asked of you does need you, and stays. */
+var basePending28 = pendingReqs;
+pendingReqs = function(){ return basePending28().filter(function(r){ return !(r.kind === "swap" && r.stage < 2 && r.to !== ME); }); };
 
 /* ---------- An invite to post in the church's WhatsApp groups (Nov 25) ----------
    User: "I want to send an invite to the roster app that I can send to people on the team. They should be able to sign
