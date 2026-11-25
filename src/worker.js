@@ -383,6 +383,8 @@ export default {
     const h = routes[url.pathname];
     if (h) return h(request, store(), env);
     // App pages (/vol/..., /admin/...) are all the one page; it reads the path and opens that screen.
+    // the invite link posted in the church's WhatsApp groups: Roster opens on its "join" welcome
+    if (request.method === "GET" && /^\/join\/?$/.test(url.pathname)) return new Response(null, { status: 302, headers: { location: "/?join=1", "cache-control": "no-store" } });
     // the church site's /roster link, with or without a trailing slash, opens Roster
     if (request.method === "GET" && /^\/roster\/?$/.test(url.pathname)) return new Response(null, { status: 302, headers: { location: "/", "cache-control": "no-store" } });
     if (request.method === "GET" && /^\/(vol|admin)(\/|$)/.test(url.pathname)) return env.ASSETS.fetch(new Request(new URL("/", url), request));

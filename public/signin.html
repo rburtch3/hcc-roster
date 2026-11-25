@@ -38,11 +38,14 @@ input{flex:1;width:100%}
 .small{margin:0;font-size:13px;color:var(--muted)}
 .done{text-align:center;align-items:center}
 .back{align-self:center;color:var(--muted);font-size:14px;padding:8px}
+.outline{background:var(--surface);color:var(--ink);border:1px solid var(--field)}
+.join{margin:0;font-size:15px;color:var(--ink)}
 </style>
 </head><body>
 <main>
   <div class="brand"><img src="/icon-192.png" alt=""><div><h1>Roster</h1><p class="sub">Hyderabad Christian Center</p></div></div>
 
+  <p class="join" id="joinMsg" hidden>Welcome! Sign up below with Google, your email, or your phone number. Then pick your name in Roster.</p>
   <div class="card" id="start">
     <button class="google" id="g" type="button"><svg width="18" height="18" viewBox="0 0 48 48" aria-hidden="true"><path fill="#EA4335" d="M24 9.5c3.5 0 6.6 1.2 9.1 3.6l6.8-6.8C35.8 2.4 30.3 0 24 0 14.6 0 6.6 5.4 2.6 13.3l7.9 6.1C12.4 13.6 17.7 9.5 24 9.5z"/><path fill="#4285F4" d="M46.5 24.5c0-1.6-.1-3.1-.4-4.5H24v9h12.7c-.6 3-2.3 5.5-4.8 7.2l7.7 6c4.5-4.2 6.9-10.3 6.9-17.7z"/><path fill="#FBBC05" d="M10.5 28.6c-.5-1.4-.8-3-.8-4.6s.3-3.2.8-4.6l-7.9-6.1C1 16.6 0 20.2 0 24s1 7.4 2.6 10.7l7.9-6.1z"/><path fill="#34A853" d="M24 48c6.5 0 11.9-2.1 15.9-5.8l-7.7-6c-2.1 1.4-4.9 2.3-8.2 2.3-6.3 0-11.6-4.1-13.5-9.9l-7.9 6.1C6.6 42.6 14.6 48 24 48z"/></svg>Continue with Google</button>
     <div class="or">or</div>
@@ -52,8 +55,18 @@ input{flex:1;width:100%}
       <input id="num" type="tel" inputmode="tel" autocomplete="tel-national" placeholder="98480 12345">
     </div>
     <button class="primary" id="send" type="button">Text me a code</button>
-    <p class="small">Codes go to India (+91) and US (+1) numbers. Elsewhere? Use Google.</p>
+    <p class="small">Codes go to India (+91) and US (+1) numbers. Elsewhere? Use Google or email.</p>
+    <div class="or">or</div>
+    <label for="em">Email</label>
+    <input id="em" type="email" inputmode="email" autocomplete="email" placeholder="you@example.com">
+    <button class="outline" id="mail" type="button">Email me a sign-in link</button>
     <p class="msg" id="m1" role="alert"></p>
+  </div>
+
+  <div class="card" id="mailCard" hidden>
+    <h1 style="font-size:20px">Check your email</h1>
+    <p class="small" id="mailMsg"></p>
+    <button class="link" id="mailBack" type="button">Use a different way</button>
   </div>
 
   <div class="card" id="codeCard" hidden>
@@ -88,7 +101,19 @@ const n = (new URLSearchParams(location.search).get("n") || "").toLowerCase();
 const nonce = /^[0-9a-f]{32,64}$/.test(n) ? n : "";
 let auth = null, confirmation = null, verifier = null;
 const say = (el, t, ok) => { $(el).textContent = t || ""; $(el).className = "msg" + (ok ? " ok" : ""); };
-const busy = (on) => { ["g", "send", "ok"].forEach((id) => { $(id).disabled = on; }); };
+const busy = (on) => { ["g", "send", "ok", "mail"].forEach((id) => { $(id).disabled = on; }); };
+// the invite link posted in WhatsApp groups (/join) arrives here with ?join=1
+if (new URLSearchParams(location.search).get("join") === "1") $("joinMsg").hidden = false;
+// Email: Firebase emails a one-time link (any address, not only Gmail). It opens this page again to finish.
+const MAIL_KEY = "roster.mail";
+const okMail = (v) => /^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(v);
+let mailFinish = false; // this page was opened from the emailed link, and the address is still needed
+async function finishMail(email) {
+  const cred = await fb.signInWithEmailLink(auth, email, location.href);
+  try { localStorage.removeItem(MAIL_KEY); } catch (e) {}
+  history.replaceState(null, "", location.pathname + (nonce ? "?n=" + nonce : ""));
+  return finish(cred);
+}
 
 async function setUp() {
   if (auth) return auth;
@@ -101,7 +126,16 @@ async function setUp() {
 }
 // Google sign-in leaves this page and comes back to it (same address, so ?n= survives); finish it here.
 busy(true);
-setUp().then((a) => fb.getRedirectResult(a)).then((cred) => cred ? finish(cred) : null)
+setUp().then(async (a) => {
+  if (fb.isSignInWithEmailLink(a, location.href)) {
+    let email = ""; try { email = localStorage.getItem(MAIL_KEY) || ""; } catch (e) {}
+    if (email) return finishMail(email);
+    // opened on another phone or browser: ask which address it was sent to
+    mailFinish = true; $("mail").textContent = "Finish signing in"; $("em").focus();
+    say("m1", "Type the email the link was sent to, then tap Finish signing in.", true); return null;
+  }
+  const cred = await fb.getRedirectResult(a); return cred ? finish(cred) : null;
+})
   .catch((e) => { if (e && e.code === "roster/lib") fail("m1", e, ""); else if (e && e.message === "config") say("m1", "Sign-in isn't ready. Check your connection and refresh."); else fail("m1", e, "Couldn't sign in with Google. Try again."); })
   .finally(() => busy(false));
 
@@ -124,6 +158,10 @@ const fail = (el, e, fallback) => {
     : c === "auth/network-request-failed" ? "No connection. Check your internet and try again."
     : c === "auth/popup-blocked" ? "Your browser blocked the Google window. Allow pop-ups for this site and try again."
     : c === "auth/unauthorized-domain" ? "Sign-in isn't switched on for this address yet. Ask your admin."
+    : c === "auth/operation-not-allowed" ? "Email sign-in isn't switched on yet. Use Google or your phone number."
+    : c === "auth/invalid-email" || c === "auth/missing-email" ? "That email doesn't look right."
+    : c === "auth/invalid-action-code" || c === "auth/expired-action-code" ? "That link has expired or was already used. Send a new one."
+    : c === "auth/quota-exceeded" ? "Too many emails sent today. Use Google or your phone number."
     : c === "roster/lib" ? "Sign-in couldn't load. Check your connection, switch off any content blocker for this page, then refresh."
     : c.startsWith("roster/") ? "That sign-in didn't work. Try again."
     : fallback + (c ? " (" + c + ")" : ""));
@@ -174,5 +212,22 @@ $("code").addEventListener("keydown", (e) => { if (e.key === "Enter") $("ok").cl
 $("num").addEventListener("keydown", (e) => { if (e.key === "Enter") $("send").click(); });
 $("again").onclick = () => { confirmation = null; $("codeCard").hidden = true; $("start").hidden = false; say("m1", ""); };
 $("here").onclick = () => location.replace("/");
+$("mail").onclick = async () => {
+  say("m1", "");
+  const email = $("em").value.trim();
+  if (!okMail(email)) { say("m1", "Type your email address."); return; }
+  busy(true);
+  try {
+    await setUp();
+    if (mailFinish) { await finishMail(email); return; }
+    await fb.sendSignInLinkToEmail(auth, email, { url: location.origin + "/signin" + (nonce ? "?n=" + nonce : ""), handleCodeInApp: true });
+    try { localStorage.setItem(MAIL_KEY, email); } catch (e) {}
+    $("start").hidden = true; $("joinMsg").hidden = true; $("mailCard").hidden = false;
+    $("mailMsg").textContent = "We sent a sign-in link to " + email + ". Open it on this phone to finish. Not there in a minute? Check spam.";
+  } catch (e) { fail("m1", e, mailFinish ? "Couldn't sign in. Try again." : "Couldn't send the email. Try again."); }
+  finally { busy(false); }
+};
+$("em").addEventListener("keydown", (e) => { if (e.key === "Enter") $("mail").click(); });
+$("mailBack").onclick = () => { $("mailCard").hidden = true; $("start").hidden = false; say("m1", ""); };
 </script>
 </body></html>

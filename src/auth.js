@@ -101,13 +101,18 @@ export async function handleMe(request, env, store) {
     return json({ signedIn: true, signedInAs: sess.email || sess.phone || sess.name, admin, name: who.name, how: who.how, asked: (!who.name && reqs[sess.sub] && reqs[sess.sub].want) || "" });
   }
   if (request.method === "POST") {
-    let name = "";
-    try { name = String((await request.json()).name || "").trim().slice(0, 80); } catch { return json({ ok: false, error: "Bad JSON" }, 400); }
+    let name = "", teams = [];
+    try {
+      const b = await request.json();
+      name = String(b.name || "").trim().slice(0, 80);
+      // someone new can say which teams they serve on; an admin sees it when saying yes
+      if (Array.isArray(b.teams)) teams = [...new Set(b.teams.filter((x) => typeof x === "string").map((x) => x.trim().slice(0, 40)).filter(Boolean))].slice(0, 10);
+    } catch { return json({ ok: false, error: "Bad JSON" }, 400); }
     if (!name) return json({ ok: false, error: "name" }, 400);
     const links = (await store.getItem("hubLinks")) || {};
     if (links[sess.sub]) return json({ ok: false, error: "already linked", name: links[sess.sub] }, 409);
     if (admin) { moveLink(links, sess.sub, name); await store.putItem("hubLinks", links); return json({ ok: true, name }); }
-    reqs[sess.sub] = { want: name, who: sess.name, email: sess.email || "", phone: sess.phone || "", at: Date.now() };
+    reqs[sess.sub] = { want: name, who: sess.name, email: sess.email || "", phone: sess.phone || "", teams, at: Date.now() };
     await store.putItem("accessReq", reqs);
     return json({ ok: true, asked: name }, 202);
   }
@@ -134,7 +139,19 @@ export async function handleAccess(request, store, isAdmin) {
     await store.putItem("hubLinks", links); return json({ ok: true, removed: n });
   }
   if (!reqs[id]) return json({ ok: false, error: "no such request" }, 404);
-  if (!b.deny) { if (!name) return json({ ok: false, error: "name" }, 400); moveLink(links, id, name); await store.putItem("hubLinks", links); }
+  if (!b.deny) {
+    if (!name) return json({ ok: false, error: "name" }, 400);
+    moveLink(links, id, name); await store.putItem("hubLinks", links);
+    // the phone or email they signed in with (checked by Google or by a texted code) is saved for that name when it
+    // has none yet, so admins can reach them and their next sign-in finds them without asking
+    const q = reqs[id];
+    if (q.phone || q.email) {
+      const all = (await store.getItem("contacts")) || {}, c = { ...(all[name] || {}) }; let changed = false;
+      if (q.phone && !c.phone) { c.phone = q.phone; changed = true; }
+      if (q.email && !c.email) { c.email = q.email; changed = true; }
+      if (changed) { if (typeof store.patchItem === "function") await store.patchItem("contacts", name, c); else { all[name] = c; await store.putItem("contacts", all); } }
+    }
+  }
   delete reqs[id]; await store.putItem("accessReq", reqs);
   return json({ ok: true });
 }

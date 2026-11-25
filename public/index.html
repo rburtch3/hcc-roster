@@ -1140,7 +1140,7 @@ SCREENS["admin:reqs"] = function(){
       + (r.kind === "swap" ? swapSteps(r) : '')
       + (r.note ? '<p class="small" style="margin:8px 0 0;color:var(--ink)">"' + esc(r.note) + '"</p>' : '')
       + (waiting && r.to === ME ? '<div class="btns two"><button class="btn sm" style="width:100%" data-a="acceptSwap" data-id="' + r.id + '">Accept</button><button class="btn sm sec" style="width:100%" data-a="declineSwap" data-id="' + r.id + '">Can\'t swap</button></div>'
-        : waiting ? '<div class="mt"><span class="chip c-mut">Waiting for ' + esc(r.to) + ' to accept</span></div>'
+        : waiting ? '<div class="mt"><span class="chip c-mut">Waiting for ' + esc(r.to) + ' to accept</span></div>' + (canStopSwap(r) ? '<div class="btns"><button class="btn sm sec" style="width:100%" data-a="sheet" data-s="swapStop" data-id="' + r.id + '">Stop this swap</button></div>' : '')
         : r.state === "pending" ? '<div class="btns two"><button class="btn sm" style="width:100%" data-a="approve" data-id="' + r.id + '">Approve</button><button class="btn sm sec" style="width:100%" data-a="decline" data-id="' + r.id + '">Decline</button></div>' : '<div class="mt"><span class="chip ' + (r.state === "approved" ? 'c-ok' : 'c-late') + '">' + (r.state === "approved" ? 'Approved' : 'Declined') + '</span></div>')
       + '</div>'; }).join("") : '<div class="empty">Nothing here.</div>';
   return { head: header("Requests"), body: body };
@@ -1151,7 +1151,7 @@ SCREENS.reqDetail = function(o){
   if (r.kind === "swap" && r.to) body += '<div class="lbl">Checks</div><div class="grp"><div class="row"><span class="chip c-ok">OK</span><div class="m"><div class="s">' + esc(r.to) + ' serves on ' + esc(x.team) + ' and isn\'t blocked out that day</div></div></div><div class="row"><span class="chip c-warn">Note</span><div class="m"><div class="s">' + esc(r.to) + ' would serve ' + (S.slots.filter(function(y){ return y.person === r.to && svc(y.sid).date === svc(x.sid).date; }).map(function(y){ return y.sid; }).filter(function(v, i, a){ return a.indexOf(v) === i; }).length + 1) + ' services that day</div></div></div></div>';
   if (r.kind === "giveaway") body += '<div class="lbl">Who could cover</div><div class="grp">' + POOL[x.team].filter(function(p){ return p !== r.from; }).slice(0,4).map(function(p){ var busy = servingAt(x.sid, p); return '<div class="row"><span class="av">' + initials(p) + '</span><div class="m"><div class="t">' + esc(p) + '</div><div class="s">' + (busy ? 'Already serving then' : 'Available') + '</div></div>' + (busy ? '' : '<button class="btn sm soft" data-a="assignCover" data-id="' + r.id + '" data-p="' + esc(p) + '">Ask</button>') + '</div>'; }).join("") + '</div>';
   if (r.state === "pending") body += waiting && r.to === ME ? '<p class="small" style="margin:12px 4px 0">' + esc(r.from) + ' asked you to swap. If you accept, a leader then approves it.</p><div class="btns two"><button class="btn" data-a="acceptSwap" data-id="' + r.id + '">Accept</button><button class="btn sec" data-a="declineSwap" data-id="' + r.id + '">Can\'t swap</button></div>'
-    : waiting ? '<div class="btns"><span class="chip c-mut">Waiting for ' + esc(r.to) + ' to accept</span></div>' : '<div class="btns"><button class="btn" data-a="approve" data-id="' + r.id + '">Approve</button><button class="btn sec" data-a="decline" data-id="' + r.id + '">Decline</button></div>';
+    : waiting ? '<div class="btns"><span class="chip c-mut">Waiting for ' + esc(r.to) + ' to accept</span></div>' + (canStopSwap(r) ? '<div class="btns"><button class="btn sec" data-a="sheet" data-s="swapStop" data-id="' + r.id + '">Stop this swap</button></div>' : '') : '<div class="btns"><button class="btn" data-a="approve" data-id="' + r.id + '">Approve</button><button class="btn sec" data-a="decline" data-id="' + r.id + '">Decline</button></div>';
   return { head: header("Request"), body: body };
 };
 SCREENS["admin:sched"] = function(){
@@ -3715,6 +3715,102 @@ A.saveNote = function(d, el){ var any = ["na", "nk", "nv", "nt"].some(function(i
 var baseProfSave26 = A.profSave;
 A.profSave = function(d, el){ var bad = ["prPh", "prWa"].some(function(id){ var v = ((document.getElementById(id) || {}).value || "").replace(/\D/g, ""); return v.length > 0 && v.length < 10; });
   if (bad) { toast("That phone number looks too short."); return; } return baseProfSave26(d, el); };
+
+/* ---------- Stop a swap before the teammate answers (Nov 25) ----------
+   User: "allow admin to delete or decline pending swap requests with a reason before the team workers approve or
+   decline". An admin (or that team's leader) can decline a swap that is still waiting for the teammate, with a reason
+   both people see, or delete the request. */
+function canStopSwap(r){ if (!r || r.kind !== "swap" || r.state !== "pending" || !(r.stage < 2)) return false; if (isAdmin()) return true;
+  var sc = scoped(), x = r.slot && slot(r.slot); return !!(sc && x && sc.indexOf(x.team) >= 0); }
+SHEETS.swapStop = function(o){ var r = req(o.id); if (!canStopSwap(r)) return ''; var t = reqTitle(r);
+  return '<h4>Stop this swap?</h4><p class="s">' + esc(t[0]) + ' · ' + esc(t[1]) + '. ' + esc(r.to) + ' hasn\'t answered yet.</p>'
+    + '<label class="fl" for="swapWhy">Reason</label><textarea class="field" id="swapWhy" placeholder="' + esc(r.from) + ' and ' + esc(r.to) + ' both see this"></textarea>'
+    + '<div class="btns"><button class="btn" data-a="swapDecline" data-id="' + r.id + '">Decline with this reason</button><button class="btn danger" data-a="swapDelete" data-id="' + r.id + '">Delete the request</button><button class="btn sec" data-a="closeSheet">Cancel</button></div>'; };
+function swapDone(msg){ S.sheet = null; var top = S.stack[S.stack.length - 1]; if (top && top.s === "reqDetail") S.stack.pop(); toast(msg); render(); }
+A.swapDecline = function(d){ var r = req(d.id); if (!canStopSwap(r)) return; var why = ((document.getElementById("swapWhy") || {}).value || "").trim();
+  if (!why) { toast("Type a reason. " + r.from + " and " + r.to + " see it."); return; }
+  var sub = reqTitle(r)[1]; r.state = "declined"; r.reason = why; r.by = meName();
+  tell(r.from, "Swap declined", sub + ". " + why); tell(r.to, "Swap called off", r.from + " · " + sub + ". " + why);
+  swapDone("Declined. " + r.from + " and " + r.to + " are told."); };
+A.swapDelete = function(d){ var r = req(d.id); if (!canStopSwap(r)) return; var why = ((document.getElementById("swapWhy") || {}).value || "").trim(), sub = reqTitle(r)[1];
+  S.requests = S.requests.filter(function(q){ return q.id !== r.id; });
+  tell([r.from, r.to], "Swap request removed", sub + (why ? ". " + why : ""));
+  swapDone("Request deleted. " + r.from + " and " + r.to + " are told."); };
+/* a declined swap shows why */
+var baseSwapSteps27 = swapSteps;
+swapSteps = function(r){ return baseSwapSteps27(r) + (r && r.state === "declined" && r.reason ? '<p class="small" style="margin:8px 0 0;color:var(--ink)">Reason: ' + esc(r.reason) + '</p>' : ''); };
+
+/* ---------- An invite to post in the church's WhatsApp groups (Nov 25) ----------
+   User: "I want to send an invite to the roster app that I can send to people on the team. They should be able to sign
+   up w/ email or whatsapp/phone number - I plan to send this invite to our whatsapp groups so they can sign up".
+   The invite is the link /join. It opens a welcome; Sign up goes to sign-in (Google, any email by a link, or a phone
+   number by a texted code); then they pick their name, or type it with their teams, and an admin says yes once. */
+var JOINING = /[?&]join=1/.test(location.search);
+try { if (JOINING) sessionStorage.setItem("roster.join", "1"); else JOINING = sessionStorage.getItem("roster.join") === "1"; } catch (e) {}
+function joinUrl(){ return location.origin + "/join"; }
+var baseSignInScreen27 = signInScreen;
+signInScreen = function(){ var r = baseSignInScreen27(); if (!r || !r.body) return r;
+  if (JOINING) { r.head = plainHead("Join"); r.body = r.body.replace(/<div class="card"><div class="t" style="font:600 17px\/22px var\(--font\)">HCC Roster<\/div>[\s\S]*?<\/button><\/div>/, '<div class="card"><div class="t" style="font:600 20px/26px var(--font)">Join the HCC Roster</div>'
+      + '<p class="small" style="margin:6px 0 12px">See when you\'re serving, ask for cover, and get reminders. Sign up with Google, your email, or your phone number. It takes a minute.</p><button class="btn" data-a="hubSignIn">Sign up</button>'
+      + '<p class="small" style="margin:10px 0 0">Already signed up? The same button signs you in.</p></div>'); }
+  else r.body = r.body.replace("Sign in with Google or your phone number to see your serves.", "Sign in with Google, your email, or your phone number to see your serves. New here? The same button signs you up.");
+  return r; };
+var baseSignIn27 = A.hubSignIn;
+A.hubSignIn = function(d, el){ if (JOINING && !STANDALONE) { location.href = "/signin?join=1"; return; } return baseSignIn27(d, el); };
+/* someone new types their name and picks the teams they serve on */
+var ASK_TEAMS = {};
+var baseAskScreen27 = askScreen;
+askScreen = function(){ var r = baseAskScreen27(); if (!r || !r.body || HUBME.asked) return r; var teams = Object.keys(POOL).sort();
+  r.body = r.body.replace("Not on the list? Type your full name and ask.", "New here? Type your full name, pick the teams you serve on, and ask to join.")
+    .replace('<div class="btns"><button class="btn sec" data-a="askName" data-id="">Ask to join as this name</button></div>',
+      (teams.length ? '<label class="fl">Teams you serve on</label><div class="pick" id="askTeams">' + teams.map(function(x){ return '<button data-a="askTeam" data-v="' + esc(x) + '" aria-pressed="' + !!ASK_TEAMS[x] + '">' + esc(x) + '</button>'; }).join("") + '</div>' : '')
+      + '<div class="btns"><button class="btn sec" data-a="askName" data-id="">Ask to join</button></div>');
+  if (JOINING) r.body = r.body.replace("Pick your name. An admin checks it once, then this sign-in stays yours.", "Welcome! Find your name below, or add yourself at the bottom. An admin checks it once, then you're in.");
+  return r; };
+A.askTeam = function(d){ if (ASK_TEAMS[d.v]) delete ASK_TEAMS[d.v]; else ASK_TEAMS[d.v] = 1; render.same = true; render(); };
+A.askName = function(d){
+  var typed = !d.id, name = d.id || ((document.getElementById("askNew") || {}).value || "").trim().replace(/\s+/g, " ");
+  if (!name) { toast("Type your full name first."); return; }
+  if (typed && name.indexOf(" ") < 0) { toast("Type your first and last name."); return; }
+  var body = { name: name }; if (typed) body.teams = Object.keys(ASK_TEAMS);
+  fetch("/api/me", { method: "POST", credentials: "same-origin", headers: { "content-type": "application/json" }, body: JSON.stringify(body) })
+    .then(function(r){ return r.json().then(function(j){ return { s: r.status, j: j }; }, function(){ return { s: r.status, j: {} }; }); })
+    .then(function(x){
+      if (x.s === 200 && !(x.j && x.j.name)) { toast("Your sign-in has ended. Sign in again."); whoNow(); return; }
+      if (x.s === 200) { HUBME.name = x.j.name; S.stack = []; toast("You're " + x.j.name + " on Roster now."); render(); return; }
+      if (x.s === 202) { HUBME.asked = x.j.asked; ASK_TEAMS = {}; toast("Asked. An admin will check it."); render(); return; }
+      if (x.s === 409) { loadMe().then(function(){ render(); }); return; }
+      toast("Couldn't send that. Try again."); },
+      function(){ toast("Couldn't reach Roster. Try again."); }); };
+/* admins see which teams someone new picked, and saying yes puts them on those teams */
+var baseContactLine27 = contactLine;
+contactLine = function(q){ var c = baseContactLine27(q); return q && q.teams && q.teams.length ? (c ? c + " · " : "") + "Teams: " + q.teams.join(", ") : c; };
+A.accYes = function(d, el, name){ var q = accReq(d.id); if (!q) return; name = name || q.want; var isNew = everyone().indexOf(name) < 0;
+  postJ("/api/access", { id: q.id, name: name }).then(function(x){
+    if (x.s === 200) { addPerson(name); if (isNew && q.teams) withAllTeams(function(){ q.teams.forEach(function(t){ if (POOL[t] && POOL[t].indexOf(name) < 0) POOL[t].push(name); }); }); saveSoon(); CONTACTS = null; }
+    accDone(x, name + " can sign in now."); }, function(){ toast("Couldn't reach Roster. Try again."); render(); }); };
+/* new sign-ups show on the admin's Dashboard */
+var baseAdminDash27 = SCREENS["admin:dash"];
+SCREENS["admin:dash"] = function(o){ var r = baseAdminDash27(o); if (!r || !r.body || !isAdmin()) return r; loadAcc(); var n = ACC ? ACC.requests.length : 0; if (!n) return r;
+  var card = '<div class="card tap" data-a="push" data-s="accessReqs" role="button" style="display:flex;gap:12px;align-items:center;cursor:pointer;margin:0 0 12px"><span class="chip c-warn">' + n + '</span><div class="m"><div class="t">' + (n > 1 ? n + " people want" : "1 person wants") + ' to join</div><div class="small">Check who they are</div></div><span class="chev" style="margin-left:auto">›</span></div>';
+  var i = r.body.indexOf('<div class="lbl'); r.body = i > 0 ? r.body.slice(0, i) + card + r.body.slice(i) : r.body + card; return r; };
+/* the invite: a message with the link, ready to post in a WhatsApp group */
+function inviteText(){ return "You're invited to the HCC Roster app.\nSee when you're serving, ask for cover, and get reminders.\n\nJoin here: " + joinUrl()
+  + "\n\n1. Open the link and tap Sign up.\n2. Use Google, your email, or your phone number.\n3. Pick your name, or type it if it's not on the list.\nAn admin checks it once, then you're in."; }
+SCREENS.invite = function(){
+  return { head: header("Invite people"), body: '<p class="small" style="margin:0 4px 10px">Post this in your WhatsApp groups. People sign up with Google, their email, or their phone number, then pick their name. You say yes once in Sign-in requests.</p>'
+    + '<label class="fl" for="invMsg">Message</label><textarea class="field" id="invMsg" rows="9" style="min-height:220px">' + esc(inviteText()) + '</textarea>'
+    + '<div class="btns"><button class="btn wa" data-a="invShare">Share in WhatsApp</button><button class="btn sec" data-a="invCopy" data-v="msg">Copy message</button><button class="btn sec" data-a="invCopy" data-v="link">Copy link only</button></div>'
+    + '<p class="small" style="margin:8px 4px 0">Link: ' + esc(joinUrl()) + '</p>' }; };
+LEAD_ONLY.invite = 1;
+function invMsg(){ var el = document.getElementById("invMsg"); return (el && el.value.trim()) || inviteText(); }
+A.invShare = function(){ window.open("https://wa.me/?text=" + encodeURIComponent(invMsg()), "_blank", "noopener"); };
+A.invCopy = function(d){ var txt = d.v === "link" ? joinUrl() : invMsg(), done = function(){ toast(d.v === "link" ? "Link copied." : "Message copied. Paste it in your group."); };
+  var fall = function(){ var ta = document.createElement("textarea"); ta.value = txt; ta.style.position = "fixed"; ta.style.opacity = "0"; document.body.appendChild(ta); ta.select(); try { document.execCommand("copy"); done(); } catch (e) { toast("Couldn't copy. Press and hold the text to copy it."); } ta.remove(); };
+  try { navigator.clipboard.writeText(txt).then(done, fall); } catch (e) { fall(); } };
+var baseAdminMore27 = SCREENS["admin:more"];
+SCREENS["admin:more"] = function(o){ var r = baseAdminMore27(o); if (!r || !r.body) return r;
+  r.body = r.body.replace('<div class="lbl">People</div><div class="grp">', '<div class="lbl">People</div><div class="grp">' + row("Invite people", "A link to post in your WhatsApp groups", "push", "invite")); return r; };
 
 /* ---------- What you typed stays typed (Nov 18) ----------
    Every redraw rebuilds the screen from saved data. A "that phone number looks too short" message, a search box on

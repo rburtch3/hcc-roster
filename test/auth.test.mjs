@@ -118,6 +118,25 @@ test("someone not matched asks for their name; an admin says yes", async () => {
   assert.equal((await ask(s, c, "Mum")).status, 409);
 });
 
+test("someone new asks with their teams; saying yes saves the phone or email they signed in with", async () => {
+  const s = mem();
+  await s.putItem("contacts", { Old: { phone: "9000000000" } });
+  const c = await signIn(s, { sub: "u-n", phone_number: "+919876543210" });
+  const r = await auth.handleMe(withCookie("/api/me", c, { method: "POST", body: JSON.stringify({ name: "Nina Rao", teams: ["Ushers", "Ushers", " Media ", 5, ""] }) }), env, s);
+  assert.equal(r.status, 202);
+  const list = await (await auth.handleAccess(new Request("https://x/api/access"), s, true)).json();
+  assert.deepEqual(list.requests[0].teams, ["Ushers", "Media"]);
+  await auth.handleAccess(new Request("https://x/api/access", { method: "POST", body: JSON.stringify({ id: "u-n", name: "Nina Rao" }) }), s, true);
+  const ct = await s.getItem("contacts");
+  assert.equal(ct["Nina Rao"].phone, "+919876543210");
+  assert.equal(ct.Old.phone, "9000000000");
+  // a name that already has a phone keeps it
+  const c2 = await signIn(s, { sub: "u-o", email: "old@x.com", email_verified: true });
+  await ask(s, c2, "Old");
+  await auth.handleAccess(new Request("https://x/api/access", { method: "POST", body: JSON.stringify({ id: "u-o", name: "Old" }) }), s, true);
+  assert.deepEqual((await s.getItem("contacts")).Old, { phone: "9000000000", email: "old@x.com" });
+});
+
 test("an admin can say no, and free a name", async () => {
   const s = mem();
   await s.putItem("hubLinks", { a: "Paul", b: "Ana" });
