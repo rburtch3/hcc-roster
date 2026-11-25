@@ -3747,6 +3747,41 @@ swapSteps = function(r){ return baseSwapSteps27(r) + (r && r.state === "declined
 var basePending28 = pendingReqs;
 pendingReqs = function(){ return basePending28().filter(function(r){ return !(r.kind === "swap" && r.stage < 2 && r.to !== ME); }); };
 
+/* ---------- Fill a spot: pick, then confirm with ✓ (Nov 25) ----------
+   User: "Add a check mark in top right to confirm selection before slide menu disappears". Tapping a name in the
+   fill sheet only picks it; the ✓ at the top right puts them on the spot and closes the sheet. Closing the sheet any
+   other way changes nothing. */
+var FILL_PICK = null;
+(function(){ var st = document.createElement("style"); st.textContent =
+  '.fillhd{position:sticky;top:-8px;z-index:3;display:flex;align-items:center;gap:12px;margin:-8px -16px 4px;padding:8px 16px 4px;background:inherit}'
+  + '.fillhd h4{flex:1;min-width:0}.fillok{flex:none;width:44px;height:44px;border-radius:50%;border:0;background:var(--line);color:var(--muted);font:600 22px/1 var(--font);cursor:pointer;display:grid;place-items:center}'
+  + '.fillok.on{background:var(--accent);color:#fff}.sheet .row.picked{background:var(--band);box-shadow:inset 0 0 0 1.5px var(--accent);border-radius:12px}';
+  document.head.appendChild(st); })();
+var baseFill28 = SHEETS.fill;
+SHEETS.fill = function(o){ var h = baseFill28(o); if (!h) return h; var x = slot(o.id);
+  if (!FILL_PICK || FILL_PICK.id !== o.id) FILL_PICK = { id: o.id, p: null };
+  var i = h.indexOf("<h4"), j = h.indexOf("</h4>"); if (i < 0 || j < 0) return h;
+  var on = FILL_PICK.p && (!x || FILL_PICK.p !== x.person);
+  h = h.slice(0, i) + '<div class="fillhd">' + h.slice(i, j + 5) + '<button class="fillok' + (on ? ' on' : '') + '" data-a="fillOk" data-id="' + esc(o.id) + '" aria-label="Confirm">✓</button></div>' + h.slice(j + 5);
+  if (FILL_PICK.p) h = h.split('data-a="assign" data-id="' + o.id + '" data-p="' + esc(FILL_PICK.p) + '"').join('data-a="assign" data-id="' + o.id + '" data-p="' + esc(FILL_PICK.p) + '" aria-selected="true"').replace(/<div class="row tap"( data-a="assign"[^>]*aria-selected="true")/g, '<div class="row tap picked"$1');
+  return h; };
+var baseAssign28 = A.assign;
+A.assign = function(d, el){
+  if (!(el && el.closest && el.closest(".sheet") && S.sheet && S.sheet.s === "fill")) return baseAssign28(d, el);
+  /* a tap in the sheet picks; the sheet stays open (the search box keeps what was typed) */
+  FILL_PICK = { id: d.id, p: d.p }; var x = slot(d.id);
+  app.querySelectorAll(".sheet .row.picked").forEach(function(r){ r.classList.remove("picked"); r.removeAttribute("aria-selected"); });
+  el.classList.add("picked"); el.setAttribute("aria-selected", "true");
+  var ok = app.querySelector(".sheet .fillok"); if (ok) ok.classList.toggle("on", !x || d.p !== x.person); };
+/* a pick is forgotten once the sheet closes, whichever way */
+var baseRender28 = render;
+render = function(){ if (!S.sheet || S.sheet.s !== "fill") FILL_PICK = null; return baseRender28(); };
+A.fillOk = function(d){ var x = slot(d.id), p = FILL_PICK && FILL_PICK.id === d.id ? FILL_PICK.p : null; FILL_PICK = null;
+  if (!x) { S.sheet = null; render(); return; }
+  if (!p) { toast("Tap a name first, then ✓."); FILL_PICK = { id: d.id, p: null }; return; }
+  if (p === x.person) { S.sheet = null; render.same = true; render(); return; }
+  baseAssign28({ id: d.id, p: p }); };
+
 /* ---------- An invite to post in the church's WhatsApp groups (Nov 25) ----------
    User: "I want to send an invite to the roster app that I can send to people on the team. They should be able to sign
    up w/ email or whatsapp/phone number - I plan to send this invite to our whatsapp groups so they can sign up".
